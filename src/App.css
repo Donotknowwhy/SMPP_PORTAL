@@ -348,6 +348,249 @@
   text-shadow: none;
 }
 
+/* SMS API request */
+.sms-request-section {
+  margin-top: 2.5rem;
+  padding: 1.5rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: #fcfcfc;
+}
+
+.section-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.section-title-row h2 {
+  margin: 0;
+}
+
+.section-badge {
+  padding: 0.35rem 0.75rem;
+  border: 1px solid #fbb848;
+  background: #fff8ea;
+  color: #a36a07;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.sms-api-config {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1.25rem;
+}
+
+.sms-api-config label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.sms-api-config input {
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #d0d0d0;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.sms-api-config input:focus {
+  outline: none;
+  border-color: #000;
+}
+
+.sms-request-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 1rem;
+}
+
+.sms-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: white;
+  padding: 1rem;
+}
+
+.sms-card h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  color: #000;
+}
+
+.sms-field-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.75rem;
+}
+
+.sms-field-grid label,
+.sms-textarea-label,
+.sms-file-input {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.sms-field-grid input,
+.sms-textarea-label textarea {
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #d0d0d0;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  font-weight: 400;
+}
+
+.sms-textarea-label {
+  margin-top: 0.75rem;
+}
+
+.sms-textarea-label textarea {
+  resize: vertical;
+  min-height: 90px;
+}
+
+.sms-field-grid input:focus,
+.sms-textarea-label textarea:focus,
+.sms-file-input input:focus {
+  outline: none;
+  border-color: #000;
+}
+
+.sms-file-input {
+  margin-top: 0.75rem;
+}
+
+.sms-file-input input {
+  padding: 0.5rem;
+  border: 1px dashed #d0d0d0;
+  border-radius: 4px;
+  background: #fafafa;
+}
+
+.sms-note {
+  margin-top: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #f1e6cd;
+  background: #fffbf1;
+  color: #745210;
+  border-radius: 4px;
+  font-size: 0.82rem;
+}
+
+.sms-file-meta {
+  margin-top: 0.6rem;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.sms-preview-table,
+.sms-bulk-results {
+  margin-top: 0.8rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  overflow-x: auto;
+}
+
+.sms-preview-table table,
+.sms-bulk-results table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.sms-preview-table th,
+.sms-preview-table td,
+.sms-bulk-results th,
+.sms-bulk-results td {
+  padding: 0.55rem 0.65rem;
+  border-bottom: 1px solid #f0f0f0;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.sms-preview-table th,
+.sms-bulk-results th {
+  background: #fafafa;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2px;
+}
+
+.sms-result-box {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+.sms-result-box.ok {
+  border: 1px solid #b6dfbf;
+  background: #f2fbf4;
+  color: #1d6a2d;
+}
+
+.sms-result-box.error {
+  border: 1px solid #f3c2c2;
+  background: #fff5f5;
+  color: #992929;
+}
+
+.sms-result-box pre {
+  margin-top: 0.6rem;
+  padding: 0.6rem;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.75);
+  font-size: 0.78rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.sms-progress-wrap {
+  margin-top: 0.75rem;
+}
+
+.sms-progress-bar {
+  height: 10px;
+  background: #f0f0f0;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.sms-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #fbb848, #f5a732);
+  transition: width 0.2s ease;
+}
+
+.sms-progress-text {
+  margin-top: 0.4rem;
+  font-size: 0.82rem;
+  color: #555;
+}
+
+.status-ok {
+  color: #1d6a2d;
+  font-weight: 600;
+}
+
+.status-error {
+  color: #992929;
+  font-weight: 600;
+}
+
 /* Reports Section */
 .report-section {
   padding: 2rem;
@@ -1141,6 +1384,23 @@ h2 {
   .distribution-form {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .sms-request-section {
+    padding: 1rem;
+  }
+
+  .section-title-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .sms-request-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sms-field-grid {
+    grid-template-columns: 1fr;
   }
 
   .btn-simulate {
