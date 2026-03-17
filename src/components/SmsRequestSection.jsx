@@ -2,10 +2,9 @@ import { useMemo, useState } from 'react'
 import * as XLSX from 'xlsx'
 import { getDefaultSmsApiUrl, sendSmsRequest } from '../utils/smsApi'
 
-const PHONE_HEADERS = ['phone', 'sdt', 'sodienthoai', 'msisdn']
-const CONTENT_HEADERS = ['content', 'message', 'noidung', 'sms', 'text']
-const BRAND_HEADERS = ['brandname', 'brand']
-const TYPE_HEADERS = ['type']
+const REQUIRED_HEADERS = ['phone', 'content']
+const DEFAULT_BRANDNAME = 'GAPIT'
+const DEFAULT_TYPE = 'CSKH'
 
 const normalizeHeader = (value) => String(value || '').trim().toLowerCase().replace(/[\s_-]+/g, '')
 
@@ -17,34 +16,37 @@ const normalizeCellValue = (value) => {
   return String(value).trim()
 }
 
-const normalizePhone = (value) => normalizeCellValue(value).replace(/[^\d+]/g, '')
+const normalizePhone = (value) => {
+  const rawValue = normalizeCellValue(value).replace(/[^\d+]/g, '')
 
-const pickByHeaders = (row, headers) => {
-  for (const header of headers) {
-    if (row[header]) {
-      return row[header]
-    }
+  if (!rawValue) {
+    return ''
   }
 
-  return ''
+  if (rawValue.startsWith('+')) {
+    return rawValue
+  }
+
+  const digitsOnly = rawValue.replace(/\D/g, '')
+
+  // Excel often removes the leading zero for local 10-digit phone numbers.
+  if (digitsOnly.length === 9 && !digitsOnly.startsWith('0')) {
+    return `0${digitsOnly}`
+  }
+
+  return digitsOnly
 }
 
 function SmsRequestSection() {
-  const [apiUrl, setApiUrl] = useState(getDefaultSmsApiUrl())
+  const apiUrl = getDefaultSmsApiUrl()
 
   const [singleForm, setSingleForm] = useState({
     phone: '',
     content: '',
-    brandname: 'GAPIT',
-    type: 'CSKH',
   })
   const [singleSending, setSingleSending] = useState(false)
   const [singleResult, setSingleResult] = useState(null)
 
-  const [bulkDefaults, setBulkDefaults] = useState({
-    brandname: 'GAPIT',
-    type: 'CSKH',
-  })
   const [excelFileName, setExcelFileName] = useState('')
   const [excelRows, setExcelRows] = useState([])
   const [invalidRowsCount, setInvalidRowsCount] = useState(0)
@@ -57,10 +59,6 @@ function SmsRequestSection() {
 
   const onSingleInputChange = (field, value) => {
     setSingleForm((prev) => ({ ...prev, [field]: value }))
-  }
-
-  const onBulkDefaultChange = (field, value) => {
-    setBulkDefaults((prev) => ({ ...prev, [field]: value }))
   }
 
   const handleSingleSend = async () => {
@@ -82,8 +80,8 @@ function SmsRequestSection() {
       const payload = {
         phone,
         content,
-        brandname: normalizeCellValue(singleForm.brandname),
-        type: normalizeCellValue(singleForm.type),
+        brandname: DEFAULT_BRANDNAME,
+        type: DEFAULT_TYPE,
       }
 
       const result = await sendSmsRequest(payload, apiUrl.trim())
@@ -105,7 +103,8 @@ function SmsRequestSection() {
   }
 
   const handleExcelFileChange = async (event) => {
-    const file = event.target.files?.[0]
+    const inputElement = event.target
+    const file = inputElement.files?.[0]
     setExcelError('')
     setBulkResults([])
     setBulkProgress({ done: 0, total: 0, success: 0, failed: 0 })
@@ -114,6 +113,7 @@ function SmsRequestSection() {
       setExcelFileName('')
       setExcelRows([])
       setInvalidRowsCount(0)
+      inputElement.value = ''
       return
     }
 
@@ -130,7 +130,14 @@ function SmsRequestSection() {
       const rawRows = XLSX.utils.sheet_to_json(worksheet, { defval: '', raw: false })
 
       if (rawRows.length === 0) {
-        throw new Error('File Excel rong. Vui long them du lieu phone va content.')
+        throw new Error('File Excel rỗng. Vui lòng thêm dữ liệu phone và content.')
+      }
+
+      const normalizedHeaders = Object.keys(rawRows[0]).map(normalizeHeader)
+      const missingHeaders = REQUIRED_HEADERS.filter((header) => !normalizedHeaders.includes(header))
+
+      if (missingHeaders.length > 0) {
+        throw new Error('Template Excel phải có đúng 2 cột phone và content.')
       }
 
       const parsedRows = rawRows
@@ -140,21 +147,13 @@ function SmsRequestSection() {
             return acc
           }, {})
 
-          const phone = normalizePhone(pickByHeaders(normalizedRow, PHONE_HEADERS))
-          const content = normalizeCellValue(pickByHeaders(normalizedRow, CONTENT_HEADERS))
-          const brandname =
-            normalizeCellValue(pickByHeaders(normalizedRow, BRAND_HEADERS)) ||
-            normalizeCellValue(bulkDefaults.brandname)
-          const type =
-            normalizeCellValue(pickByHeaders(normalizedRow, TYPE_HEADERS)) ||
-            normalizeCellValue(bulkDefaults.type)
+          const phone = normalizePhone(normalizedRow.phone)
+          const content = normalizeCellValue(normalizedRow.content)
 
           return {
             rowNumber: index + 2,
             phone,
             content,
-            brandname,
-            type,
             valid: Boolean(phone && content),
           }
         })
@@ -167,13 +166,16 @@ function SmsRequestSection() {
       setInvalidRowsCount(invalidRows)
 
       if (validRows.length === 0) {
-        setExcelError('Khong tim thay dong hop le. Kiem tra cot phone va content trong file Excel.')
+        setExcelError('Không tìm thấy dòng hợp lệ. Kiểm tra lại cột phone và content.')
       }
     } catch (error) {
       setExcelFileName(file.name)
       setExcelRows([])
       setInvalidRowsCount(0)
       setExcelError(error.message || 'Khong the doc file Excel.')
+    } finally {
+      // Allow selecting the same file again to force re-parse and refresh the list.
+      inputElement.value = ''
     }
   }
 
@@ -201,8 +203,8 @@ function SmsRequestSection() {
       const payload = {
         phone: row.phone,
         content: row.content,
-        brandname: row.brandname,
-        type: row.type,
+        brandname: DEFAULT_BRANDNAME,
+        type: DEFAULT_TYPE,
       }
 
       try {
@@ -244,26 +246,19 @@ function SmsRequestSection() {
   return (
     <div className="sms-request-section">
       <div className="section-title-row">
-        <h2>Gui SMS qua API</h2>
-        <span className="section-badge">2 che do: Gui don / Gui tu Excel</span>
+        <h2>Gửi SMS qua API</h2>
+        <span className="section-badge">2 chế độ: Gửi đơn / Gửi từ Excel</span>
       </div>
 
-      <div className="sms-api-config">
-        <label htmlFor="sms-api-url">API URL</label>
-        <input
-          id="sms-api-url"
-          type="text"
-          value={apiUrl}
-          onChange={(event) => setApiUrl(event.target.value)}
-          placeholder="https://sms.skyfi.com.vn/api/v1/sms/send"
-        />
-      </div>
+      {/* <div className="sms-note">
+        API URL đang dùng: <strong>{apiUrl}</strong>
+      </div> */}
 
       <div className="sms-request-grid">
         <div className="sms-card">
-          <h3>Gui don (nhap tay)</h3>
+          <h3>Gửi đơn ( nhập tay )</h3>
 
-          <div className="sms-field-grid">
+          <div className="sms-field-grid sms-single-grid">
             <label>
               Phone
               <input
@@ -273,27 +268,9 @@ function SmsRequestSection() {
                 placeholder="0382741633"
               />
             </label>
-
-            <label>
-              Brandname
-              <input
-                type="text"
-                value={singleForm.brandname}
-                onChange={(event) => onSingleInputChange('brandname', event.target.value)}
-                placeholder="GAPIT"
-              />
-            </label>
-
-            <label>
-              Type
-              <input
-                type="text"
-                value={singleForm.type}
-                onChange={(event) => onSingleInputChange('type', event.target.value)}
-                placeholder="CSKH"
-              />
-            </label>
           </div>
+
+          <div className="sms-helper-text">Brandname: {DEFAULT_BRANDNAME} | Type: {DEFAULT_TYPE}</div>
 
           <label className="sms-textarea-label">
             Content
@@ -306,52 +283,49 @@ function SmsRequestSection() {
           </label>
 
           <button className="btn-simulate" onClick={handleSingleSend} disabled={singleSending}>
-            {singleSending ? 'Dang gui...' : 'Gui SMS'}
+            {singleSending ? 'Đang gửi...' : 'Gửi SMS'}
           </button>
 
           {singleResult && (
             <div className={`sms-result-box ${singleResult.ok ? 'ok' : 'error'}`}>
-              <strong>{singleResult.ok ? 'Thanh cong' : 'That bai'}:</strong> {singleResult.message}
+              <strong>{singleResult.ok ? 'Thành công' : 'Thất bại'}:</strong> {singleResult.message}
               {singleResult.response && <pre>{JSON.stringify(singleResult.response, null, 2)}</pre>}
             </div>
           )}
         </div>
 
         <div className="sms-card">
-          <h3>Gui hang loat tu Excel</h3>
+          <h3>Gửi hàng loạt từ Excel</h3>
 
-          <div className="sms-field-grid">
-            <label>
-              Brandname mac dinh
-              <input
-                type="text"
-                value={bulkDefaults.brandname}
-                onChange={(event) => onBulkDefaultChange('brandname', event.target.value)}
-              />
-            </label>
-
-            <label>
-              Type mac dinh
-              <input
-                type="text"
-                value={bulkDefaults.type}
-                onChange={(event) => onBulkDefaultChange('type', event.target.value)}
-              />
-            </label>
+          <div className="sms-template-actions">
+            <a className="sms-template-link" href="/templates/sms-template.xlsx" download>
+              Tải template Excel mẫu (phone, content)
+            </a>
           </div>
 
           <label className="sms-file-input">
-            Chon file Excel (.xlsx, .xls)
-            <input type="file" accept=".xlsx,.xls" onChange={handleExcelFileChange} />
+            Chọn file Excel (.xlsx, .xls)
+            <input
+              type="file"
+              accept=".xlsx,.xls"
+              onClick={(event) => {
+                event.currentTarget.value = ''
+              }}
+              onChange={handleExcelFileChange}
+            />
           </label>
 
           <div className="sms-note">
-            Yeu cau toi thieu: cot <strong>phone</strong> va <strong>content</strong>. Co the dung ten cot thay the: sdt, sodienthoai, message, noidung.
+            File chỉ cần 2 cột: <strong>phone</strong> và <strong>content</strong>. Hệ thống sẽ gửi tuần tự từng dòng một.
           </div>
+
+          <div className="sms-helper-text">Nếu Excel làm mất số 0 đầu số, hệ thống sẽ tự thêm lại trước khi gửi.</div>
+
+          <div className="sms-helper-text">Brandname: {DEFAULT_BRANDNAME} | Type: {DEFAULT_TYPE}</div>
 
           {excelFileName && (
             <div className="sms-file-meta">
-              File: {excelFileName} | Hop le: {excelRows.length} dong | Bo qua: {invalidRowsCount} dong
+              File: {excelFileName} | Hợp lệ: {excelRows.length} dòng | Bỏ qua: {invalidRowsCount} dòng
             </div>
           )}
 
@@ -381,7 +355,7 @@ function SmsRequestSection() {
           )}
 
           <button className="btn-simulate" onClick={handleBulkSend} disabled={bulkSending || excelRows.length === 0}>
-            {bulkSending ? `Dang gui... (${bulkProgress.done}/${bulkProgress.total})` : 'Gui theo file Excel'}
+            {bulkSending ? `Đang gửi... (${bulkProgress.done}/${bulkProgress.total})` : 'Gửi theo file Excel'}
           </button>
 
           {bulkProgress.total > 0 && (
@@ -390,7 +364,7 @@ function SmsRequestSection() {
                 <div className="sms-progress-fill" style={{ width: `${progressPercent}%` }}></div>
               </div>
               <div className="sms-progress-text">
-                {bulkProgress.done}/{bulkProgress.total} | Thanh cong: {bulkProgress.success} | That bai: {bulkProgress.failed}
+                {bulkProgress.done}/{bulkProgress.total} | Thành công: {bulkProgress.success} | Thất bại: {bulkProgress.failed}
               </div>
             </div>
           )}
@@ -400,9 +374,9 @@ function SmsRequestSection() {
               <table>
                 <thead>
                   <tr>
-                    <th>Dong</th>
+                    <th>Dòng</th>
                     <th>Phone</th>
-                    <th>Trang thai</th>
+                    <th>Trạng thái</th>
                     <th>Message</th>
                   </tr>
                 </thead>
