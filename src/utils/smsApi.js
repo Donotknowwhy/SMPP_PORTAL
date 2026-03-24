@@ -1,5 +1,5 @@
 const DEFAULT_SMS_API_URL =
-  import.meta.env.VITE_SMS_API_URL || 'https://sms.skyfi.com.vn/api/v1/sms/send'
+  import.meta.env.VITE_SMS_API_URL || 'https://sms.skyfi.com.vn/api/sms/send'
 
 export async function sendSmsRequest(payload, apiUrl = DEFAULT_SMS_API_URL) {
   const response = await fetch(apiUrl, {
