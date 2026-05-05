@@ -8,33 +8,38 @@ function ProvidersContent({
 }) {
   return (
     <div className="providers-content">
+      {/* Header with actions */}
       <div className="add-provider-section">
         <div className="section-header">
           <h2>Danh Sách Nhà Cung Cấp ({providers.length})</h2>
           <div className="header-actions">
             <button onClick={openAddModal} className="btn-add-new">
-              <span className="btn-icon">➕</span>
+              <span className="btn-icon">＋</span>
               Thêm nhà cung cấp
             </button>
             <button onClick={distributeEvenly} className="btn-distribute">
-              <span className="btn-icon">⚖️</span>
+              <span className="btn-icon">≡</span>
               Phân phối đều
             </button>
           </div>
         </div>
       </div>
 
+      {/* Status bar */}
       <div className="providers-section">
-        <div
-          className="total-percentage"
-          style={{
-            borderColor: totalPercentage === 100 ? '#000' : '#999',
-          }}
-        >
+        <div className="total-percentage">
+          {totalPercentage === 100 ? (
+            <span className="check-icon">✓</span>
+          ) : null}
           <span>Tổng: {totalPercentage}%</span>
           {totalPercentage !== 100 && (
             <span className="warning">
               {totalPercentage > 100 ? 'Vượt quá 100%' : 'Chưa đủ 100%'}
+            </span>
+          )}
+          {totalPercentage === 100 && (
+            <span style={{ fontSize: '0.82rem', color: 'var(--success)', fontWeight: 500 }}>
+              Đã cấu hình
             </span>
           )}
         </div>
@@ -53,7 +58,7 @@ function ProvidersContent({
               {providers.map((provider, index) => (
                 <tr key={provider.id}>
                   <td>{index + 1}</td>
-                  <td>{provider.name}</td>
+                  <td style={{ fontWeight: 500 }}>{provider.name}</td>
                   <td>
                     <span className="percentage-badge">{provider.percentage}%</span>
                   </td>

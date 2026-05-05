@@ -243,157 +243,173 @@ function SmsRequestSection() {
   const progressPercent =
     bulkProgress.total > 0 ? Math.round((bulkProgress.done / bulkProgress.total) * 100) : 0
 
+  const [activeTab, setActiveTab] = useState('single')
+
   return (
     <div className="sms-request-section">
       <div className="section-title-row">
         <h2>Gửi SMS qua API</h2>
-        <span className="section-badge">2 chế độ: Gửi đơn / Gửi từ Excel</span>
       </div>
 
-      {/* <div className="sms-note">
-        API URL đang dùng: <strong>{apiUrl}</strong>
-      </div> */}
+      {/* Tab bar */}
+      <div className="sms-tabs">
+        <button
+          className={`sms-tab-btn${activeTab === 'single' ? ' active' : ''}`}
+          onClick={() => setActiveTab('single')}
+        >
+          Gửi đơn (nhập tay)
+        </button>
+        <button
+          className={`sms-tab-btn${activeTab === 'bulk' ? ' active' : ''}`}
+          onClick={() => setActiveTab('bulk')}
+        >
+          Gửi hàng loạt từ Excel
+        </button>
+      </div>
 
-      <div className="sms-request-grid">
-        <div className="sms-card">
-          <h3>Gửi đơn ( nhập tay )</h3>
+      {/* Tab content */}
+      <div className="sms-tab-content">
 
-          <div className="sms-field-grid sms-single-grid">
-            <label>
-              Phone
-              <input
-                type="text"
-                value={singleForm.phone}
-                onChange={(event) => onSingleInputChange('phone', event.target.value)}
-                placeholder="0382741633"
+        {activeTab === 'single' && (
+          <div className="sms-card">
+            <div className="sms-field-grid sms-single-grid">
+              <label>
+                Phone
+                <input
+                  type="text"
+                  value={singleForm.phone}
+                  onChange={(event) => onSingleInputChange('phone', event.target.value)}
+                  placeholder="0707123583"
+                />
+              </label>
+            </div>
+
+            <div className="sms-helper-text">Brandname: {DEFAULT_BRANDNAME} | Type: {DEFAULT_TYPE}</div>
+
+            <label className="sms-textarea-label">
+              Content
+              <textarea
+                rows={4}
+                value={singleForm.content}
+                onChange={(event) => onSingleInputChange('content', event.target.value)}
+                placeholder="Xin chao. Day la tin nhan de mo."
               />
             </label>
-          </div>
 
-          <div className="sms-helper-text">Brandname: {DEFAULT_BRANDNAME} | Type: {DEFAULT_TYPE}</div>
+            <button className="btn-simulate" onClick={handleSingleSend} disabled={singleSending}>
+              {singleSending ? 'Đang gửi...' : 'Gửi SMS'}
+            </button>
 
-          <label className="sms-textarea-label">
-            Content
-            <textarea
-              rows={4}
-              value={singleForm.content}
-              onChange={(event) => onSingleInputChange('content', event.target.value)}
-              placeholder="Xin chao. Day la tin nhan de mo."
-            />
-          </label>
-
-          <button className="btn-simulate" onClick={handleSingleSend} disabled={singleSending}>
-            {singleSending ? 'Đang gửi...' : 'Gửi SMS'}
-          </button>
-
-          {singleResult && (
-            <div className={`sms-result-box ${singleResult.ok ? 'ok' : 'error'}`}>
-              <strong>{singleResult.ok ? 'Thành công' : 'Thất bại'}:</strong> {singleResult.message}
-              {singleResult.response && <pre>{JSON.stringify(singleResult.response, null, 2)}</pre>}
-            </div>
-          )}
-        </div>
-
-        <div className="sms-card">
-          <h3>Gửi hàng loạt từ Excel</h3>
-
-          <div className="sms-template-actions">
-            <a className="sms-template-link" href="/templates/sms-template.xlsx" download>
-              Tải template Excel mẫu (phone, content)
-            </a>
-          </div>
-
-          <label className="sms-file-input">
-            Chọn file Excel (.xlsx, .xls)
-            <input
-              type="file"
-              accept=".xlsx,.xls"
-              onClick={(event) => {
-                event.currentTarget.value = ''
-              }}
-              onChange={handleExcelFileChange}
-            />
-          </label>
-
-          <div className="sms-note">
-            File chỉ cần 2 cột: <strong>phone</strong> và <strong>content</strong>. Hệ thống sẽ gửi tuần tự từng dòng một.
-          </div>
-
-          <div className="sms-helper-text">Nếu Excel làm mất số 0 đầu số, hệ thống sẽ tự thêm lại trước khi gửi.</div>
-
-          <div className="sms-helper-text">Brandname: {DEFAULT_BRANDNAME} | Type: {DEFAULT_TYPE}</div>
-
-          {excelFileName && (
-            <div className="sms-file-meta">
-              File: {excelFileName} | Hợp lệ: {excelRows.length} dòng | Bỏ qua: {invalidRowsCount} dòng
-            </div>
-          )}
-
-          {excelError && <div className="sms-result-box error">{excelError}</div>}
-
-          {previewRows.length > 0 && (
-            <div className="sms-preview-table">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Dong</th>
-                    <th>Phone</th>
-                    <th>Content</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {previewRows.map((row) => (
-                    <tr key={row.rowNumber}>
-                      <td>{row.rowNumber}</td>
-                      <td>{row.phone}</td>
-                      <td>{row.content}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          <button className="btn-simulate" onClick={handleBulkSend} disabled={bulkSending || excelRows.length === 0}>
-            {bulkSending ? `Đang gửi... (${bulkProgress.done}/${bulkProgress.total})` : 'Gửi theo file Excel'}
-          </button>
-
-          {bulkProgress.total > 0 && (
-            <div className="sms-progress-wrap">
-              <div className="sms-progress-bar">
-                <div className="sms-progress-fill" style={{ width: `${progressPercent}%` }}></div>
+            {singleResult && (
+              <div className={`sms-result-box ${singleResult.ok ? 'ok' : 'error'}`}>
+                <strong>{singleResult.ok ? 'Thành công' : 'Thất bại'}:</strong> {singleResult.message}
+                {singleResult.response && <pre>{JSON.stringify(singleResult.response, null, 2)}</pre>}
               </div>
-              <div className="sms-progress-text">
-                {bulkProgress.done}/{bulkProgress.total} | Thành công: {bulkProgress.success} | Thất bại: {bulkProgress.failed}
-              </div>
-            </div>
-          )}
+            )}
+          </div>
+        )}
 
-          {bulkResults.length > 0 && (
-            <div className="sms-bulk-results">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Dòng</th>
-                    <th>Phone</th>
-                    <th>Trạng thái</th>
-                    <th>Message</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {bulkResults.slice(-20).map((item) => (
-                    <tr key={`${item.rowNumber}-${item.phone}`}>
-                      <td>{item.rowNumber}</td>
-                      <td>{item.phone}</td>
-                      <td className={item.ok ? 'status-ok' : 'status-error'}>{item.ok ? 'SUCCESS' : 'FAILED'}</td>
-                      <td>{item.message}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+        {activeTab === 'bulk' && (
+          <div className="sms-card">
+            <div className="sms-template-actions">
+              <a className="sms-template-link" href="/templates/sms-template.xlsx" download>
+                Tải template Excel mẫu (phone, content)
+              </a>
             </div>
-          )}
-        </div>
+
+            <label className="sms-file-input">
+              Chọn file Excel (.xlsx, .xls)
+              <input
+                type="file"
+                accept=".xlsx,.xls"
+                onClick={(event) => {
+                  event.currentTarget.value = ''
+                }}
+                onChange={handleExcelFileChange}
+              />
+            </label>
+
+            <div className="sms-note">
+              File chỉ cần 2 cột: <strong>phone</strong> và <strong>content</strong>. Hệ thống sẽ gửi tuần tự từng dòng một.
+            </div>
+
+            <div className="sms-helper-text">Nếu Excel làm mất số 0 đầu số, hệ thống sẽ tự thêm lại trước khi gửi.</div>
+
+            <div className="sms-helper-text">Brandname: {DEFAULT_BRANDNAME} | Type: {DEFAULT_TYPE}</div>
+
+            {excelFileName && (
+              <div className="sms-file-meta">
+                File: {excelFileName} | Hợp lệ: {excelRows.length} dòng | Bỏ qua: {invalidRowsCount} dòng
+              </div>
+            )}
+
+            {excelError && <div className="sms-result-box error">{excelError}</div>}
+
+            {previewRows.length > 0 && (
+              <div className="sms-preview-table">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Dòng</th>
+                      <th>Phone</th>
+                      <th>Content</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {previewRows.map((row) => (
+                      <tr key={row.rowNumber}>
+                        <td>{row.rowNumber}</td>
+                        <td>{row.phone}</td>
+                        <td>{row.content}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            <button className="btn-simulate" onClick={handleBulkSend} disabled={bulkSending || excelRows.length === 0}>
+              {bulkSending ? `Đang gửi... (${bulkProgress.done}/${bulkProgress.total})` : 'Gửi theo file Excel'}
+            </button>
+
+            {bulkProgress.total > 0 && (
+              <div className="sms-progress-wrap">
+                <div className="sms-progress-bar">
+                  <div className="sms-progress-fill" style={{ width: `${progressPercent}%` }}></div>
+                </div>
+                <div className="sms-progress-text">
+                  {bulkProgress.done}/{bulkProgress.total} | Thành công: {bulkProgress.success} | Thất bại: {bulkProgress.failed}
+                </div>
+              </div>
+            )}
+
+            {bulkResults.length > 0 && (
+              <div className="sms-bulk-results">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Dòng</th>
+                      <th>Phone</th>
+                      <th>Trạng thái</th>
+                      <th>Message</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {bulkResults.slice(-20).map((item) => (
+                      <tr key={`${item.rowNumber}-${item.phone}`}>
+                        <td>{item.rowNumber}</td>
+                        <td>{item.phone}</td>
+                        <td className={item.ok ? 'status-ok' : 'status-error'}>{item.ok ? 'SUCCESS' : 'FAILED'}</td>
+                        <td>{item.message}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
       </div>
     </div>
   )

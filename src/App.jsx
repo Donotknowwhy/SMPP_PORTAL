@@ -5,6 +5,7 @@ import PageHeader from './components/PageHeader'
 import HomeContent from './components/HomeContent'
 import ProvidersContent from './components/ProvidersContent'
 import ReportsContent from './components/ReportsContent'
+import Footer from './components/Footer'
 import EditProviderModal from './components/modals/EditProviderModal'
 import AddProviderModal from './components/modals/AddProviderModal'
 import { initialProviders } from './data/initialProviders'
@@ -108,10 +109,9 @@ function App() {
   return (
     <div className="app">
       <TopNav activeMenu={activeMenu} onChangeMenu={setActiveMenu} onGoHome={onGoHome} />
+      <PageHeader />
 
       <div className="container">
-        <PageHeader />
-
         {activeMenu === 'home' && (
           <HomeContent
             providers={providers}
@@ -160,6 +160,8 @@ function App() {
           saveNewProvider={saveNewProvider}
         />
       </div>
+
+      <Footer />
     </div>
   )
 }

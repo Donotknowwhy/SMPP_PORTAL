@@ -1,4 +1,4 @@
-function ReportsContent({ providers, totalPercentage }) {
+﻿function ReportsContent({ providers, totalPercentage }) {
   const totalSent = providers.reduce((sum, p) => sum + p.totalSent, 0)
   const totalSuccess = providers.reduce((sum, p) => sum + (p.successRate * p.totalSent) / 100, 0)
   const totalError = providers.reduce((sum, p) => sum + (p.errorRate * p.totalSent) / 100, 0)
@@ -8,13 +8,7 @@ function ReportsContent({ providers, totalPercentage }) {
 
   return (
     <div className="reports-content">
-      <div className="page-header">
-        <div className="page-title-section">
-          <h1 className="page-title">Báo Cáo & Phân Tích</h1>
-          <p className="page-subtitle">Tổng quan hiệu suất và tỷ lệ thành công</p>
-        </div>
-      </div>
-
+      {/* Stats overview cards */}
       <div className="report-overview">
         <div className="overview-card success-card">
           <div className="card-icon">✓</div>
@@ -26,7 +20,7 @@ function ReportsContent({ providers, totalPercentage }) {
         </div>
 
         <div className="overview-card error-card">
-          <div className="card-icon">✗</div>
+          <div className="card-icon">✕</div>
           <div className="card-content">
             <div className="card-value">{errorRate}%</div>
             <div className="card-label">Tỷ Lệ Lỗi</div>
@@ -35,7 +29,7 @@ function ReportsContent({ providers, totalPercentage }) {
         </div>
 
         <div className="overview-card total-card">
-          <div className="card-icon">📊</div>
+          <div className="card-icon">≡</div>
           <div className="card-content">
             <div className="card-value">{totalSent.toLocaleString()}</div>
             <div className="card-label">Tổng Tin Nhắn</div>
@@ -44,6 +38,7 @@ function ReportsContent({ providers, totalPercentage }) {
         </div>
       </div>
 
+      {/* Performance bars */}
       <div className="report-section">
         <h3 className="section-title">So Sánh Hiệu Suất Nhà Cung Cấp</h3>
         <div className="chart-container">
@@ -59,7 +54,6 @@ function ReportsContent({ providers, totalPercentage }) {
                     <div
                       className="bar success-bar"
                       style={{ width: `${provider.successRate}%` }}
-                      title={`Thành công: ${provider.successRate}%`}
                     >
                       <span className="bar-label">{provider.successRate}%</span>
                     </div>
@@ -68,7 +62,6 @@ function ReportsContent({ providers, totalPercentage }) {
                     <div
                       className="bar error-bar"
                       style={{ width: `${provider.errorRate}%` }}
-                      title={`Lỗi: ${provider.errorRate}%`}
                     >
                       <span className="bar-label">{provider.errorRate}%</span>
                     </div>
@@ -91,6 +84,7 @@ function ReportsContent({ providers, totalPercentage }) {
         </div>
       </div>
 
+      {/* Detail table */}
       <div className="report-section">
         <h3 className="section-title">Chi Tiết Từng Nhà Cung Cấp</h3>
         <div className="report-table-container">
@@ -134,12 +128,8 @@ function ReportsContent({ providers, totalPercentage }) {
                 <td><strong>{totalSent.toLocaleString()}</strong></td>
                 <td className="success-cell"><strong>{Math.round(totalSuccess).toLocaleString()}</strong></td>
                 <td className="error-cell"><strong>{Math.round(totalError).toLocaleString()}</strong></td>
-                <td>
-                  <span className="rate-badge success-badge">{successRate}%</span>
-                </td>
-                <td>
-                  <span className="rate-badge error-badge">{errorRate}%</span>
-                </td>
+                <td><span className="rate-badge success-badge">{successRate}%</span></td>
+                <td><span className="rate-badge error-badge">{errorRate}%</span></td>
               </tr>
             </tfoot>
           </table>
