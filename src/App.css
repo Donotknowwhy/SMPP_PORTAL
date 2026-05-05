@@ -1087,6 +1087,7 @@
 .distribution-form input[type="number"]:focus { outline: none; border-color: var(--red); }
 
 .btn-simulate {
+  margin-top: 10px;
   padding: 0.6rem 1.25rem;
   border: none;
   background: var(--red);
