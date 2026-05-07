@@ -89,14 +89,14 @@ function SmsRequestSection({ authToken }) {
       const result = await sendSmsRequest(payload, authToken)
       setSingleResult({
         ok: true,
-        message: result.data?.message || 'Gui SMS thanh cong.',
+        message: result.data?.message || 'Gửi SMS thành công.',
         payload,
         response: result.data,
       })
     } catch (error) {
       setSingleResult({
         ok: false,
-        message: error.message || 'Gui SMS that bai.',
+        message: error.message || 'Gửi SMS thất bại.',
         response: error.details || null,
       })
     } finally {
@@ -125,7 +125,7 @@ function SmsRequestSection({ authToken }) {
       const firstSheetName = workbook.SheetNames[0]
 
       if (!firstSheetName) {
-        throw new Error('File Excel khong co du lieu.')
+        throw new Error('File Excel không có dữ liệu.')
       }
 
       const worksheet = workbook.Sheets[firstSheetName]
