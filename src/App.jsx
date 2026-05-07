@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import './App.css'
+import LoginPage from './components/LoginPage'
 import TopNav from './components/TopNav'
 import PageHeader from './components/PageHeader'
 import HomeContent from './components/HomeContent'
@@ -12,6 +13,9 @@ import { initialProviders } from './data/initialProviders'
 import { calculateDistribution } from './utils/providerUtils'
 
 function App() {
+  const [authToken, setAuthToken] = useState(() => sessionStorage.getItem('sms_token') || null)
+  const [authUsername, setAuthUsername] = useState(() => sessionStorage.getItem('sms_username') || '')
+
   const [activeMenu, setActiveMenu] = useState('home')
   const [providers, setProviders] = useState(initialProviders)
   const [totalMessages, setTotalMessages] = useState(1000)
@@ -24,6 +28,24 @@ function App() {
   const [showAddModal, setShowAddModal] = useState(false)
   const [newProviderModalName, setNewProviderModalName] = useState('')
   const [newProviderModalPercentage, setNewProviderModalPercentage] = useState(0)
+
+  const handleLoginSuccess = (token, username) => {
+    sessionStorage.setItem('sms_token', token)
+    sessionStorage.setItem('sms_username', username)
+    setAuthToken(token)
+    setAuthUsername(username)
+  }
+
+  const handleLogout = () => {
+    sessionStorage.removeItem('sms_token')
+    sessionStorage.removeItem('sms_username')
+    setAuthToken(null)
+    setAuthUsername('')
+  }
+
+  if (!authToken) {
+    return <LoginPage onLoginSuccess={handleLoginSuccess} />
+  }
 
   const totalPercentage = providers.reduce((sum, provider) => sum + provider.percentage, 0)
 
@@ -108,7 +130,7 @@ function App() {
 
   return (
     <div className="app">
-      <TopNav activeMenu={activeMenu} onChangeMenu={setActiveMenu} onGoHome={onGoHome} />
+      <TopNav activeMenu={activeMenu} onChangeMenu={setActiveMenu} onGoHome={onGoHome} username={authUsername} onLogout={handleLogout} />
       <PageHeader />
 
       <div className="container">
@@ -121,6 +143,7 @@ function App() {
             showDistribution={showDistribution}
             setShowDistribution={setShowDistribution}
             calculateDistribution={() => calculateDistribution(providers, totalMessages, totalPercentage)}
+            authToken={authToken}
           />
         )}
 

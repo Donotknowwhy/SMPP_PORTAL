@@ -62,6 +62,7 @@ function HomeContent({
   showDistribution,
   setShowDistribution,
   calculateDistribution,
+  authToken,
 }) {
   return (
     <div className="home-content">
@@ -160,7 +161,7 @@ function HomeContent({
       )}
 
       {/* SMS Send Section */}
-      <SmsRequestSection />
+      <SmsRequestSection authToken={authToken} />
 
       {/* Distribution Simulator */}
       <div className="distribution-section">

@@ -1,4 +1,4 @@
-function TopNav({ activeMenu, onChangeMenu, onGoHome }) {
+function TopNav({ activeMenu, onChangeMenu, onGoHome, username, onLogout }) {
   return (
     <header className="top-nav">
       <div className="nav-left">
@@ -29,7 +29,12 @@ function TopNav({ activeMenu, onChangeMenu, onGoHome }) {
       </div>
       <div className="nav-right">
         <button className="icon-btn" title="Thông báo">🔔</button>
-        <button className="icon-btn" title="Tài khoản">👤</button>
+        {username && (
+          <span className="nav-username" title={`Đăng nhập: ${username}`}>👤 {username}</span>
+        )}
+        <button className="nav-logout-btn" onClick={onLogout} title="Đăng xuất">
+          Đăng xuất
+        </button>
       </div>
     </header>
   )

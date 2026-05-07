@@ -1,6 +1,9 @@
 import { useMemo, useState } from 'react'
 import * as XLSX from 'xlsx'
-import { getDefaultSmsApiUrl, sendSmsRequest } from '../utils/smsApi'
+import { v4 as uuidv4 } from 'uuid'
+import { sendSmsRequest } from '../utils/smsApi'
+
+const genRequestId = () => uuidv4().replace(/-/g, '').slice(0, 50)
 
 const REQUIRED_HEADERS = ['phone', 'content']
 const DEFAULT_BRANDNAME = 'GAPIT'
@@ -37,9 +40,7 @@ const normalizePhone = (value) => {
   return digitsOnly
 }
 
-function SmsRequestSection() {
-  const apiUrl = getDefaultSmsApiUrl()
-
+function SmsRequestSection({ authToken }) {
   const [singleForm, setSingleForm] = useState({
     phone: '',
     content: '',
@@ -82,9 +83,10 @@ function SmsRequestSection() {
         content,
         brandname: DEFAULT_BRANDNAME,
         type: DEFAULT_TYPE,
+        requestId: genRequestId(),
       }
 
-      const result = await sendSmsRequest(payload, apiUrl.trim())
+      const result = await sendSmsRequest(payload, authToken)
       setSingleResult({
         ok: true,
         message: result.data?.message || 'Gui SMS thanh cong.',
@@ -205,10 +207,11 @@ function SmsRequestSection() {
         content: row.content,
         brandname: DEFAULT_BRANDNAME,
         type: DEFAULT_TYPE,
+        requestId: genRequestId(),
       }
 
       try {
-        const result = await sendSmsRequest(payload, apiUrl.trim())
+        const result = await sendSmsRequest(payload, authToken)
         success += 1
         results.push({
           rowNumber: row.rowNumber,
