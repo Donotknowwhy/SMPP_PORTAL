@@ -127,7 +127,7 @@ export default function LoginPage({ onLoginSuccess }) {
           </button>
         </form>
 
-        <p className="login-footer-note">Token sẽ hết hạn sau 24 giờ</p>
+        {/* <p className="login-footer-note">Token sẽ hết hạn sau 24 giờ</p> */}
       </div>
     </div>
   )
