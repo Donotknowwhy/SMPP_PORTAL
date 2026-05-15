@@ -6,6 +6,7 @@ import PageHeader from './components/PageHeader'
 import HomeContent from './components/HomeContent'
 import ProvidersContent from './components/ProvidersContent'
 import ReportsContent from './components/ReportsContent'
+import SmsRequestSection from './components/SmsRequestSection'
 import Footer from './components/Footer'
 import EditProviderModal from './components/modals/EditProviderModal'
 import AddProviderModal from './components/modals/AddProviderModal'
@@ -143,7 +144,6 @@ function App() {
             showDistribution={showDistribution}
             setShowDistribution={setShowDistribution}
             calculateDistribution={() => calculateDistribution(providers, totalMessages, totalPercentage)}
-            authToken={authToken}
           />
         )}
 
@@ -160,6 +160,10 @@ function App() {
 
         {activeMenu === 'reports' && (
           <ReportsContent providers={providers} totalPercentage={totalPercentage} />
+        )}
+
+        {activeMenu === 'send-sms' && (
+          <SmsRequestSection authToken={authToken} />
         )}
 
         <EditProviderModal

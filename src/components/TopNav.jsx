@@ -26,6 +26,13 @@ function TopNav({ activeMenu, onChangeMenu, onGoHome, username, onLogout }) {
           <span className="nav-icon">↗</span>
           Báo cáo
         </button>
+        <button
+          className={`nav-menu-item ${activeMenu === 'send-sms' ? 'active' : ''}`}
+          onClick={() => onChangeMenu('send-sms')}
+        >
+          <span className="nav-icon">✉</span>
+          Gửi SMS
+        </button>
       </div>
       <div className="nav-right">
         <button className="icon-btn" title="Thông báo">🔔</button>
