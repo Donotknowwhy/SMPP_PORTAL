@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import './App.css'
 import LoginPage from './components/LoginPage'
+import Sidebar from './components/Sidebar'
 import TopNav from './components/TopNav'
 import PageHeader from './components/PageHeader'
 import HomeContent from './components/HomeContent'
 import ProvidersContent from './components/ProvidersContent'
 import ReportsContent from './components/ReportsContent'
 import SmsRequestSection from './components/SmsRequestSection'
+import RoutingRulesContent from './components/RoutingRulesContent'
 import Footer from './components/Footer'
 import EditProviderModal from './components/modals/EditProviderModal'
 import AddProviderModal from './components/modals/AddProviderModal'
@@ -17,7 +19,7 @@ function App() {
   const [authToken, setAuthToken] = useState(() => sessionStorage.getItem('sms_token') || null)
   const [authUsername, setAuthUsername] = useState(() => sessionStorage.getItem('sms_username') || '')
 
-  const [activeMenu, setActiveMenu] = useState('home')
+  const [activeMenu, setActiveMenu] = useState('routing')
   const [providers, setProviders] = useState(initialProviders)
   const [totalMessages, setTotalMessages] = useState(1000)
   const [showDistribution, setShowDistribution] = useState(false)
@@ -132,63 +134,74 @@ function App() {
   return (
     <div className="app">
       <TopNav activeMenu={activeMenu} onChangeMenu={setActiveMenu} onGoHome={onGoHome} username={authUsername} onLogout={handleLogout} />
-      <PageHeader />
+      
+      <div className="app-body">
+        <Sidebar activeMenu={activeMenu} onChangeMenu={setActiveMenu} username={authUsername} onLogout={handleLogout} />
+        
+        <main className="main-content">
+          {/* <PageHeader /> */}
 
-      <div className="container">
-        {activeMenu === 'home' && (
-          <HomeContent
-            providers={providers}
-            totalPercentage={totalPercentage}
-            totalMessages={totalMessages}
-            setTotalMessages={setTotalMessages}
-            showDistribution={showDistribution}
-            setShowDistribution={setShowDistribution}
-            calculateDistribution={() => calculateDistribution(providers, totalMessages, totalPercentage)}
-          />
-        )}
+          <div className="container">
+            {activeMenu === 'home' && (
+              <HomeContent
+                providers={providers}
+                totalPercentage={totalPercentage}
+                totalMessages={totalMessages}
+                setTotalMessages={setTotalMessages}
+                showDistribution={showDistribution}
+                setShowDistribution={setShowDistribution}
+                calculateDistribution={() => calculateDistribution(providers, totalMessages, totalPercentage)}
+              />
+            )}
 
-        {activeMenu === 'providers' && (
-          <ProvidersContent
-            providers={providers}
-            totalPercentage={totalPercentage}
-            openAddModal={openAddModal}
-            distributeEvenly={distributeEvenly}
-            openEditModal={openEditModal}
-            deleteProvider={deleteProvider}
-          />
-        )}
+            {activeMenu === 'providers' && (
+              <ProvidersContent
+                providers={providers}
+                totalPercentage={totalPercentage}
+                openAddModal={openAddModal}
+                distributeEvenly={distributeEvenly}
+                openEditModal={openEditModal}
+                deleteProvider={deleteProvider}
+              />
+            )}
 
-        {activeMenu === 'reports' && (
-          <ReportsContent providers={providers} totalPercentage={totalPercentage} />
-        )}
+            {activeMenu === 'reports' && (
+              <ReportsContent providers={providers} totalPercentage={totalPercentage} />
+            )}
 
-        {activeMenu === 'send-sms' && (
-          <SmsRequestSection authToken={authToken} />
-        )}
+            {activeMenu === 'send-sms' && (
+              <SmsRequestSection authToken={authToken} />
+            )}
 
-        <EditProviderModal
-          editingProvider={editingProvider}
-          editProviderName={editProviderName}
-          setEditProviderName={setEditProviderName}
-          editPercentage={editPercentage}
-          setEditPercentage={setEditPercentage}
-          closeEditModal={closeEditModal}
-          saveEdit={saveEdit}
-        />
+            {activeMenu === 'routing' && (
+              <RoutingRulesContent />
+            )}
 
-        <AddProviderModal
-          showAddModal={showAddModal}
-          closeAddModal={closeAddModal}
-          newProviderModalName={newProviderModalName}
-          setNewProviderModalName={setNewProviderModalName}
-          newProviderModalPercentage={newProviderModalPercentage}
-          setNewProviderModalPercentage={setNewProviderModalPercentage}
-          handleAddKeyPress={handleAddKeyPress}
-          saveNewProvider={saveNewProvider}
-        />
+            <EditProviderModal
+              editingProvider={editingProvider}
+              editProviderName={editProviderName}
+              setEditProviderName={setEditProviderName}
+              editPercentage={editPercentage}
+              setEditPercentage={setEditPercentage}
+              closeEditModal={closeEditModal}
+              saveEdit={saveEdit}
+            />
+
+            <AddProviderModal
+              showAddModal={showAddModal}
+              closeAddModal={closeAddModal}
+              newProviderModalName={newProviderModalName}
+              setNewProviderModalName={setNewProviderModalName}
+              newProviderModalPercentage={newProviderModalPercentage}
+              setNewProviderModalPercentage={setNewProviderModalPercentage}
+              handleAddKeyPress={handleAddKeyPress}
+              saveNewProvider={saveNewProvider}
+            />
+          </div>
+
+          <Footer />
+        </main>
       </div>
-
-      <Footer />
     </div>
   )
 }
