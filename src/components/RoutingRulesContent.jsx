@@ -1,4 +1,19 @@
 import { useState } from 'react'
+
+function SelectWrapper({ children }) {
+  const [open, setOpen] = useState(false)
+
+  const handleFocus = () => setOpen(true)
+  const handleBlur = () => setOpen(false)
+  const handleChange = () => setTimeout(() => setOpen(false), 150)
+
+  return (
+    <div className={`select-wrapper${open ? ' is-open' : ''}`}>
+      {children(handleFocus, handleBlur, handleChange)}
+      <span className="select-arrow" />
+    </div>
+  )
+}
 import wifiAntennaIcon from '../assets/icons/streamline_wifi-antenna.svg'
 import shieldTickIcon from '../assets/icons/shield-tick.svg'
 import shieldZapIcon from '../assets/icons/shield-zap.svg'
@@ -43,12 +58,19 @@ function RoutingRulesContent() {
             <img src={wifiAntennaIcon} alt="Nhà mạng" className="filter-icon" />
             Nhà mạng
           </label>
-          <select className="filter-select" value={network} onChange={(e) => setNetwork(e.target.value)}>
-            <option value="SkyFi">SkyFi</option>
-            <option value="Viettel">Viettel</option>
-            <option value="Mobifone">Mobifone</option>
-            <option value="Vinaphone">Vinaphone</option>
-          </select>
+          <SelectWrapper>
+            {(onFocus, onBlur, onChange) => (
+              <select className="filter-select" value={network}
+                onChange={(e) => { setNetwork(e.target.value); onChange() }}
+                onFocus={onFocus} onBlur={onBlur}
+              >
+                <option value="SkyFi">SkyFi</option>
+                <option value="Viettel">Viettel</option>
+                <option value="Mobifone">Mobifone</option>
+                <option value="Vinaphone">Vinaphone</option>
+              </select>
+            )}
+          </SelectWrapper>
         </div>
 
         <div className="filter-group">
@@ -56,11 +78,18 @@ function RoutingRulesContent() {
             <img src={shieldTickIcon} alt="Provider chính" className="filter-icon" />
             Provider chính
           </label>
-          <select className="filter-select" value={primaryProvider} onChange={(e) => setPrimaryProvider(e.target.value)}>
-            <option value="ST">ST</option>
-            <option value="VNPAY">VNPAY</option>
-            <option value="Gapit">Gapit</option>
-          </select>
+          <SelectWrapper>
+            {(onFocus, onBlur, onChange) => (
+              <select className="filter-select" value={primaryProvider}
+                onChange={(e) => { setPrimaryProvider(e.target.value); onChange() }}
+                onFocus={onFocus} onBlur={onBlur}
+              >
+                <option value="ST">ST</option>
+                <option value="VNPAY">VNPAY</option>
+                <option value="Gapit">Gapit</option>
+              </select>
+            )}
+          </SelectWrapper>
         </div>
 
         <div className="filter-group">
@@ -68,11 +97,18 @@ function RoutingRulesContent() {
             <img src={shieldZapIcon} alt="Provider backup" className="filter-icon" />
             Provider backup
           </label>
-          <select className="filter-select" value={backupProvider} onChange={(e) => setBackupProvider(e.target.value)}>
-            <option value="Gapit">Gapit</option>
-            <option value="ST">ST</option>
-            <option value="VNPAY">VNPAY</option>
-          </select>
+          <SelectWrapper>
+            {(onFocus, onBlur, onChange) => (
+              <select className="filter-select" value={backupProvider}
+                onChange={(e) => { setBackupProvider(e.target.value); onChange() }}
+                onFocus={onFocus} onBlur={onBlur}
+              >
+                <option value="Gapit">Gapit</option>
+                <option value="ST">ST</option>
+                <option value="VNPAY">VNPAY</option>
+              </select>
+            )}
+          </SelectWrapper>
         </div>
 
         <div className="filter-group">
@@ -80,11 +116,18 @@ function RoutingRulesContent() {
             <img src={fileShieldIcon} alt="Điều kiện chuyển hướng" className="filter-icon" />
             Điều kiện chuyển hướng
           </label>
-          <select className="filter-select" value={condition} onChange={(e) => setCondition(e.target.value)}>
-            <option value="Fail Rate > 10%">Fail Rate &gt; 10%</option>
-            <option value="Fail Rate > 20%">Fail Rate &gt; 20%</option>
-            <option value="Timeout > 5s">Timeout &gt; 5s</option>
-          </select>
+          <SelectWrapper>
+            {(onFocus, onBlur, onChange) => (
+              <select className="filter-select" value={condition}
+                onChange={(e) => { setCondition(e.target.value); onChange() }}
+                onFocus={onFocus} onBlur={onBlur}
+              >
+                <option value="Fail Rate > 10%">Fail Rate &gt; 10%</option>
+                <option value="Fail Rate > 20%">Fail Rate &gt; 20%</option>
+                <option value="Timeout > 5s">Timeout &gt; 5s</option>
+              </select>
+            )}
+          </SelectWrapper>
         </div>
       </div>
 
