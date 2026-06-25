@@ -43,7 +43,7 @@
         <h3 className="section-title">So Sánh Hiệu Suất Nhà Cung Cấp</h3>
         <div className="chart-container">
           {providers.map((provider) => (
-            <div key={provider.id} className="chart-row">
+            <div key={provider.id} className="chart-row flex-wrap sm:flex-nowrap">
               <div className="chart-label">
                 <div className="provider-name">{provider.name}</div>
                 <div className="provider-stats">{provider.totalSent.toLocaleString()} tin</div>

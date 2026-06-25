@@ -1,4 +1,8 @@
+import { useState } from 'react'
+
 function Sidebar({ activeMenu, onChangeMenu, username, onLogout }) {
+  const [collapsed, setCollapsed] = useState(false)
+
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: '▣' },
     { id: 'gateway', label: 'Cấu hình gateway', icon: '⚙' },
@@ -10,10 +14,19 @@ function Sidebar({ activeMenu, onChangeMenu, username, onLogout }) {
     { id: 'motion', label: 'Motion', icon: '🎬' },
   ]
 
+  const labelClass = collapsed ? 'hidden' : 'hidden md:inline-block'
+
   return (
-    <aside className="sidebar">
+    <aside className={`sidebar w-16 ${collapsed ? 'collapsed' : 'md:w-60'}`}>
       <div className="sidebar-header">
-        <h2 className="sidebar-title">Main Menu</h2>
+        <h2 className={`sidebar-title ${labelClass}`}>Main Menu</h2>
+        <button
+          className="sidebar-toggle-btn hidden md:flex"
+          onClick={() => setCollapsed(!collapsed)}
+          title={collapsed ? 'Mở rộng menu' : 'Thu gọn menu'}
+        >
+          {collapsed ? '»' : '«'}
+        </button>
       </div>
       <nav className="sidebar-nav">
         {menuItems.map((item) => (
@@ -21,9 +34,10 @@ function Sidebar({ activeMenu, onChangeMenu, username, onLogout }) {
             key={item.id}
             className={`sidebar-menu-item ${activeMenu === item.id ? 'active' : ''}`}
             onClick={() => onChangeMenu(item.id)}
+            title={item.label}
           >
             <span className="sidebar-menu-icon">{item.icon}</span>
-            <span className="sidebar-menu-number">
+            <span className={`sidebar-menu-number ${labelClass}`}>
               {menuItems.indexOf(item) + 1}. {item.label}
             </span>
           </button>
@@ -32,10 +46,11 @@ function Sidebar({ activeMenu, onChangeMenu, username, onLogout }) {
       <div className="sidebar-footer">
         <div className="sidebar-user">
           <span className="sidebar-user-icon">👤</span>
-          <span className="sidebar-user-name">{username}</span>
+          <span className={`sidebar-user-name ${labelClass}`}>{username}</span>
         </div>
-        <button className="sidebar-logout-btn" onClick={onLogout}>
-          Đăng xuất
+        <button className="sidebar-logout-btn" onClick={onLogout} title="Đăng xuất">
+          <span className={labelClass}>Đăng xuất</span>
+          <span className={collapsed ? 'inline' : 'inline md:hidden'}>⏻</span>
         </button>
       </div>
     </aside>

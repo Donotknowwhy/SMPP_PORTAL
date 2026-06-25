@@ -10,9 +10,9 @@ function ProvidersContent({
     <div className="providers-content">
       {/* Header with actions */}
       <div className="add-provider-section">
-        <div className="section-header">
+        <div className="section-header flex-wrap gap-3 sm:flex-nowrap">
           <h2>Danh Sách Nhà Cung Cấp ({providers.length})</h2>
-          <div className="header-actions">
+          <div className="header-actions flex-wrap sm:flex-nowrap">
             <button onClick={openAddModal} className="btn-add-new">
               <span className="btn-icon">＋</span>
               Thêm nhà cung cấp
@@ -45,6 +45,7 @@ function ProvidersContent({
         </div>
 
         {providers.length > 0 ? (
+          <div className="overflow-x-auto">
           <table className="providers-table">
             <thead>
               <tr>
@@ -76,6 +77,7 @@ function ProvidersContent({
               ))}
             </tbody>
           </table>
+          </div>
         ) : (
           <div className="empty-state">
             <p>Chưa có nhà cung cấp nào. Hãy thêm nhà cung cấp để bắt đầu!</p>

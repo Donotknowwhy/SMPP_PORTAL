@@ -137,6 +137,7 @@ function RoutingRulesContent() {
           <h3 className="table-title">Danh sách Rule</h3>
         </div>
 
+        <div className="overflow-x-auto">
         <table className="routing-table">
           <thead>
             <tr>
@@ -181,8 +182,9 @@ function RoutingRulesContent() {
             ))}
           </tbody>
         </table>
+        </div>
 
-        <div className="routing-pagination">
+        <div className="routing-pagination flex-wrap gap-3">
           <span className="pagination-info">Hiển thị 1 - 2 của 2</span>
           <div className="pagination-controls">
             <button className="pagination-btn" disabled>‹</button>

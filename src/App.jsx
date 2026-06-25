@@ -142,7 +142,7 @@ function App() {
           {/* <PageHeader /> */}
 
           <div className="container">
-            {activeMenu === 'home' && (
+            {(activeMenu === 'home' || activeMenu === 'dashboard') && (
               <HomeContent
                 providers={providers}
                 totalPercentage={totalPercentage}
@@ -175,6 +175,14 @@ function App() {
 
             {activeMenu === 'routing' && (
               <RoutingRulesContent />
+            )}
+
+            {!['home', 'dashboard', 'providers', 'reports', 'send-sms', 'routing'].includes(activeMenu) && (
+              <div className="feature-developing">
+                <div className="feature-developing-icon">🚧</div>
+                <h2 className="feature-developing-title">Tính năng đang phát triển</h2>
+                <p className="feature-developing-text">Chức năng này sẽ sớm được ra mắt. Vui lòng quay lại sau.</p>
+              </div>
             )}
 
             <EditProviderModal
