@@ -215,7 +215,7 @@ function GatewayConfigContent() {
               placeholder="--Loại mạng--"
               className="bn-dropdown gw-filter-dropdown"
             />
-            <input type="text" className="gw-filter-date" defaultValue="05/06/2026" />
+            {/* <input type="text" className="gw-filter-date" defaultValue="05/06/2026" /> */}
             <button className="db-filter-btn">
               Lọc dữ liệu <ListFilter size={16} />
             </button>

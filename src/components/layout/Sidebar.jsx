@@ -59,7 +59,7 @@ function Sidebar({ activeMenu, onChangeMenu, username, onLogout }) {
         </div>
         <button className="sidebar-logout-btn" onClick={onLogout} title="Đăng xuất">
           <span className={labelClass}>Đăng xuất</span>
-          <span className={`sidebar-logout-icon ${collapsed ? 'inline' : 'inline md:hidden'}`}>
+          <span className="sidebar-logout-icon">
             <LogOut size={16} />
           </span>
         </button>

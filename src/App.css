@@ -1632,14 +1632,21 @@ h2 {
 }
 
 .sidebar-logout-icon {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
 }
 
 .sidebar-logout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   width: 100%;
-  padding: 0.5rem;
+  padding: 0.5rem 0.75rem;
   border: 1px solid var(--gray-200);
   background: var(--white);
   color: var(--red);
@@ -3130,6 +3137,65 @@ h2 {
 .rc-recon-table th,
 .rc-recon-table td { white-space: nowrap; }
 
+.rc-bulk-bar {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  background: #FFF5EC;
+  border: 1px solid #FDE3C0;
+  border-radius: var(--radius-sm);
+  overflow-x: auto;
+}
+
+.rc-bulk-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--gray-700);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.rc-bulk-checkbox input[type='checkbox'] { width: 16px; height: 16px; cursor: pointer; flex-shrink: 0; }
+
+.rc-bulk-dropdown.bn-dropdown.p-dropdown {
+  width: 160px;
+  height: 2.25rem;
+  flex-shrink: 0;
+}
+
+.rc-bulk-dropdown.bn-dropdown .p-dropdown-label {
+  padding: 0 0.65rem;
+  font-size: 0.8rem;
+  color: var(--gray-600);
+}
+
+.rc-bulk-dropdown.bn-dropdown .p-dropdown-trigger {
+  width: 2rem;
+}
+
+.rc-bulk-bar .bn-btn-draft.p-button,
+.rc-bulk-bar .gw-save-btn { width: auto; flex-shrink: 0; }
+
+.rc-bulk-bar .bn-btn-draft.p-button:disabled,
+.rc-bulk-bar .gw-save-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.rc-recon-table td input[type='checkbox'],
+.rc-recon-table th input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
 .rc-note {
   display: flex;
   align-items: flex-start;
@@ -3796,6 +3862,12 @@ h2 {
 }
 
 .db-calendar-inline.p-calendar { width: 130px; flex-shrink: 0; }
+
+.rc-filter-grid .db-calendar-inline.p-calendar,
+.lk-basic-grid .db-calendar-inline.p-calendar {
+  width: 100%;
+  flex-shrink: 1;
+}
 
 .db-calendar-inline .p-inputtext {
   padding: 0.4rem 0.5rem;

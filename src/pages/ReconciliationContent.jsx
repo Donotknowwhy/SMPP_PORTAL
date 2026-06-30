@@ -3,8 +3,15 @@ import { Calendar } from 'primereact/calendar'
 import { Dropdown } from 'primereact/dropdown'
 import {
   GitCompare, FileDown, Upload, MessageCircle, FileText, Building2, TrendingDown,
-  RefreshCw, Search, Download, Info,
+  RefreshCw, Search, Download, Info, NotebookPen, Save,
 } from 'lucide-react'
+
+const BULK_STATUS_OPTIONS = [
+  { label: 'Cập nhật trạng thái', value: '' },
+  { label: 'Đã đối soát', value: 'reconciled' },
+  { label: 'Chưa đối soát', value: 'pending' },
+  { label: 'Tạm dừng', value: 'paused' },
+]
 
 const NETWORK_OPTIONS = [
   { label: 'Tất cả', value: 'all' },
@@ -75,6 +82,13 @@ function ReconciliationContent() {
   const [brandname, setBrandname] = useState('all')
   const [partner, setPartner] = useState('all')
   const [status, setStatus] = useState('all')
+  const [selectedRows, setSelectedRows] = useState([])
+  const [bulkStatus, setBulkStatus] = useState('')
+
+  const allSelected = selectedRows.length === RECON_ROWS.length
+  const toggleSelectAll = () => setSelectedRows(allSelected ? [] : RECON_ROWS.map((row) => row.id))
+  const toggleSelectRow = (id) =>
+    setSelectedRows((prev) => (prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id]))
 
   return (
     <div className="reconciliation-content">
@@ -180,10 +194,33 @@ function ReconciliationContent() {
           </div>
         </div>
 
+        <div className="rc-bulk-bar">
+          <label className="rc-bulk-checkbox">
+            <input type="checkbox" checked={allSelected} onChange={toggleSelectAll} />
+            Đã chọn {selectedRows.length} bản ghi
+          </label>
+          <Dropdown
+            value={bulkStatus}
+            onChange={(e) => setBulkStatus(e.value)}
+            options={BULK_STATUS_OPTIONS}
+            disabled={selectedRows.length === 0}
+            className="bn-dropdown rc-bulk-dropdown"
+          />
+          <button className="bn-btn-draft p-button" disabled={selectedRows.length === 0}>
+            <NotebookPen size={16} /> Thêm ghi chú
+          </button>
+          <button className="db-export-btn gw-save-btn" disabled={selectedRows.length === 0}>
+            <Save size={16} /> Lưu
+          </button>
+        </div>
+
         <div className="overflow-x-auto">
           <table className="routing-table rc-recon-table">
             <thead>
               <tr>
+                <th>
+                  <input type="checkbox" checked={allSelected} onChange={toggleSelectAll} />
+                </th>
                 <th>Từ ngày</th>
                 <th>Đến ngày</th>
                 <th>Tên KH</th>
@@ -202,6 +239,13 @@ function ReconciliationContent() {
             <tbody>
               {RECON_ROWS.map((row) => (
                 <tr key={row.id}>
+                  <td>
+                    <input
+                      type="checkbox"
+                      checked={selectedRows.includes(row.id)}
+                      onChange={() => toggleSelectRow(row.id)}
+                    />
+                  </td>
                   <td>{row.from}</td>
                   <td>{row.to}</td>
                   <td>{row.customer}</td>
