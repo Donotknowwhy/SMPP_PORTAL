@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { InputText } from 'primereact/inputtext'
 import { Dropdown } from 'primereact/dropdown'
 import { MultiSelect } from 'primereact/multiselect'
 import { InputSwitch } from 'primereact/inputswitch'
@@ -192,24 +193,18 @@ function AccountManagementContent() {
           </div>
           <div className="gw-form-field">
             <label>Username</label>
-            <Dropdown
-              value={form.username}
-              onChange={(e) => updateForm('username', e.value)}
-              options={[]}
-              editable
+            <InputText
+              value={form.username || ''}
+              onChange={(e) => updateForm('username', e.target.value)}
               placeholder="Nhập username"
-              className="bn-dropdown"
             />
           </div>
           <div className="gw-form-field">
             <label>Email</label>
-            <Dropdown
-              value={form.email}
-              onChange={(e) => updateForm('email', e.value)}
-              options={[]}
-              editable
+            <InputText
+              value={form.email || ''}
+              onChange={(e) => updateForm('email', e.target.value)}
               placeholder="Nhập email"
-              className="bn-dropdown"
             />
           </div>
         </div>

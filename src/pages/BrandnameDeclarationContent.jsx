@@ -11,18 +11,6 @@ const BRANDNAME_TYPES = [
   { label: 'Cơ quan nhà nước', value: 'co-quan-nha-nuoc' },
 ]
 
-const BUSINESS_OPTIONS = [
-  { label: 'Công ty TNHH SkyFi', value: 'skyfi' },
-  { label: 'Công ty CP Gapit', value: 'gapit' },
-  { label: 'Công ty TNHH VNPAY', value: 'vnpay' },
-]
-
-const PHONE_OPTIONS = [
-  { label: '0707123583', value: '0707123583' },
-  { label: '0909123456', value: '0909123456' },
-  { label: '0987654321', value: '0987654321' },
-]
-
 function BrandnameDeclarationContent() {
   const [form, setForm] = useState({
     name: '',
@@ -93,13 +81,10 @@ function BrandnameDeclarationContent() {
 
           <div className="gw-form-field">
             <label>Doanh nghiệp</label>
-            <Dropdown
-              value={form.business}
-              onChange={(e) => updateForm('business', e.value)}
-              options={BUSINESS_OPTIONS}
-              editable
+            <InputText
+              value={form.business || ''}
+              onChange={(e) => updateForm('business', e.target.value)}
               placeholder="Nhập tên doanh nghiệp"
-              className="bn-dropdown"
             />
           </div>
           <div className="gw-form-field">
@@ -113,13 +98,10 @@ function BrandnameDeclarationContent() {
 
           <div className="gw-form-field">
             <label>Số điện thoại</label>
-            <Dropdown
-              value={form.phone}
-              onChange={(e) => updateForm('phone', e.value)}
-              options={PHONE_OPTIONS}
-              editable
+            <InputText
+              value={form.phone || ''}
+              onChange={(e) => updateForm('phone', e.target.value)}
               placeholder="Nhập số điện thoại"
-              className="bn-dropdown"
             />
           </div>
           <div className="gw-form-field">
