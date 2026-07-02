@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Calendar } from 'primereact/calendar'
 import { Dropdown } from 'primereact/dropdown'
+import { Dialog } from 'primereact/dialog'
 import { FileSearch2, ChevronDown, ChevronUp, RefreshCw, Search, Eye } from 'lucide-react'
 
 const BRANDNAME_OPTIONS = [
@@ -234,69 +235,66 @@ function MessageLookupContent() {
         </div>
       </div>
 
-      {selectedRow && (
-        <div className="modal-overlay" onClick={() => setSelectedRow(null)}>
-          <div className="modal-content lk-detail-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>Chi tiết tin nhắn</h2>
-              <button className="btn-close" onClick={() => setSelectedRow(null)}>×</button>
+      <Dialog
+        header="Chi tiết tin nhắn"
+        visible={!!selectedRow}
+        onHide={() => setSelectedRow(null)}
+        className="lk-detail-dialog"
+        dismissableMask
+      >
+        {selectedRow && (
+          <div className="lk-detail-grid">
+            <div className="lk-detail-item">
+              <span className="lk-detail-label">MsgID</span>
+              <span className="lk-detail-value">{selectedRow.msgId}</span>
             </div>
-
-            <div className="modal-body">
-              <div className="lk-detail-grid">
-                <div className="lk-detail-item">
-                  <span className="lk-detail-label">MsgID</span>
-                  <span className="lk-detail-value">{selectedRow.msgId}</span>
-                </div>
-                <div className="lk-detail-item">
-                  <span className="lk-detail-label">Thời gian nhận (request)</span>
-                  <span className="lk-detail-value">{selectedRow.requestAt}</span>
-                </div>
-                <div className="lk-detail-item">
-                  <span className="lk-detail-label">Thời gian gửi</span>
-                  <span className="lk-detail-value">{selectedRow.sentAt}</span>
-                </div>
-                <div className="lk-detail-item">
-                  <span className="lk-detail-label">Thời gian nhận DLR</span>
-                  <span className="lk-detail-value">{selectedRow.dlrAt}</span>
-                </div>
-                <div className="lk-detail-item">
-                  <span className="lk-detail-label">Nội dung tin nhắn</span>
-                  <span className="lk-detail-value">{selectedRow.content}</span>
-                </div>
-                <div className="lk-detail-item">
-                  <span className="lk-detail-label">Khách hàng</span>
-                  <span className="lk-detail-value">{selectedRow.customer}</span>
-                </div>
-                <div className="lk-detail-item">
-                  <span className="lk-detail-label">Brandname</span>
-                  <span className="lk-detail-value">{selectedRow.brandname}</span>
-                </div>
-                <div className="lk-detail-item">
-                  <span className="lk-detail-label">SDT người nhận</span>
-                  <span className="lk-detail-value">{selectedRow.phone}</span>
-                </div>
-                <div className="lk-detail-item">
-                  <span className="lk-detail-label">Nhà mạng</span>
-                  <span className="lk-detail-value">{selectedRow.network}</span>
-                </div>
-                <div className="lk-detail-item">
-                  <span className="lk-detail-label">Đối tác/ Vendor</span>
-                  <span className="lk-detail-value">{selectedRow.partner}</span>
-                </div>
-                <div className="lk-detail-item">
-                  <span className="lk-detail-label">Trạng thái DLR</span>
-                  <span className={`lk-dlr-badge lk-dlr-${selectedRow.dlr.toLowerCase()}`}>{selectedRow.dlr}</span>
-                </div>
-                <div className="lk-detail-item">
-                  <span className="lk-detail-label">Response/ Lý do lỗi</span>
-                  <span className="lk-detail-value">{selectedRow.response}</span>
-                </div>
-              </div>
+            <div className="lk-detail-item">
+              <span className="lk-detail-label">Thời gian nhận (request)</span>
+              <span className="lk-detail-value">{selectedRow.requestAt}</span>
+            </div>
+            <div className="lk-detail-item">
+              <span className="lk-detail-label">Thời gian gửi</span>
+              <span className="lk-detail-value">{selectedRow.sentAt}</span>
+            </div>
+            <div className="lk-detail-item">
+              <span className="lk-detail-label">Thời gian nhận DLR</span>
+              <span className="lk-detail-value">{selectedRow.dlrAt}</span>
+            </div>
+            <div className="lk-detail-item">
+              <span className="lk-detail-label">Nội dung tin nhắn</span>
+              <span className="lk-detail-value">{selectedRow.content}</span>
+            </div>
+            <div className="lk-detail-item">
+              <span className="lk-detail-label">Khách hàng</span>
+              <span className="lk-detail-value">{selectedRow.customer}</span>
+            </div>
+            <div className="lk-detail-item">
+              <span className="lk-detail-label">Brandname</span>
+              <span className="lk-detail-value">{selectedRow.brandname}</span>
+            </div>
+            <div className="lk-detail-item">
+              <span className="lk-detail-label">SDT người nhận</span>
+              <span className="lk-detail-value">{selectedRow.phone}</span>
+            </div>
+            <div className="lk-detail-item">
+              <span className="lk-detail-label">Nhà mạng</span>
+              <span className="lk-detail-value">{selectedRow.network}</span>
+            </div>
+            <div className="lk-detail-item">
+              <span className="lk-detail-label">Đối tác/ Vendor</span>
+              <span className="lk-detail-value">{selectedRow.partner}</span>
+            </div>
+            <div className="lk-detail-item">
+              <span className="lk-detail-label">Trạng thái DLR</span>
+              <span className={`lk-dlr-badge lk-dlr-${selectedRow.dlr.toLowerCase()}`}>{selectedRow.dlr}</span>
+            </div>
+            <div className="lk-detail-item">
+              <span className="lk-detail-label">Response/ Lý do lỗi</span>
+              <span className="lk-detail-value">{selectedRow.response}</span>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </Dialog>
     </div>
   )
 }

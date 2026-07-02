@@ -3345,7 +3345,9 @@ h2 {
 }
 .lk-detail-icon-btn:hover { background: #FFF7ED; }
 
-.lk-detail-modal { max-width: 96vw; width: 780px; }
+.lk-detail-dialog.p-dialog { width: 780px; max-width: 96vw; }
+.lk-detail-dialog .p-dialog-header { padding: 1.25rem 1.5rem; }
+.lk-detail-dialog .p-dialog-content { padding: 0 1.5rem 1.5rem; }
 
 .lk-detail-grid {
   display: grid;
