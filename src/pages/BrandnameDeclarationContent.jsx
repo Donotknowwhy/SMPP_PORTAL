@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { InputText } from 'primereact/inputtext'
 import { Dropdown } from 'primereact/dropdown'
 import { FileUpload } from 'primereact/fileupload'
@@ -21,18 +21,42 @@ function BrandnameDeclarationContent() {
     email: '',
   })
   const updateForm = (field, value) => setForm((prev) => ({ ...prev, [field]: value }))
+  const fileUploadRef = useRef(null)
+  const [isDragging, setIsDragging] = useState(false)
 
   const headerTemplate = (options) => (
     <div className="bn-upload-static">
       <span className="bn-upload-cloud-icon">
         <CloudUpload size={22} />
       </span>
-      <p className="bn-upload-title">Kém thả hoặc chọn tệp để upload</p>
+      <p className="bn-upload-title">Kéo thả hoặc chọn tệp để upload</p>
       <p className="bn-upload-hint">Hồ sơ: PDF,DOCX,PNG,JPG,ZIP,RAR</p>
       <p className="bn-upload-hint">Tối đa: 20MB</p>
       <div className="bn-upload-header">{options.chooseButton}</div>
     </div>
   )
+
+  const handleDragOver = (e) => {
+    e.preventDefault()
+    setIsDragging(true)
+  }
+
+  const handleDragLeave = (e) => {
+    e.preventDefault()
+    setIsDragging(false)
+  }
+
+  const handleDrop = (e) => {
+    e.preventDefault()
+    setIsDragging(false)
+    const input = fileUploadRef.current?.getInput()
+    if (!input || !e.dataTransfer?.files?.length) return
+
+    const dataTransfer = new DataTransfer()
+    Array.from(e.dataTransfer.files).forEach((file) => dataTransfer.items.add(file))
+    input.files = dataTransfer.files
+    input.dispatchEvent(new Event('change', { bubbles: true }))
+  }
 
   const itemTemplate = (file, options) => (
     <div className="bn-file-item">
@@ -115,8 +139,14 @@ function BrandnameDeclarationContent() {
         </div>
       </div>
 
-      <div className="gw-card bn-upload-card">
+      <div
+        className={`gw-card bn-upload-card${isDragging ? ' bn-upload-card-dragging' : ''}`}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
         <FileUpload
+          ref={fileUploadRef}
           name="brandnameFiles[]"
           multiple
           accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.zip,.rar"

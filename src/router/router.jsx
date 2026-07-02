@@ -99,7 +99,7 @@ export const router = createBrowserRouter([
       </RequireAuth>
     ),
     children: [
-      { index: true, element: <Navigate to="/routing" replace /> },
+      { index: true, element: <Navigate to="/home" replace /> },
       { path: 'dashboard', element: <HomePage /> },
       { path: 'home', element: <Navigate to="/dashboard" replace /> },
       { path: 'providers', element: <ProvidersPage /> },
