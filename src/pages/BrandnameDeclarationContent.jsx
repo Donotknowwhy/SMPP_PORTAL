@@ -4,12 +4,7 @@ import { Dropdown } from 'primereact/dropdown'
 import { FileUpload } from 'primereact/fileupload'
 import { Button } from 'primereact/button'
 import { IdCard, CloudUpload, FileArchive, Info, Save, Send } from 'lucide-react'
-
-const BRANDNAME_TYPES = [
-  { label: 'Doanh nghiệp', value: 'doanh-nghiep' },
-  { label: 'Cá nhân', value: 'ca-nhan' },
-  { label: 'Cơ quan nhà nước', value: 'co-quan-nha-nuoc' },
-]
+import { BRANDNAME_TYPES } from '../constants/brandnameDeclaration'
 
 function BrandnameDeclarationContent() {
   const [form, setForm] = useState({

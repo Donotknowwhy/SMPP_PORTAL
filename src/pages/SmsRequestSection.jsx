@@ -2,12 +2,9 @@ import { useMemo, useState } from 'react'
 import * as XLSX from 'xlsx'
 import { v4 as uuidv4 } from 'uuid'
 import { sendSmsRequest } from '../utils/smsApi'
+import { REQUIRED_HEADERS, DEFAULT_BRANDNAME, DEFAULT_TYPE } from '../constants/smsRequest'
 
 const genRequestId = () => uuidv4().replace(/-/g, '').slice(0, 50)
-
-const REQUIRED_HEADERS = ['phone', 'content']
-const DEFAULT_BRANDNAME = 'GAPIT'
-const DEFAULT_TYPE = 'CSKH'
 
 const normalizeHeader = (value) => String(value || '').trim().toLowerCase().replace(/[\s_-]+/g, '')
 
