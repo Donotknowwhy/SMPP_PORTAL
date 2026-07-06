@@ -1863,6 +1863,27 @@ h2 {
   border: 1px solid #c3e6d0;
 }
 
+.status-badge.inactive {
+  background: #fdf2f2;
+  color: #c0392b;
+  border: 1px solid #f0c9c9;
+}
+
+.status-badge.inactive .status-dot {
+  background: #c0392b;
+}
+
+.gw-table-status {
+  text-align: center;
+  padding: 1.5rem 0;
+  color: var(--gray-400);
+  font-size: 0.9rem;
+}
+
+.gw-table-error {
+  color: #c0392b;
+}
+
 .status-dot {
   width: 6px;
   height: 6px;
@@ -4038,5 +4059,66 @@ h2 {
 
 @media (max-width: 768px) {
   .db-header { flex-direction: column; align-items: stretch; }
+}
+
+/* Confirm dialog (delete confirmation, etc.) */
+.p-confirm-dialog .p-dialog-header {
+  padding: 1.25rem 1.5rem 0.5rem;
+}
+
+.p-confirm-dialog .p-dialog-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--gray-800, #1f2937);
+}
+
+.p-confirm-dialog .p-confirm-dialog-message {
+  margin-left: 0.9rem;
+  color: var(--gray-500, #6b7280);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.p-confirm-dialog .p-confirm-dialog-icon {
+  font-size: 1.6rem;
+  color: #f59e0b;
+}
+
+.p-confirm-dialog .p-dialog-content {
+  padding: 0.75rem 1.5rem 1.5rem;
+}
+
+.p-confirm-dialog .p-dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  padding: 0 1.5rem 1.25rem;
+}
+
+.p-confirm-dialog .p-dialog-footer .p-button {
+  margin: 0;
+  padding: 0.55rem 1.1rem;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+.p-confirm-dialog .p-button-danger {
+  background: var(--red);
+  border-color: var(--red);
+}
+
+.p-confirm-dialog .p-button-danger:hover {
+  background: var(--red-dark);
+  border-color: var(--red-dark);
+}
+
+.p-confirm-dialog .p-button-text {
+  color: var(--gray-500, #6b7280);
+  background: transparent;
+}
+
+.p-confirm-dialog .p-button-text:hover {
+  background: var(--gray-100, #f3f4f6);
 }
 
