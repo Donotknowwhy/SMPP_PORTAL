@@ -1,11 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Dropdown } from 'primereact/dropdown'
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog'
 import { toast } from 'react-toastify'
-import { Router, ListFilter, Download, Pencil, Trash2, ShieldCheck, History, Save } from 'lucide-react'
+import { Router, ListFilter, Download, Pencil, Trash2, ShieldCheck, History, Save, X } from 'lucide-react'
 import {
-  BRANDNAMES,
-  NETWORK_FILTER_OPTIONS,
   STATUSES,
   PRIORITIES,
 } from '../constants/gatewayConfig'
@@ -14,6 +12,7 @@ import {
   getRoutingList,
   getRoutingInfo,
   createRoutingRule,
+  updateRoutingRule,
   exportRoutingRules,
   deleteRoutingRule,
   getRoutingAudit,
@@ -88,6 +87,8 @@ function GatewayConfigContent() {
   const [form, setForm] = useState(DEFAULT_FORM)
   const [filterBrandname, setFilterBrandname] = useState(null)
   const [filterNetwork, setFilterNetwork] = useState(null)
+  const [appliedFilterBrandname, setAppliedFilterBrandname] = useState(null)
+  const [appliedFilterNetwork, setAppliedFilterNetwork] = useState(null)
 
   const { authToken } = useAuth()
   const [routingRows, setRoutingRows] = useState([])
@@ -112,8 +113,27 @@ function GatewayConfigContent() {
   const [saving, setSaving] = useState(false)
   const [exporting, setExporting] = useState(false)
   const [deletingId, setDeletingId] = useState(null)
+  const [editingId, setEditingId] = useState(null)
 
   const updateForm = (field, value) => setForm((prev) => ({ ...prev, [field]: value }))
+
+  const handleEdit = (row) => {
+    setEditingId(row.id)
+    setForm({
+      brandname: row.brandNameId,
+      network: row.telcoId,
+      primary: row.primaryProviderId,
+      backup: row.backupProviderId || null,
+      tps: row.tps,
+      priority: row.priority,
+      status: row.status === 'ACTIVE' ? 'Active' : 'Inactive',
+    })
+  }
+
+  const handleCancelEdit = () => {
+    setEditingId(null)
+    setForm(DEFAULT_FORM)
+  }
 
   const handleExport = () => {
     if (!authToken) return
@@ -226,6 +246,28 @@ function GatewayConfigContent() {
     setPage(0)
   }
 
+  const filteredRoutingRows = useMemo(() => {
+    return routingRows.filter((row) => {
+      if (appliedFilterBrandname && row.brandNameId !== appliedFilterBrandname) return false
+      if (appliedFilterNetwork && row.telcoId !== appliedFilterNetwork) return false
+      return true
+    })
+  }, [routingRows, appliedFilterBrandname, appliedFilterNetwork])
+
+  const isRoutingFiltered = appliedFilterBrandname !== null || appliedFilterNetwork !== null
+
+  const handleApplyRoutingFilter = () => {
+    setAppliedFilterBrandname(filterBrandname)
+    setAppliedFilterNetwork(filterNetwork)
+  }
+
+  const handleClearRoutingFilter = () => {
+    setFilterBrandname(null)
+    setFilterNetwork(null)
+    setAppliedFilterBrandname(null)
+    setAppliedFilterNetwork(null)
+  }
+
   const refreshAuditList = () => {
     if (!authToken) return
     setAuditLoading(true)
@@ -282,24 +324,36 @@ function GatewayConfigContent() {
 
     setSaving(true)
 
-    createRoutingRule({
-      token: authToken,
-      brandNameId: form.brandname,
-      telcoId: form.network,
-      primaryProviderId: form.primary,
-      backupProviderId: form.backup || null,
-      tps: Number(form.tps),
-      priority: form.priority,
-      status: form.status === 'Active' ? 'ACTIVE' : 'INACTIVE',
-    })
+    const request = editingId
+      ? updateRoutingRule({
+          token: authToken,
+          id: editingId,
+          brandNameId: form.brandname,
+          telcoId: form.network,
+          primaryProviderId: form.primary,
+          backupProviderId: form.backup || null,
+        })
+      : createRoutingRule({
+          token: authToken,
+          brandNameId: form.brandname,
+          telcoId: form.network,
+          primaryProviderId: form.primary,
+          backupProviderId: form.backup || null,
+          tps: Number(form.tps),
+          priority: form.priority,
+          status: form.status === 'Active' ? 'ACTIVE' : 'INACTIVE',
+        })
+
+    request
       .then((message) => {
-        toast.success(message || 'Tạo cấu hình routing thành công.')
+        toast.success(message || (editingId ? 'Cập nhật cấu hình routing thành công.' : 'Tạo cấu hình routing thành công.'))
+        setEditingId(null)
         setForm(DEFAULT_FORM)
         refreshRoutingList()
         refreshAuditList()
       })
       .catch((err) => {
-        toast.error(err.message || 'Không tạo được cấu hình routing.')
+        toast.error(err.message || 'Không lưu được cấu hình routing.')
       })
       .finally(() => setSaving(false))
   }
@@ -395,8 +449,13 @@ function GatewayConfigContent() {
           </div>
 
           <div className="gw-form-actions">
+            {editingId && (
+              <button className="db-filter-btn gw-cancel-btn" onClick={handleCancelEdit} disabled={saving}>
+                <X size={16} /> Hủy
+              </button>
+            )}
             <button className="db-export-btn gw-save-btn" onClick={handleSave} disabled={saving}>
-              <Save size={16} /> {saving ? 'Đang lưu...' : 'Lưu cấu hình'}
+              <Save size={16} /> {saving ? 'Đang lưu...' : editingId ? 'Cập nhật routing' : 'Lưu cấu hình'}
             </button>
           </div>
         </div>
@@ -416,21 +475,26 @@ function GatewayConfigContent() {
             <Dropdown
               value={filterBrandname}
               onChange={(e) => setFilterBrandname(e.value)}
-              options={BRANDNAMES}
+              options={brandNameOptions}
               placeholder="Brandname"
               className="bn-dropdown gw-filter-dropdown"
             />
             <Dropdown
               value={filterNetwork}
               onChange={(e) => setFilterNetwork(e.value)}
-              options={NETWORK_FILTER_OPTIONS}
+              options={telcoOptions}
               placeholder="--Loại mạng--"
               className="bn-dropdown gw-filter-dropdown"
             />
             {/* <input type="text" className="gw-filter-date" defaultValue="05/06/2026" /> */}
-            <button className="db-filter-btn">
+            <button className="db-filter-btn" onClick={handleApplyRoutingFilter}>
               Lọc dữ liệu <ListFilter size={16} />
             </button>
+            {isRoutingFiltered && (
+              <button className="db-filter-btn gw-filter-clear-btn" onClick={handleClearRoutingFilter}>
+                Xóa bộ lọc <X size={16} />
+              </button>
+            )}
             <button className="db-export-btn" onClick={handleExport} disabled={exporting}>
               {exporting ? 'Đang xuất...' : 'Kết xuất cấu hình tổng'} <Download size={16} />
             </button>
@@ -464,13 +528,13 @@ function GatewayConfigContent() {
                   <td colSpan={10} className="gw-table-status gw-table-error">{routingError}</td>
                 </tr>
               )}
-              {!routingLoading && !routingError && routingRows.length === 0 && (
+              {!routingLoading && !routingError && filteredRoutingRows.length === 0 && (
                 <tr>
                   <td colSpan={10} className="gw-table-status">Không có dữ liệu routing.</td>
                 </tr>
               )}
-              {!routingLoading && !routingError && routingRows.map((row) => (
-                <tr key={row.id}>
+              {!routingLoading && !routingError && filteredRoutingRows.map((row) => (
+                <tr key={row.id} className={editingId === row.id ? 'gw-row-editing' : ''}>
                   <td><span className="table-network">{row.brandName}</span></td>
                   <td>{row.telco}</td>
                   <td><span className="table-provider primary">{row.primaryProvider}</span></td>
@@ -487,7 +551,7 @@ function GatewayConfigContent() {
                   <td>{row.createdBy}</td>
                   <td>
                     <div className="table-actions">
-                      <button className="action-btn edit" title="Chỉnh sửa">
+                      <button className="action-btn edit" title="Chỉnh sửa" onClick={() => handleEdit(row)}>
                         <Pencil size={16} />
                       </button>
                       <button

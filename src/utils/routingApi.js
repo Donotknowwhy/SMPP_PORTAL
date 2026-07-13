@@ -6,6 +6,7 @@ const CREATE_URL = `${API_BASE_URL}/routingRule/create`
 const EXPORT_URL = `${API_BASE_URL}/routingRule/exportRoutingRule`
 const DELETE_URL = `${API_BASE_URL}/routingRule/delete`
 const GET_AUDIT_URL = `${API_BASE_URL}/routingRule/getRoutingAudit`
+const UPDATE_URL = `${API_BASE_URL}/routingRule/update`
 
 async function parseResponse(response) {
   const rawText = await response.text()
@@ -121,11 +122,47 @@ export async function createRoutingRule({
 }
 
 /**
+ * Update an existing routing rule. Requires a valid Bearer token.
+ */
+export async function updateRoutingRule({
+  token,
+  id,
+  brandNameId,
+  telcoId,
+  primaryProviderId,
+  backupProviderId = null,
+}) {
+  const res = await fetch(UPDATE_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      id,
+      brandNameId,
+      telcoId,
+      primaryProviderId,
+      backupProviderId,
+    }),
+  })
+
+  const { response, data } = await parseResponse(res)
+
+  if (!response.ok || data?.status !== 1) {
+    const msg = data?.message || `HTTP ${response.status}: ${response.statusText}`
+    throw new Error(msg)
+  }
+
+  return data?.message ?? ''
+}
+
+/**
  * Delete a routing rule by id. Requires a valid Bearer token.
  */
 export async function deleteRoutingRule(token, routingRuleId) {
   const res = await fetch(`${DELETE_URL}?routingRuleId=${routingRuleId}`, {
-    method: 'POST',
+    method: 'DELETE',
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -173,7 +210,7 @@ export async function getRoutingAudit({ token, page = 0, size = 10, signal }) {
   if (Array.isArray(payload?.data)) return { rows: payload.data, total: payload.total ?? payload.data.length }
   if (Array.isArray(payload?.content)) return { rows: payload.content, total: payload.totalElements ?? payload.content.length }
   return { rows: [], total: 0 }
-}
+} 
 
 /**
  * Export the routing rule configuration as an Excel file. Requires a valid Bearer token.

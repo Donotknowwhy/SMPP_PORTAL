@@ -2088,10 +2088,27 @@ h2 {
   display: flex;
   align-items: flex-end;
   justify-content: flex-end;
+  gap: 0.75rem;
 }
 
 .gw-save-btn.db-export-btn {
   background: #faa61a;
+}
+
+.gw-cancel-btn.db-filter-btn {
+  background: var(--white);
+  color: var(--red);
+  border: 1.5px solid var(--red);
+  font-weight: 700;
+}
+
+.gw-cancel-btn.db-filter-btn:hover {
+  background: var(--red-light);
+}
+
+.routing-table tbody tr.gw-row-editing {
+  background: rgba(227, 30, 36, 0.06);
+  box-shadow: inset 3px 0 0 var(--red);
 }
 
 .gw-table-section { margin: 0; }
