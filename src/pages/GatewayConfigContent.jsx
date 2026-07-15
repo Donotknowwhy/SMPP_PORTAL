@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Dropdown } from 'primereact/dropdown'
+import { InputText } from 'primereact/inputtext'
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog'
 import { toast } from 'react-toastify'
 import { Router, ListFilter, Download, Pencil, Trash2, ShieldCheck, History, Save, X } from 'lucide-react'
@@ -385,6 +386,7 @@ function GatewayConfigContent() {
               options={brandNameOptions}
               placeholder="Chọn Brandname"
               className="bn-dropdown"
+              disabled={!!editingId}
             />
           </div>
           <div className="gw-form-field">
@@ -395,6 +397,7 @@ function GatewayConfigContent() {
               options={telcoOptions}
               placeholder="Chọn nhà mạng"
               className="bn-dropdown"
+              disabled={!!editingId}
             />
           </div>
           <div className="gw-form-field">
@@ -420,11 +423,11 @@ function GatewayConfigContent() {
 
           <div className="gw-form-field">
             <label>TPS (Tin/giây) <span className="gw-required">*</span></label>
-            <input
-              type="number"
-              min="0"
+            <InputText
+              keyfilter="pint"
               value={form.tps}
               onChange={(e) => updateForm('tps', e.target.value)}
+              disabled={!!editingId}
             />
           </div>
           <div className="gw-form-field">
@@ -435,6 +438,7 @@ function GatewayConfigContent() {
               options={PRIORITIES}
               placeholder="Chọn Priority"
               className="bn-dropdown"
+              disabled={!!editingId}
             />
           </div>
           <div className="gw-form-field">
@@ -445,6 +449,7 @@ function GatewayConfigContent() {
               options={STATUSES}
               placeholder="Chọn trạng thái"
               className="bn-dropdown"
+              disabled={!!editingId}
             />
           </div>
 

@@ -1,34 +1,19 @@
-const API_BASE_URL = import.meta.env.VITE_SMS_API_BASE_URL || 'https://uat-sms.skyfi.com.vn/api/sms'
+import httpClient, { authHeader, safeRequest } from './httpClient'
 
-const LOGIN_URL = `${API_BASE_URL}/login`
-const SEND_URL = `${API_BASE_URL}/send`
-
-async function parseResponse(response) {
-  const rawText = await response.text()
-  let data = null
-  try {
-    data = rawText ? JSON.parse(rawText) : null
-  } catch {
-    data = { raw: rawText }
-  }
-  return { response, data }
-}
+const LOGIN_URL = '/login'
+const SEND_URL = '/send'
 
 /**
  * Authenticate with the SMS gateway.
  * Returns { token, username } on success, throws on failure.
  */
 export async function loginSms(username, password) {
-  const res = await fetch(LOGIN_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username, password }),
-  })
+  const { ok, status, statusText, data } = await safeRequest(
+    httpClient.post(LOGIN_URL, { username, password }),
+  )
 
-  const { response, data } = await parseResponse(res)
-
-  if (!response.ok || data?.status !== 1) {
-    const msg = data?.message || `HTTP ${response.status}: ${response.statusText}`
+  if (!ok || data?.status !== 1) {
+    const msg = data?.message || `HTTP ${status}: ${statusText}`
     throw new Error(msg)
   }
 
@@ -44,23 +29,16 @@ export async function loginSms(username, password) {
  * Send an SMS. Requires a valid Bearer token.
  */
 export async function sendSmsRequest(payload, token) {
-  const res = await fetch(SEND_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(payload),
-  })
+  const { ok, status, statusText, data } = await safeRequest(
+    httpClient.post(SEND_URL, payload, { headers: authHeader(token) }),
+  )
 
-  const { response, data } = await parseResponse(res)
-
-  if (!response.ok) {
-    const msg = data?.message || data?.error || `HTTP ${response.status}: ${response.statusText}`
+  if (!ok) {
+    const msg = data?.message || data?.error || `HTTP ${status}: ${statusText}`
     const error = new Error(msg)
     error.details = data
     throw error
   }
 
-  return { status: response.status, data }
+  return { status, data }
 }
