@@ -81,7 +81,15 @@ function ReconciliationContent() {
     }
   }, [authToken])
 
-  const fetchStats = () => {
+  const fetchStats = ({
+    telcoId = network,
+    brandNameId = brandname,
+    providerId = partner,
+    applyDateFilter = dateFilterApplied,
+    from = fromDate,
+    to = toDate,
+    statusFilter = status,
+  } = {}) => {
     if (!authToken) return
 
     setStatsLoading(true)
@@ -89,13 +97,13 @@ function ReconciliationContent() {
 
     getReconciliationStats({
       token: authToken,
-      telcoId: network,
-      brandNameId: brandname,
-      providerId: partner,
-      timeType: dateFilterApplied ? 1 : 0,
-      startTime: dateFilterApplied ? formatDate(fromDate) : undefined,
-      endTime: dateFilterApplied ? formatDate(toDate) : undefined,
-      status,
+      telcoId,
+      brandNameId,
+      providerId,
+      timeType: applyDateFilter ? 1 : 0,
+      startTime: applyDateFilter ? formatDate(from) : undefined,
+      endTime: applyDateFilter ? formatDate(to) : undefined,
+      status: statusFilter,
     })
       .then((result) => setStats(result))
       .catch((err) => {
@@ -118,6 +126,16 @@ function ReconciliationContent() {
     setPartner(0)
     setStatus('')
     setDateFilterApplied(false)
+
+    fetchStats({
+      telcoId: 0,
+      brandNameId: 0,
+      providerId: 0,
+      applyDateFilter: false,
+      from: DEFAULT_FROM_DATE,
+      to: DEFAULT_TO_DATE,
+      statusFilter: '',
+    })
   }
 
   const handleExport = () => {
