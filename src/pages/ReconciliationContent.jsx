@@ -92,9 +92,9 @@ function ReconciliationContent() {
       telcoId: network,
       brandNameId: brandname,
       providerId: partner,
-      timeType: fromDate && toDate ? 1 : 0,
-      startTime: formatDate(fromDate),
-      endTime: formatDate(toDate),
+      timeType: dateFilterApplied ? 1 : 0,
+      startTime: dateFilterApplied ? formatDate(fromDate) : undefined,
+      endTime: dateFilterApplied ? formatDate(toDate) : undefined,
       status,
     })
       .then((result) => setStats(result))
