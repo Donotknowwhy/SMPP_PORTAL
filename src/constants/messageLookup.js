@@ -24,9 +24,8 @@ export const PARTNER_OPTIONS = [
 ]
 
 export const DLR_STATUS_OPTIONS = [
-  { label: 'Tất cả', value: 'all' },
-  { label: 'DELIVRD', value: 'DELIVRD' },
-  { label: 'PENDING', value: 'PENDING' },
+  { label: 'Tất cả', value: '' },
+  { label: 'SUCCESS', value: 'SUCCESS' },
   { label: 'FAILED', value: 'FAILED' },
 ]
 
