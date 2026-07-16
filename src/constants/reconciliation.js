@@ -29,16 +29,16 @@ export const PARTNER_OPTIONS = [
 ]
 
 export const STATUS_OPTIONS = [
-  { label: 'Tất cả', value: 'all' },
+  { label: 'Tất cả', value: '' },
   { label: 'Verified', value: 'verified' },
   { label: 'Need Review', value: 'review' },
 ]
 
-export const STATS = [
-  { id: 1, icon: MessageCircle, color: '#2563EB', label: 'Tổng SMS', value: '5.2M', unit: 'Tin nhắn', trend: '12.3% so với tháng 5' },
-  { id: 2, icon: FileText, color: '#16A34A', label: 'Tổng doanh thu', value: '3.5B', unit: 'VND', trend: '8.5% so với tháng 5' },
-  { id: 3, icon: Building2, color: '#2563EB', label: 'Tổng chi phí NCC', value: '2.8B', unit: 'VND', trend: '12.5% so với tháng 5' },
-  { id: 4, icon: TrendingDown, color: '#E31E24', label: 'Lợi nhuận', value: '700M', unit: 'VND', trend: '12.5% so với tháng 5' },
+export const STATS_CONFIG = [
+  { id: 1, icon: MessageCircle, color: '#2563EB', label: 'Tổng SMS', unit: 'Tin nhắn', key: 'totalSms' },
+  { id: 2, icon: FileText, color: '#16A34A', label: 'Tổng doanh thu', unit: 'VND', key: 'totalPrice' },
+  { id: 3, icon: Building2, color: '#2563EB', label: 'Tổng chi phí NCC', unit: 'VND', key: 'totalCost' },
+  { id: 4, icon: TrendingDown, color: '#E31E24', label: 'Lợi nhuận', unit: 'VND', key: 'profit' },
 ]
 
 export const RECON_ROWS = [

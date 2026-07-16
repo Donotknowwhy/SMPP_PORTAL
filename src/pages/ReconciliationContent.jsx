@@ -1,39 +1,156 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Calendar } from 'primereact/calendar'
 import { Dropdown } from 'primereact/dropdown'
+import { toast } from 'react-toastify'
 import {
   GitCompare, FileDown, Upload,
   RefreshCw, Search, Download, Info, NotebookPen, Save,
 } from 'lucide-react'
 import {
   BULK_STATUS_OPTIONS,
-  NETWORK_OPTIONS,
-  BRANDNAME_OPTIONS,
-  PARTNER_OPTIONS,
   STATUS_OPTIONS,
-  STATS,
+  STATS_CONFIG,
   RECON_ROWS,
   HISTORY_ROWS,
 } from '../constants/reconciliation'
+import { useAuth } from '../context/AuthContext'
+import { getRoutingInfo } from '../utils/routingApi'
+import { getReconciliationStats, exportReconciliationReport } from '../utils/reconciliationApi'
+
+const ALL_OPTION = { label: 'Tất cả', value: 0 }
+
+function formatDate(date) {
+  if (!date) return ''
+  const pad = (n) => String(n).padStart(2, '0')
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
+}
+
+function formatNumber(value) {
+  return new Intl.NumberFormat('vi-VN').format(value ?? 0)
+}
+
+const DEFAULT_FROM_DATE = new Date(2025, 5, 14)
+const DEFAULT_TO_DATE = new Date(2025, 5, 26)
 
 function ReconciliationContent() {
-  const [fromDate, setFromDate] = useState(new Date(2025, 5, 14))
-  const [toDate, setToDate] = useState(new Date(2025, 5, 26))
-  const [network, setNetwork] = useState('all')
-  const [brandname, setBrandname] = useState('all')
-  const [partner, setPartner] = useState('all')
-  const [status, setStatus] = useState('all')
+  const { authToken } = useAuth()
+  const [fromDate, setFromDate] = useState(DEFAULT_FROM_DATE)
+  const [toDate, setToDate] = useState(DEFAULT_TO_DATE)
+  const [network, setNetwork] = useState(0)
+  const [brandname, setBrandname] = useState(0)
+  const [partner, setPartner] = useState(0)
+  const [status, setStatus] = useState('')
   const [selectedRows, setSelectedRows] = useState([])
   const [bulkStatus, setBulkStatus] = useState('')
+
+  const [networkOptions, setNetworkOptions] = useState([ALL_OPTION])
+  const [brandnameOptions, setBrandnameOptions] = useState([ALL_OPTION])
+  const [partnerOptions, setPartnerOptions] = useState([ALL_OPTION])
+  const [infoError, setInfoError] = useState('')
+
+  const [stats, setStats] = useState({ totalCost: 0, totalPrice: 0, totalSms: 0, profit: 0 })
+  const [statsLoading, setStatsLoading] = useState(false)
+  const [statsError, setStatsError] = useState('')
+  const [exporting, setExporting] = useState(false)
+  const [dateFilterApplied, setDateFilterApplied] = useState(false)
 
   const allSelected = selectedRows.length === RECON_ROWS.length
   const toggleSelectAll = () => setSelectedRows(allSelected ? [] : RECON_ROWS.map((row) => row.id))
   const toggleSelectRow = (id) =>
     setSelectedRows((prev) => (prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id]))
 
+  useEffect(() => {
+    if (!authToken) return
+
+    let cancelled = false
+    setInfoError('')
+
+    getRoutingInfo(authToken)
+      .then(({ brandNames, telcos, providers }) => {
+        if (cancelled) return
+        setNetworkOptions([ALL_OPTION, ...telcos.map((t) => ({ label: t.telco, value: t.id }))])
+        setBrandnameOptions([ALL_OPTION, ...brandNames.map((b) => ({ label: b.brandName, value: b.id }))])
+        setPartnerOptions([ALL_OPTION, ...providers.map((p) => ({ label: p.providerName, value: p.id }))])
+      })
+      .catch((err) => {
+        if (!cancelled) setInfoError(err.message || 'Không tải được dữ liệu bộ lọc.')
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [authToken])
+
+  const fetchStats = () => {
+    if (!authToken) return
+
+    setStatsLoading(true)
+    setStatsError('')
+
+    getReconciliationStats({
+      token: authToken,
+      telcoId: network,
+      brandNameId: brandname,
+      providerId: partner,
+      timeType: fromDate && toDate ? 1 : 0,
+      startTime: formatDate(fromDate),
+      endTime: formatDate(toDate),
+      status,
+    })
+      .then((result) => setStats(result))
+      .catch((err) => {
+        setStatsError(err.message || 'Không tải được dữ liệu đối soát.')
+        toast.error(err.message || 'Không tải được dữ liệu đối soát.')
+      })
+      .finally(() => setStatsLoading(false))
+  }
+
+  useEffect(() => {
+    fetchStats()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authToken])
+
+  const handleResetFilters = () => {
+    setFromDate(DEFAULT_FROM_DATE)
+    setToDate(DEFAULT_TO_DATE)
+    setNetwork(0)
+    setBrandname(0)
+    setPartner(0)
+    setStatus('')
+    setDateFilterApplied(false)
+  }
+
+  const handleExport = () => {
+    if (!authToken) return
+
+    setExporting(true)
+
+    exportReconciliationReport({
+      token: authToken,
+      timeType: dateFilterApplied ? 1 : 0,
+      startTime: dateFilterApplied ? formatDate(fromDate) : undefined,
+      endTime: dateFilterApplied ? formatDate(toDate) : undefined,
+    })
+      .then(({ blob, filename }) => {
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = filename
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+        URL.revokeObjectURL(url)
+        toast.success('Xuất báo cáo đối soát thành công.')
+      })
+      .catch((err) => {
+        toast.error(err.message || 'Không xuất được báo cáo đối soát.')
+      })
+      .finally(() => setExporting(false))
+  }
+
   return (
     <div className="reconciliation-content">
-      {/* Header */}
+        {/* Header */}
       <div className="gw-card rc-header-card">
         <div className="gw-card-head am-create-head-text" style={{ marginBottom: 0 }}>
           <span className="gw-card-icon">
@@ -45,8 +162,8 @@ function ReconciliationContent() {
           </div>
         </div>
         <div className="rc-header-actions">
-          <button className="bn-btn-draft p-button">
-            <FileDown size={16} /> Export báo cáo
+          <button className="bn-btn-draft p-button" onClick={handleExport} disabled={exporting}>
+            <FileDown size={16} /> {exporting ? 'Đang xuất...' : 'Export báo cáo'}
           </button>
           <button className="db-export-btn">
             <Upload size={16} /> Upload file
@@ -54,47 +171,45 @@ function ReconciliationContent() {
         </div>
       </div>
 
-      {/* KPI stats */}
-      <div className="rc-stats-grid">
-        {STATS.map((s) => (
-          <div key={s.id} className="rc-stat-card">
-            <span className="rc-stat-icon" style={{ background: s.color }}>
-              <s.icon size={18} />
-            </span>
-            <div className="rc-stat-body">
-              <p className="rc-stat-label">{s.label}</p>
-              <p className="rc-stat-value">{s.value} <span className="rc-stat-unit">{s.unit}</span></p>
-              <p className="rc-stat-trend">↑ {s.trend}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Filters */}
+       {/* Filters */}
       <div className="gw-card">
         <h3 className="gw-card-title">Bộ lọc đối soát</h3>
         <p className="gw-card-subtitle" style={{ marginBottom: '1rem' }}>Tìm kiếm dữ liệu đối soát theo thời gian và nhà mạng</p>
 
+        {infoError && <p className="gw-table-error">{infoError}</p>}
+
         <div className="rc-filter-grid">
           <div className="gw-form-field">
             <label>Từ ngày</label>
-            <Calendar value={fromDate} onChange={(e) => setFromDate(e.value)} dateFormat="dd/mm/yy" showIcon className="db-calendar db-calendar-inline" />
+            <Calendar
+              value={fromDate}
+              onChange={(e) => { setFromDate(e.value); setDateFilterApplied(true) }}
+              dateFormat="dd/mm/yy"
+              showIcon
+              className="db-calendar db-calendar-inline"
+            />
           </div>
           <div className="gw-form-field">
             <label>Đến ngày</label>
-            <Calendar value={toDate} onChange={(e) => setToDate(e.value)} dateFormat="dd/mm/yy" showIcon className="db-calendar db-calendar-inline" />
+            <Calendar
+              value={toDate}
+              onChange={(e) => { setToDate(e.value); setDateFilterApplied(true) }}
+              dateFormat="dd/mm/yy"
+              showIcon
+              className="db-calendar db-calendar-inline"
+            />
           </div>
           <div className="gw-form-field">
             <label>Nhà mạng</label>
-            <Dropdown value={network} onChange={(e) => setNetwork(e.value)} options={NETWORK_OPTIONS} className="bn-dropdown" />
+            <Dropdown value={network} onChange={(e) => setNetwork(e.value)} options={networkOptions} className="bn-dropdown" />
           </div>
           <div className="gw-form-field">
             <label>Brandname</label>
-            <Dropdown value={brandname} onChange={(e) => setBrandname(e.value)} options={BRANDNAME_OPTIONS} className="bn-dropdown" />
+            <Dropdown value={brandname} onChange={(e) => setBrandname(e.value)} options={brandnameOptions} className="bn-dropdown" />
           </div>
           <div className="gw-form-field">
             <label>Đối tác</label>
-            <Dropdown value={partner} onChange={(e) => setPartner(e.value)} options={PARTNER_OPTIONS} className="bn-dropdown" />
+            <Dropdown value={partner} onChange={(e) => setPartner(e.value)} options={partnerOptions} className="bn-dropdown" />
           </div>
           <div className="gw-form-field">
             <label>Trạng thái</label>
@@ -103,14 +218,34 @@ function ReconciliationContent() {
         </div>
 
         <div className="rc-filter-actions">
-          <button className="bn-btn-draft p-button">
+          <button className="bn-btn-draft p-button" onClick={handleResetFilters} disabled={statsLoading}>
             <RefreshCw size={16} /> Làm mới
           </button>
-          <button className="db-export-btn">
-            <Search size={16} /> Tìm kiếm
+          <button className="db-export-btn" onClick={fetchStats} disabled={statsLoading}>
+            <Search size={16} /> {statsLoading ? 'Đang tìm...' : 'Tìm kiếm'}
           </button>
         </div>
       </div>
+    
+      {/* KPI stats */}
+      {statsError && <p className="gw-table-error">{statsError}</p>}
+      <div className="rc-stats-grid">
+        {STATS_CONFIG.map((s) => (
+          <div key={s.id} className="rc-stat-card">
+            <span className="rc-stat-icon" style={{ background: s.color }}>
+              <s.icon size={18} />
+            </span>
+            <div className="rc-stat-body">
+              <p className="rc-stat-label">{s.label}</p>
+              <p className="rc-stat-value">
+                {statsLoading ? '...' : formatNumber(stats[s.key])} <span className="rc-stat-unit">{s.unit}</span>
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+     
 
       {/* Reconciliation table */}
       <div className="routing-table-section gw-table-section">

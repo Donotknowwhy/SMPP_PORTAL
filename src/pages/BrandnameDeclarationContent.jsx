@@ -1,23 +1,84 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { InputText } from 'primereact/inputtext'
 import { Dropdown } from 'primereact/dropdown'
 import { FileUpload } from 'primereact/fileupload'
 import { Button } from 'primereact/button'
+import { toast } from 'react-toastify'
 import { IdCard, CloudUpload, FileArchive, Info, Save, Send } from 'lucide-react'
 import { BRANDNAME_TYPES } from '../constants/brandnameDeclaration'
+import { useAuth } from '../context/AuthContext'
+import { getRoutingInfo } from '../utils/routingApi'
+import { createBrandname } from '../utils/brandnameApi'
+
+const DEFAULT_FORM = {
+  name: '',
+  type: null,
+  business: null,
+  taxCode: '',
+  phone: null,
+  email: '',
+  providerId: null,
+}
 
 function BrandnameDeclarationContent() {
-  const [form, setForm] = useState({
-    name: '',
-    type: null,
-    business: null,
-    taxCode: '',
-    phone: null,
-    email: '',
-  })
+  const { authToken } = useAuth()
+  const [form, setForm] = useState(DEFAULT_FORM)
   const updateForm = (field, value) => setForm((prev) => ({ ...prev, [field]: value }))
   const fileUploadRef = useRef(null)
   const [isDragging, setIsDragging] = useState(false)
+  const [providerOptions, setProviderOptions] = useState([])
+  const [infoError, setInfoError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+
+  useEffect(() => {
+    if (!authToken) return
+
+    let cancelled = false
+    setInfoError('')
+
+    getRoutingInfo(authToken)
+      .then(({ providers }) => {
+        if (cancelled) return
+        setProviderOptions(providers.map((p) => ({ label: p.providerName, value: p.id })))
+      })
+      .catch((err) => {
+        if (!cancelled) setInfoError(err.message || 'Không tải được danh sách đối tác.')
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [authToken])
+
+  const handleSubmit = () => {
+    if (!authToken) return
+    if (!form.name || !form.providerId) {
+      toast.warn('Vui lòng nhập tên Brandname và chọn đối tác.')
+      return
+    }
+
+    setSubmitting(true)
+
+    createBrandname({
+      token: authToken,
+      brandName: form.name,
+      providerId: form.providerId,
+      type: form.type,
+      business: form.business,
+      taxCode: form.taxCode,
+      phone: form.phone,
+      email: form.email,
+    })
+      .then((message) => {
+        toast.success(message || 'Tạo cấu hình brandname thành công.')
+        setForm(DEFAULT_FORM)
+        fileUploadRef.current?.clear()
+      })
+      .catch((err) => {
+        toast.error(err.message || 'Không tạo được cấu hình brandname.')
+      })
+      .finally(() => setSubmitting(false))
+  }
 
   const headerTemplate = (options) => (
     <div className="bn-upload-static">
@@ -78,6 +139,8 @@ function BrandnameDeclarationContent() {
           <h2 className="gw-card-title">Thông tin Brandname</h2>
         </div>
 
+        {infoError && <p className="gw-table-error">{infoError}</p>}
+
         <div className="bn-form-grid">
           <div className="gw-form-field">
             <label>Tên Brandname <span className="gw-required">*</span></label>
@@ -85,6 +148,16 @@ function BrandnameDeclarationContent() {
               value={form.name}
               onChange={(e) => updateForm('name', e.target.value)}
               placeholder="Nhập tên brandname"
+            />
+          </div>
+          <div className="gw-form-field">
+            <label>Đối tác <span className="gw-required">*</span></label>
+            <Dropdown
+              value={form.providerId}
+              onChange={(e) => updateForm('providerId', e.value)}
+              options={providerOptions}
+              placeholder="Chọn đối tác"
+              className="bn-dropdown"
             />
           </div>
           <div className="gw-form-field">
@@ -167,9 +240,11 @@ function BrandnameDeclarationContent() {
           outlined
         />
         <Button
-          label="Đăng ký Brandname"
+          label={submitting ? 'Đang gửi...' : 'Đăng ký Brandname'}
           icon={() => <Send size={16} />}
           className="bn-btn-submit"
+          onClick={handleSubmit}
+          disabled={submitting}
         />
       </div>
     </div>

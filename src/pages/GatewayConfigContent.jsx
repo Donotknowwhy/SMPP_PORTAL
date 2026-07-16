@@ -386,7 +386,7 @@ function GatewayConfigContent() {
               options={brandNameOptions}
               placeholder="Chọn Brandname"
               className="bn-dropdown"
-              disabled={!!editingId}
+              disabled={editingId}
             />
           </div>
           <div className="gw-form-field">
@@ -397,7 +397,7 @@ function GatewayConfigContent() {
               options={telcoOptions}
               placeholder="Chọn nhà mạng"
               className="bn-dropdown"
-              disabled={!!editingId}
+              disabled={editingId}
             />
           </div>
           <div className="gw-form-field">
@@ -427,7 +427,7 @@ function GatewayConfigContent() {
               keyfilter="pint"
               value={form.tps}
               onChange={(e) => updateForm('tps', e.target.value)}
-              disabled={!!editingId}
+              disabled={editingId}
             />
           </div>
           <div className="gw-form-field">
@@ -438,7 +438,7 @@ function GatewayConfigContent() {
               options={PRIORITIES}
               placeholder="Chọn Priority"
               className="bn-dropdown"
-              disabled={!!editingId}
+              disabled={editingId}
             />
           </div>
           <div className="gw-form-field">
@@ -449,7 +449,7 @@ function GatewayConfigContent() {
               options={STATUSES}
               placeholder="Chọn trạng thái"
               className="bn-dropdown"
-              disabled={!!editingId}
+              disabled={editingId}
             />
           </div>
 
