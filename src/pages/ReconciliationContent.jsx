@@ -29,8 +29,8 @@ function formatNumber(value) {
   return new Intl.NumberFormat('vi-VN').format(value ?? 0)
 }
 
-const DEFAULT_FROM_DATE = new Date(2025, 5, 14)
-const DEFAULT_TO_DATE = new Date(2025, 5, 26)
+const DEFAULT_FROM_DATE = new Date(2026, 5, 14)
+const DEFAULT_TO_DATE = new Date(2026, 5, 26)
 
 function ReconciliationContent() {
   const { authToken } = useAuth()
@@ -275,13 +275,13 @@ function ReconciliationContent() {
             </div>
           </div>
           <div className="rc-table-toolbar">
-            <div className="pm-search-field">
+            {/* <div className="pm-search-field">
               <input type="text" placeholder="Tìm kiếm đối soát..." />
               <Search size={16} className="pm-search-icon" />
             </div>
             <button className="db-filter-btn">Tìm <Search size={14} /></button>
             <input type="text" className="gw-filter-date" defaultValue="14/06/2025" />
-            <input type="text" className="gw-filter-date" defaultValue="26/06/2025" />
+            <input type="text" className="gw-filter-date" defaultValue="26/06/2025" /> */}
             <button className="bn-btn-draft p-button">
               <Download size={16} /> Tải tất cả
             </button>
