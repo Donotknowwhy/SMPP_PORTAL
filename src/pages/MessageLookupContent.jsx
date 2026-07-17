@@ -246,9 +246,8 @@ function MessageLookupContent() {
         <div className="routing-table-header gw-table-header">
           <div className="gw-table-header-text">
             <h3 className="table-title">
-              <FileSearch2 size={16} /> Kết quả tra cứu
+              <FileSearch2 size={16} /> Kết quả tra cứu <span className="am-count-badge lk-result-badge">{resultTotal} tin nhắn</span>
             </h3>
-            <span className="am-count-badge lk-result-badge">{resultTotal} tin nhắn</span>
           </div>
         </div>
 

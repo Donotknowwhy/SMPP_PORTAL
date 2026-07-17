@@ -283,7 +283,7 @@ function ReconciliationContent() {
             <input type="text" className="gw-filter-date" defaultValue="14/06/2025" />
             <input type="text" className="gw-filter-date" defaultValue="26/06/2025" /> */}
             <button className="bn-btn-draft p-button">
-              <Download size={16} /> Tải tất cả
+              <Download size={16} /> Xuất excel
             </button>
           </div>
         </div>
