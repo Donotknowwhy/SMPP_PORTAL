@@ -3373,7 +3373,8 @@ h2 {
   letter-spacing: 0.02em;
 }
 
-.lk-dlr-delivrd { background: var(--success-light); color: var(--success); }
+.lk-dlr-delivrd,
+.lk-dlr-success { background: var(--success-light); color: var(--success); }
 .lk-dlr-pending { background: #FFF7ED; color: var(--orange); }
 .lk-dlr-failed { background: var(--red-light); color: var(--red); }
 
