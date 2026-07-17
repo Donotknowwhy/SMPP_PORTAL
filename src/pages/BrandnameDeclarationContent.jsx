@@ -161,7 +161,7 @@ function BrandnameDeclarationContent() {
             />
           </div>
           <div className="gw-form-field">
-            <label>Loại Brandname</label>
+            <label>Loại Brandname <span className="gw-required">*</span></label>
             <Dropdown
               value={form.type}
               onChange={(e) => updateForm('type', e.value)}
