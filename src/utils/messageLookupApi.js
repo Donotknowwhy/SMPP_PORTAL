@@ -49,6 +49,7 @@ export async function lookupMessages({
     throw new Error(msg)
   }
 
-  const rows = Array.isArray(data?.data) ? data.data : []
-  return { rows, total: rows.length }
+  const rows = Array.isArray(data?.data?.data) ? data.data.data : []
+  const total = typeof data?.data?.total === 'number' ? data.data.total : rows.length
+  return { rows, total }
 }

@@ -22,6 +22,14 @@ function formatDate(date) {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
 }
 
+function formatDateTime(value) {
+  if (!value) return '-'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+  const pad = (n) => String(n).padStart(2, '0')
+  return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
+}
+
 function MessageLookupContent() {
   const { authToken } = useAuth()
   const [advancedOpen, setAdvancedOpen] = useState(true)
@@ -43,9 +51,12 @@ function MessageLookupContent() {
   const [infoError, setInfoError] = useState('')
 
   const [resultRows, setResultRows] = useState([])
+  const [resultTotal, setResultTotal] = useState(0)
   const [resultLoading, setResultLoading] = useState(false)
   const [resultError, setResultError] = useState('')
   const [dateFilterApplied, setDateFilterApplied] = useState(false)
+  const [page, setPage] = useState(0)
+  const [pageSize, setPageSize] = useState(10)
 
   useEffect(() => {
     if (!authToken) return
@@ -69,9 +80,10 @@ function MessageLookupContent() {
     }
   }, [authToken])
 
-  const handleSearch = () => {
+  const handleSearch = (targetPage = 0, targetPageSize = pageSize) => {
     if (!authToken) return
 
+    setPage(targetPage)
     setResultLoading(true)
     setResultError('')
 
@@ -87,8 +99,13 @@ function MessageLookupContent() {
       telcoId: network,
       providerId: partner,
       deliveryStatus: dlrStatus,
+      page: targetPage,
+      size: targetPageSize,
     })
-      .then(({ rows }) => setResultRows(rows))
+      .then(({ rows, total }) => {
+        setResultRows(rows)
+        setResultTotal(total)
+      })
       .catch((err) => {
         setResultError(err.message || 'Không tra cứu được tin nhắn.')
         toast.error(err.message || 'Không tra cứu được tin nhắn.')
@@ -97,9 +114,11 @@ function MessageLookupContent() {
   }
 
   useEffect(() => {
-    handleSearch()
+    handleSearch(0, pageSize)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authToken])
+
+  const totalPages = Math.ceil(resultTotal / pageSize)
 
   const handleReset = () => {
     setPhone('')
@@ -113,6 +132,7 @@ function MessageLookupContent() {
     setPartner(0)
     setDlrStatus('')
     setDateFilterApplied(false)
+    setPage(0)
   }
 
   return (
@@ -173,7 +193,7 @@ function MessageLookupContent() {
             <button className="bn-btn-draft p-button" onClick={handleReset} disabled={resultLoading}>
               <RefreshCw size={16} /> Làm mới
             </button>
-            <button className="db-export-btn" onClick={handleSearch} disabled={resultLoading}>
+            <button className="db-export-btn" onClick={() => handleSearch(0, pageSize)} disabled={resultLoading}>
               <Search size={16} /> {resultLoading ? 'Đang tìm...' : 'Tìm kiếm'}
             </button>
           </div>
@@ -228,7 +248,7 @@ function MessageLookupContent() {
             <h3 className="table-title">
               <FileSearch2 size={16} /> Kết quả tra cứu
             </h3>
-            <span className="am-count-badge lk-result-badge">{resultRows.length} tin nhắn</span>
+            <span className="am-count-badge lk-result-badge">{resultTotal} tin nhắn</span>
           </div>
         </div>
 
@@ -262,7 +282,7 @@ function MessageLookupContent() {
               {!resultLoading && resultRows.map((row) => (
                 <tr key={row.id}>
                   <td>{row.requestId}</td>
-                  <td>{row.sentTime}</td>
+                  <td>{formatDateTime(row.sentTime)}</td>
                   <td>{row.brandName}</td>
                   <td>{row.phone}</td>
                   <td>{row.telco}</td>
@@ -287,13 +307,51 @@ function MessageLookupContent() {
         </div>
 
         <div className="lk-pagination">
-          <span className="lk-pagination-info">Hiển thị {resultRows.length === 0 ? 0 : 1} - {resultRows.length} của {resultRows.length}</span>
+          <span className="lk-pagination-info">
+            Hiển thị {resultRows.length === 0 ? 0 : page * pageSize + 1} - {page * pageSize + resultRows.length} của {resultTotal}
+          </span>
           <div className="pagination-controls">
-            <button className="pagination-btn" disabled>‹</button>
-            <button className="pagination-btn active">1</button>
-            <button className="pagination-btn">›</button>
+            <button
+              className="pagination-btn"
+              disabled={page === 0 || resultLoading}
+              onClick={() => handleSearch(0, pageSize)}
+            >
+              «
+            </button>
+            <button
+              className="pagination-btn"
+              disabled={page === 0 || resultLoading}
+              onClick={() => handleSearch(page - 1, pageSize)}
+            >
+              ‹
+            </button>
+            <span className="pagination-page-info">
+              Trang {totalPages === 0 ? 0 : page + 1} / {totalPages}
+            </span>
+            <button
+              className="pagination-btn"
+              disabled={resultLoading || page + 1 >= totalPages}
+              onClick={() => handleSearch(page + 1, pageSize)}
+            >
+              ›
+            </button>
+            <button
+              className="pagination-btn"
+              disabled={resultLoading || page + 1 >= totalPages}
+              onClick={() => handleSearch(totalPages - 1, pageSize)}
+            >
+              »
+            </button>
           </div>
-          <select className="pagination-select" defaultValue="10">
+          <select
+            className="pagination-select"
+            value={pageSize}
+            onChange={(e) => {
+              const size = Number(e.target.value)
+              setPageSize(size)
+              handleSearch(0, size)
+            }}
+          >
             <option value="10">10/trang</option>
             <option value="20">20/trang</option>
             <option value="50">50/trang</option>
@@ -316,15 +374,15 @@ function MessageLookupContent() {
             </div>
             <div className="lk-detail-item">
               <span className="lk-detail-label">Thời gian nhận (request)</span>
-              <span className="lk-detail-value">{selectedRow.createdAt}</span>
+              <span className="lk-detail-value">{formatDateTime(selectedRow.createdAt)}</span>
             </div>
             <div className="lk-detail-item">
               <span className="lk-detail-label">Thời gian gửi</span>
-              <span className="lk-detail-value">{selectedRow.sentTime}</span>
+              <span className="lk-detail-value">{formatDateTime(selectedRow.sentTime)}</span>
             </div>
             <div className="lk-detail-item">
               <span className="lk-detail-label">Thời gian nhận DLR</span>
-              <span className="lk-detail-value">{selectedRow.deliveryTime}</span>
+              <span className="lk-detail-value">{formatDateTime(selectedRow.deliveryTime)}</span>
             </div>
             <div className="lk-detail-item">
               <span className="lk-detail-label">Nội dung tin nhắn</span>
