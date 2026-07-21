@@ -277,14 +277,14 @@ function ReconciliationContent() {
           <div className="rc-table-toolbar">
             {/* <div className="pm-search-field">
               <input type="text" placeholder="Tìm kiếm đối soát..." />
-              <Search size={16} className="pm-search-icon" />
+              <Search size={16} className="pm-search-icon" />v
             </div>
             <button className="db-filter-btn">Tìm <Search size={14} /></button>
             <input type="text" className="gw-filter-date" defaultValue="14/06/2025" />
             <input type="text" className="gw-filter-date" defaultValue="26/06/2025" /> */}
-            <button className="bn-btn-draft p-button">
+            {/* <button className="bn-btn-draft p-button">
               <Download size={16} /> Xuất excel
-            </button>
+            </button> */}
           </div>
         </div>
 
@@ -304,7 +304,7 @@ function ReconciliationContent() {
             <NotebookPen size={16} /> Thêm ghi chú
           </button>
           <button className="db-export-btn gw-save-btn" disabled={selectedRows.length === 0}>
-            <Save size={16} /> Lưu
+            <Save size={16} /> Cập nhật
           </button>
         </div>
 
@@ -399,9 +399,9 @@ function ReconciliationContent() {
             </h2>
             <p className="gw-card-subtitle">Theo dõi lịch sử upload và xử lý đối soát</p>
           </div>
-          <button className="db-export-btn am-create-btn">
+          {/* <button className="db-export-btn am-create-btn">
             <FileDown size={16} /> Xuất excel
-          </button>
+          </button> */}
         </div>
 
         <div className="overflow-x-auto">

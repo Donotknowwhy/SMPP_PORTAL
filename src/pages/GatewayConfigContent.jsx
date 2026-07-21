@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Dropdown } from 'primereact/dropdown'
 import { InputText } from 'primereact/inputtext'
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog'
@@ -116,6 +116,8 @@ function GatewayConfigContent() {
   const [deletingId, setDeletingId] = useState(null)
   const [editingId, setEditingId] = useState(null)
 
+  const formCardRef = useRef(null)
+
   const updateForm = (field, value) => setForm((prev) => ({ ...prev, [field]: value }))
 
   const handleEdit = (row) => {
@@ -129,6 +131,7 @@ function GatewayConfigContent() {
       priority: row.priority,
       status: row.status === 'ACTIVE' ? 'Active' : 'Inactive',
     })
+    formCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
   const handleCancelEdit = () => {
@@ -364,7 +367,7 @@ function GatewayConfigContent() {
       <ConfirmDialog />
 
       {/* Form card */}
-      <div className="gw-card">
+      <div className="gw-card" ref={formCardRef}>
         <div className="gw-card-head">
           <span className="gw-card-icon">
             <Router size={18} />
