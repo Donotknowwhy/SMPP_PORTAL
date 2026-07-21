@@ -160,24 +160,20 @@ function MessageLookupContent() {
             <input type="text" value={content} onChange={(e) => setContent(e.target.value)} placeholder="Nhập nội dung tin nhắn" />
           </div>
           <div className="gw-form-field">
-            <label>Từ ngày - giờ</label>
+            <label>Từ ngày</label>
             <Calendar
               value={fromDate}
               onChange={(e) => { setFromDate(e.value); setDateFilterApplied(true) }}
-              showTime
-              hourFormat="24"
               dateFormat="dd/mm/yy"
               showIcon
               className="db-calendar db-calendar-inline lk-calendar"
             />
           </div>
           <div className="gw-form-field">
-            <label>Đến ngày - giờ</label>
+            <label>Đến ngày</label>
             <Calendar
               value={toDate}
               onChange={(e) => { setToDate(e.value); setDateFilterApplied(true) }}
-              showTime
-              hourFormat="24"
               dateFormat="dd/mm/yy"
               showIcon
               className="db-calendar db-calendar-inline lk-calendar"
@@ -204,12 +200,7 @@ function MessageLookupContent() {
 
         {advancedOpen && (
           <div className="lk-advanced-panel">
-            <div className="lk-advanced-head">
-              <h3>Tìm kiếm nâng cao</h3>
-              <button className="lk-collapse-btn" onClick={() => setAdvancedOpen(false)}>
-                Thu gọn <ChevronUp size={15} />
-              </button>
-            </div>
+           
 
             <div className="lk-advanced-grid">
               <div className="gw-form-field">
@@ -280,7 +271,7 @@ function MessageLookupContent() {
               )}
               {!resultLoading && resultRows.map((row) => (
                 <tr key={row.id}>
-                  <td>{row.requestId}</td>
+                  <td className="lk-cell-truncate" title={row.requestId}>{row.requestId}</td>
                   <td>{formatDateTime(row.sentTime)}</td>
                   <td>{row.brandName}</td>
                   <td>{row.phone}</td>
@@ -288,7 +279,7 @@ function MessageLookupContent() {
                   <td>
                     <span className={`lk-dlr-badge lk-dlr-${(row.deliveryStatus || '').toLowerCase()}`}>{row.deliveryStatus}</span>
                   </td>
-                  <td>{row.errorMessage || '-'}</td>
+                  <td className="lk-cell-truncate" title={row.errorMessage || '-'}>{row.errorMessage || '-'}</td>
                   <td>
                     <button
                       type="button"

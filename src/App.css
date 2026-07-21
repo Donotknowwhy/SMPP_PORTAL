@@ -1784,6 +1784,9 @@ h2 {
   font-size: 0.95rem;
   font-weight: 700;
   color: var(--gray-800);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
 .routing-table {
@@ -3362,7 +3365,14 @@ h2 {
 
 .lk-result-badge { margin-left: 0.5rem; }
 
-.table-title svg { vertical-align: -3px; margin-right: 0.3rem; }
+.lk-cell-truncate {
+  max-width: 220px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.table-title svg { flex-shrink: 0; }
 
 .lk-dlr-badge {
   display: inline-block;
