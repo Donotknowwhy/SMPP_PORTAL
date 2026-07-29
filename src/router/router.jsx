@@ -2,15 +2,15 @@ import { createBrowserRouter, Navigate, useNavigate, useOutletContext } from 're
 import RequireAuth from './RequireAuth'
 import MainLayout from '../layouts/MainLayout'
 import LoginPage from '../pages/LoginPage'
-// import HomeContent from '../pages/HomeContent'
+import HomeContent from '../pages/HomeContent'
 import ProvidersContent from '../pages/ProvidersContent'
 import ReportsContent from '../pages/ReportsContent'
 import SmsRequestSection from '../pages/SmsRequestSection'
-// import RoutingRulesContent from '../pages/RoutingRulesContent'
+import RoutingRulesContent from '../pages/RoutingRulesContent'
 import GatewayConfigContent from '../pages/GatewayConfigContent'
 import BrandnameDeclarationContent from '../pages/BrandnameDeclarationContent'
-// import PricingManagementContent from '../pages/PricingManagementContent'
-// import AccountManagementContent from '../pages/AccountManagementContent'
+import PricingManagementContent from '../pages/PricingManagementContent'
+import AccountManagementContent from '../pages/AccountManagementContent'
 import ReconciliationContent from '../pages/ReconciliationContent'
 import MessageLookupContent from '../pages/MessageLookupContent'
 import { useAuth } from '../context/AuthContext'
@@ -19,21 +19,6 @@ import { useAuth } from '../context/AuthContext'
 // Pages below this line need data shared by MainLayout (provider list/modals)
 // or the auth token, which they read via useOutletContext()/useAuth() instead
 // of prop drilling through the route config.
-
-// function HomePage() {
-//   const ctx = useOutletContext()
-//   return (
-//     <HomeContent
-//       providers={ctx.providers}
-//       totalPercentage={ctx.totalPercentage}
-//       totalMessages={ctx.totalMessages}
-//       setTotalMessages={ctx.setTotalMessages}
-//       showDistribution={ctx.showDistribution}
-//       setShowDistribution={ctx.setShowDistribution}
-//       calculateDistribution={() => calculateDistribution(ctx.providers, ctx.totalMessages, ctx.totalPercentage)}
-//     />
-//   )
-// }
 
 function ProvidersPage() {
   const ctx = useOutletContext()
@@ -100,16 +85,16 @@ export const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <Navigate to="/dashboard" replace /> },
-      { path: 'dashboard', element: <NotFoundPage /> },
+      { path: 'dashboard', element: <HomeContent /> },
       { path: 'home', element: <Navigate to="/dashboard" replace /> },
       { path: 'providers', element: <ProvidersPage /> },
       { path: 'reports', element: <ReportsPage /> },
       { path: 'send-sms', element: <SendSmsPage /> },
-      { path: 'routing', element: <NotFoundPage /> },
+      { path: 'routing', element: <RoutingRulesContent /> },
       { path: 'gateway', element: <GatewayConfigContent /> },
       { path: 'brandname', element: <BrandnameDeclarationContent /> },
-      { path: 'pricing', element: <NotFoundPage /> },
-      { path: 'account', element: <NotFoundPage /> },
+      { path: 'pricing', element: <PricingManagementContent /> },
+      { path: 'account', element: <AccountManagementContent /> },
       { path: 'reconcile', element: <ReconciliationContent /> },
       { path: 'lookup', element: <MessageLookupContent /> },
       { path: '*', element: <NotFoundPage /> },

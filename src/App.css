@@ -28,10 +28,11 @@
 
 /* App shell */
 .app {
-  min-height: 100vh;
+  height: 100vh;
   background: var(--gray-100);
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 /* Top Navigation */
@@ -3532,7 +3533,18 @@ h2 {
 
 .db-date-field input:focus { border-color: var(--red); }
 
-.db-calendar.p-calendar { width: 160px; }
+.db-date-field select {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  color: var(--gray-800);
+  background: var(--white);
+  min-width: 160px;
+  cursor: pointer;
+}
+
+.db-calendar.p-calendar { width: 190px; }
 
 .db-calendar .p-inputtext {
   padding: 0.5rem 0.75rem;
@@ -3668,6 +3680,9 @@ h2 {
 }
 
 .db-refresh-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   padding: 0.5rem 1rem;
   border: none;
   border-radius: 99px;
@@ -3680,6 +3695,8 @@ h2 {
 }
 
 .db-refresh-btn:hover { filter: brightness(1.08); }
+
+.db-refresh-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
 /* Charts row */
 .db-charts-row {
@@ -3737,10 +3754,16 @@ h2 {
 
 .db-bar-chart-area { position: relative; flex: 1; }
 
+.db-chart-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--gray-400);
+  font-size: 0.85rem;
+}
+
 .db-bar-mini-legend {
-  position: absolute;
-  top: 0;
-  left: 52px;
   background: var(--white);
   border: 1px solid var(--gray-200);
   border-radius: var(--radius-sm);
@@ -3748,10 +3771,9 @@ h2 {
   font-size: 0.72rem;
   color: var(--gray-600);
   display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-  z-index: 2;
-  box-shadow: var(--shadow-sm);
+  flex-wrap: wrap;
+  gap: 0.3rem 1rem;
+  margin-top: 0.75rem;
 }
 
 .db-bar-mini-legend > div { display: flex; align-items: center; gap: 0.4rem; }
@@ -3923,7 +3945,15 @@ h2 {
   width: 100%;
 }
 
-.db-report-filters select {
+.db-report-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.db-report-filters select,
+.db-report-filters input[type="text"] {
   flex: 1 1 0;
   min-width: 0;
   padding: 0.5rem 0.65rem;
@@ -3932,8 +3962,20 @@ h2 {
   font-size: 0.8rem;
   color: var(--gray-600);
   background: var(--white);
-  cursor: pointer;
   text-overflow: ellipsis;
+}
+
+.db-report-filters select {
+  cursor: pointer;
+}
+
+.db-report-filters input[type="text"]::placeholder {
+  color: var(--gray-400);
+}
+
+.db-report-filters input[type="text"]:focus {
+  outline: none;
+  border-color: var(--red);
 }
 
 .db-date-field-inline {
@@ -3953,7 +3995,7 @@ h2 {
   width: 110px;
 }
 
-.db-calendar-inline.p-calendar { width: 130px; flex-shrink: 0; }
+.db-calendar-inline.p-calendar { width: 150px; flex-shrink: 0; }
 
 .rc-filter-grid .db-calendar-inline.p-calendar,
 .lk-basic-grid .db-calendar-inline.p-calendar {
