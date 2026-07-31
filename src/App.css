@@ -3740,7 +3740,7 @@ h2 {
 /* Charts row */
 .db-charts-row {
   display: grid;
-  grid-template-columns: 1fr 1.1fr;
+  grid-template-columns: 1fr;
   gap: 1.25rem;
   margin-bottom: 1.25rem;
   align-items: stretch;
@@ -3791,7 +3791,9 @@ h2 {
 
 .db-toggle-checkbox.active { color: var(--success); font-weight: 600; }
 
-.db-bar-chart-area { position: relative; flex: 1; }
+.db-bar-chart-area { position: relative; flex: 1; overflow-x: auto; overflow-y: hidden; }
+
+.db-bar-scroll { height: 100%; }
 
 .db-chart-empty {
   display: flex;

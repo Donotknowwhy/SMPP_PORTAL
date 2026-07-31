@@ -420,7 +420,7 @@ function HomeContent() {
       {/* Charts row */}
       <div className="db-charts-row">
         {/* Traffic bar chart */}
-        <div className="db-chart-card db-traffic-card w-full max-w-[833px] h-[380px] sm:h-[420px] md:h-[450px]">
+        <div className="db-chart-card db-traffic-card w-full h-[380px] sm:h-[420px] md:h-[450px]">
           <div className="db-chart-head">
             <h3>Lưu lượng SMS</h3>
             <div className="db-chart-toggles">
@@ -436,11 +436,23 @@ function HomeContent() {
             ) : chartData.length === 0 ? (
               <p className="db-chart-empty">Không có dữ liệu lưu lượng SMS.</p>
             ) : (
-              <>
+              <div
+                className="db-bar-scroll"
+                style={{ minWidth: `${Math.max(chartData.length * Math.max(providers.length, 1) * 42, 100)}px` }}
+              >
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartData} margin={{ top: 0, right: 8, left: 0, bottom: 0 }} barGap={3} barCategoryGap="20%">
+                  <BarChart data={chartData} margin={{ top: 0, right: 8, left: 0, bottom: 24 }} barGap={3} barCategoryGap="20%">
                     <CartesianGrid vertical={false} stroke="#E5E7EB" strokeDasharray="3 3" />
-                    <XAxis dataKey="label" axisLine={{ stroke: '#E5E7EB' }} tickLine={false} tick={{ fontSize: 12, fill: '#4B5563' }} />
+                    <XAxis
+                      dataKey="label"
+                      axisLine={{ stroke: '#E5E7EB' }}
+                      tickLine={false}
+                      tick={{ fontSize: 12, fill: '#4B5563' }}
+                      interval={0}
+                      angle={chartData.length > 6 ? -30 : 0}
+                      textAnchor={chartData.length > 6 ? 'end' : 'middle'}
+                      height={chartData.length > 6 ? 48 : 30}
+                    />
                     <YAxis
                       domain={[0, trafficMax]}
                       tickFormatter={(v) => new Intl.NumberFormat('vi-VN').format(v)}
@@ -473,7 +485,7 @@ function HomeContent() {
                     ))}
                   </BarChart>
                 </ResponsiveContainer>
-              </>
+              </div>
             )}
           </div>
 
