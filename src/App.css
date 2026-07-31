@@ -2452,6 +2452,45 @@ h2 {
 
 .am-multiselect-panel .p-multiselect-close:hover { background: var(--gray-100); color: var(--red); }
 
+.bn-add-dialog.p-dialog {
+  width: 680px;
+  max-width: 94vw;
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.bn-add-dialog .p-dialog-header {
+  padding: 1.25rem 1.75rem;
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.bn-add-dialog .p-dialog-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--gray-800);
+}
+
+.bn-add-dialog .p-dialog-content {
+  padding: 1.75rem;
+}
+
+.bn-add-dialog .p-dialog-footer {
+  margin: 0;
+  padding: 1.1rem 1.75rem;
+  border-top: 1px solid var(--gray-100);
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.bn-dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.bn-add-dialog .bn-form-grid { gap: 1.1rem 1.5rem; }
+
 .bn-upload-card { padding: 1.5rem; }
 
 .bn-upload-card-dragging .bn-fileupload.p-fileupload {
