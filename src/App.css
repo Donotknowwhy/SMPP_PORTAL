@@ -4079,12 +4079,40 @@ h2 {
   gap: 0.4rem;
 }
 
-.db-table-wrap { overflow-x: auto; }
+.db-table-wrap { position: relative; overflow-x: auto; min-height: 120px; transition: opacity 0.15s ease; }
 
 .db-report-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.82rem;
+}
+
+.db-report-table-loading {
+  opacity: 0.5;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.db-table-loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.35);
+  z-index: 1;
+}
+
+@keyframes db-table-spin { to { transform: rotate(360deg); } }
+
+.db-table-spinner {
+  display: inline-block;
+  width: 26px;
+  height: 26px;
+  border: 3px solid var(--gray-200);
+  border-top-color: var(--red, #E31E24);
+  border-radius: 50%;
+  animation: db-table-spin 0.7s linear infinite;
 }
 
 .db-report-table th {

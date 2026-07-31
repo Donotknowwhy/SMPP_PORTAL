@@ -563,7 +563,7 @@ function HomeContent() {
         </div>
 
         <div className="db-table-wrap">
-          <table className="db-report-table">
+          <table className={`db-report-table${reportLoading ? ' db-report-table-loading' : ''}`}>
             <thead>
               <tr>
                 <th>Khách hàng</th>
@@ -579,9 +579,9 @@ function HomeContent() {
               </tr>
             </thead>
             <tbody>
-              {reportLoading ? (
+              {reportLoading && reportRows.length === 0 ? (
                 <tr><td colSpan={10} className="db-chart-empty">Đang tải dữ liệu...</td></tr>
-              ) : reportRows.length === 0 ? (
+              ) : !reportLoading && reportRows.length === 0 ? (
                 <tr><td colSpan={10} className="db-chart-empty">Không có dữ liệu.</td></tr>
               ) : (
                 reportRows.map((row, i) => (
@@ -601,6 +601,11 @@ function HomeContent() {
               )}
             </tbody>
           </table>
+          {reportLoading && reportRows.length > 0 && (
+            <div className="db-table-loading-overlay">
+              <span className="db-table-spinner" />
+            </div>
+          )}
         </div>
 
         <div className="db-table-pagination">
