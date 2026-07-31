@@ -555,7 +555,7 @@ function HomeContent() {
             Lọc dữ liệu <ListSortDescending size={16} />
           </button>
           <button className="db-export-btn" onClick={handleExport} disabled={exporting}>
-            {exporting ? 'Đang xuất...' : 'Kết xuất báo cáo Tổng'} <Upload size={16} />
+            {exporting ? 'Đang xuất...' : 'Kết xuất báo cáo'} <Upload size={16} />
           </button>
           <button className="bn-btn-draft p-button" onClick={resetReportFilters} disabled={reportLoading}>
             Xoá bộ lọc
