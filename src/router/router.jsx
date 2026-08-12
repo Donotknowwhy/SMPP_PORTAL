@@ -13,6 +13,12 @@ import PricingManagementContent from '../pages/PricingManagementContent'
 import AccountManagementContent from '../pages/AccountManagementContent'
 import ReconciliationContent from '../pages/ReconciliationContent'
 import MessageLookupContent from '../pages/MessageLookupContent'
+import CustomerDashboardContent from '../pages/CustomerDashboardContent'
+import CustomerCampaignCreateContent from '../pages/CustomerCampaignCreateContent'
+import CustomerCampaignApprovalContent from '../pages/CustomerCampaignApprovalContent'
+import CustomerContactsContent from '../pages/CustomerContactsContent'
+import CustomerMessageLookupContent from '../pages/CustomerMessageLookupContent'
+import ComingSoon from '../components/common/ComingSoon'
 import { useAuth } from '../context/AuthContext'
 // import { calculateDistribution } from '../utils/providerUtils'
 
@@ -97,6 +103,15 @@ export const router = createBrowserRouter([
       { path: 'account', element: <AccountManagementContent /> },
       { path: 'reconcile', element: <ReconciliationContent /> },
       { path: 'lookup', element: <MessageLookupContent /> },
+      { path: 'customer/dashboard', element: <CustomerDashboardContent /> },
+      { path: 'customer/campaigns/new', element: <CustomerCampaignCreateContent /> },
+      { path: 'customer/campaigns/approval', element: <CustomerCampaignApprovalContent /> },
+      { path: 'customer/contacts', element: <CustomerContactsContent /> },
+      { path: 'customer/lookup', element: <CustomerMessageLookupContent /> },
+      {
+        path: 'customer/history',
+        element: <ComingSoon title="Lịch sử tin nhắn" description="Tính năng lịch sử tin nhắn đang được phát triển." />,
+      },
       { path: '*', element: <NotFoundPage /> },
     ],
   },

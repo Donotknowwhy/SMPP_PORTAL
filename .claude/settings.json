@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node \"C:\\\\Users\\\\VIETLE~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-VietLeQuoc-Desktop-SMPP-SMPP-Project\\\\59e9e454-608b-4d4d-8558-71e296d1a24a\\\\scratchpad\\\\verify.js\")",
+      "Bash(npx --yes playwright@1.62.1 install chromium --with-deps)",
+      "Bash(npx --yes playwright@1.62.1 --version)",
+      "Bash(node -e ' *)",
+      "Bash(lsof -ti:5173 -sTCP:LISTEN)",
+      "Bash(xargs -r kill)"
+    ]
+  }
+}
