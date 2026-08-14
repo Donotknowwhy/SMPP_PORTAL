@@ -8,6 +8,7 @@ import { STATS } from '../constants/home'
 import { useAuth } from '../context/AuthContext'
 import { getSmsTraffic, getDeliveryStatus, getTotalSmsOutput, exportTotalSmsOutput } from '../utils/homeApi'
 import { getRoutingInfo } from '../utils/routingApi'
+import Pagination from '../components/common/Pagination'
 
 const ALL_OPTION = { label: 'Tất cả', value: 0 }
 const numberFormat = (v) => new Intl.NumberFormat('vi-VN').format(v ?? 0)
@@ -620,37 +621,14 @@ function HomeContent() {
           )}
         </div>
 
-        <div className="db-table-pagination">
-          <div className="db-page-size">
-            <span>Show</span>
-            <select value={reportSize} onChange={(e) => setReportSize(Number(e.target.value))}>
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="50">50</option>
-            </select>
-            <span>Row</span>
-          </div>
-          <div className="db-page-controls">
-            <span className="db-page-ellipsis">
-              Trang {reportPage + 1}/{reportTotalPages} ({numberFormat(reportTotal)} bản ghi)
-            </span>
-            <button
-              className="db-page-btn"
-              disabled={reportPage === 0 || reportLoading}
-              onClick={() => fetchReport({ page: reportPage - 1 })}
-            >
-              ‹
-            </button>
-            <button className="db-page-btn active">{reportPage + 1}</button>
-            <button
-              className="db-page-btn"
-              disabled={reportPage + 1 >= reportTotalPages || reportLoading}
-              onClick={() => fetchReport({ page: reportPage + 1 })}
-            >
-              ›
-            </button>
-          </div>
-        </div>
+        <Pagination
+          page={reportPage + 1}
+          totalPages={reportTotalPages}
+          pageSize={reportSize}
+          disabled={reportLoading}
+          onPageChange={(p) => fetchReport({ page: p - 1 })}
+          onPageSizeChange={(size) => setReportSize(size)}
+        />
       </div>
     </div>
   )

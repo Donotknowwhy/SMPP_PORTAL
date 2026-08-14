@@ -18,6 +18,7 @@ import {
   deleteRoutingRule,
   getRoutingAudit,
 } from '../utils/routingApi'
+import Pagination from '../components/common/Pagination'
 
 function formatDateTime(value) {
   if (!value) return '-'
@@ -578,26 +579,13 @@ function GatewayConfigContent() {
           </table>
         </div>
 
-        <div className="routing-pagination flex-wrap gap-3">
-          <div className="db-page-size">
-            <span>Show</span>
-            <select
-              value={pageSize}
-              onChange={(e) => { setPageSize(Number(e.target.value)); setPage(0) }}
-              className="pagination-select"
-            >
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="50">50</option>
-            </select>
-            <span>Row</span>
-          </div>
-          <div className="pagination-controls">
-            <button className="pagination-btn" disabled={page === 0} onClick={() => setPage((p) => Math.max(0, p - 1))}>‹</button>
-            <button className="pagination-btn active">{page + 1}</button>
-            <button className="pagination-btn" disabled={(page + 1) * pageSize >= routingTotal} onClick={() => setPage((p) => p + 1)}>›</button>
-          </div>
-        </div>
+        <Pagination
+          page={page + 1}
+          totalPages={Math.max(1, Math.ceil(routingTotal / pageSize))}
+          pageSize={pageSize}
+          onPageChange={(p) => setPage(p - 1)}
+          onPageSizeChange={(size) => { setPageSize(size); setPage(0) }}
+        />
       </div>
 
       {/* History */}
@@ -661,26 +649,13 @@ function GatewayConfigContent() {
           })}
         </div>
 
-        <div className="routing-pagination flex-wrap gap-3">
-          <div className="db-page-size">
-            <span>Show</span>
-            <select
-              value={auditPageSize}
-              onChange={(e) => { setAuditPageSize(Number(e.target.value)); setAuditPage(0) }}
-              className="pagination-select"
-            >
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="50">50</option>
-            </select>
-            <span>Row</span>
-          </div>
-          <div className="pagination-controls">
-            <button className="pagination-btn" disabled={auditPage === 0} onClick={() => setAuditPage((p) => Math.max(0, p - 1))}>‹</button>
-            <button className="pagination-btn active">{auditPage + 1}</button>
-            <button className="pagination-btn" disabled={(auditPage + 1) * auditPageSize >= auditTotal} onClick={() => setAuditPage((p) => p + 1)}>›</button>
-          </div>
-        </div>
+        <Pagination
+          page={auditPage + 1}
+          totalPages={Math.max(1, Math.ceil(auditTotal / auditPageSize))}
+          pageSize={auditPageSize}
+          onPageChange={(p) => setAuditPage(p - 1)}
+          onPageSizeChange={(size) => { setAuditPageSize(size); setAuditPage(0) }}
+        />
       </div>
     </div>
   )

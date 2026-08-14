@@ -7,6 +7,7 @@ import { LOOKUP_STATUS_OPTIONS } from '../constants/customerPortal'
 import { useAuth } from '../context/AuthContext'
 import { getRoutingInfo } from '../utils/routingApi'
 import { lookupMessagesClient } from '../utils/customerMessageLookupApi'
+import Pagination from '../components/common/Pagination'
 
 const ALL_TELCO = { label: 'Tất cả nhà mạng', value: 0 }
 const ALL_STATUS = { value: 'all', label: 'Tất cả' }
@@ -305,57 +306,14 @@ function CustomerMessageLookupContent() {
           )}
         </div>
 
-        <div className="lk-pagination">
-          <span className="lk-pagination-info">
-            Hiển thị {rows.length === 0 ? 0 : page * pageSize + 1} - {page * pageSize + rows.length} của {total}
-          </span>
-          <div className="pagination-controls">
-            <button
-              className="pagination-btn"
-              disabled={page === 0 || loading}
-              onClick={() => handleSearch(0, pageSize)}
-            >
-              «
-            </button>
-            <button
-              className="pagination-btn"
-              disabled={page === 0 || loading}
-              onClick={() => handleSearch(page - 1, pageSize)}
-            >
-              ‹
-            </button>
-            <span className="pagination-page-info">
-              Trang {totalPages === 0 ? 0 : page + 1} / {totalPages}
-            </span>
-            <button
-              className="pagination-btn"
-              disabled={loading || page + 1 >= totalPages}
-              onClick={() => handleSearch(page + 1, pageSize)}
-            >
-              ›
-            </button>
-            <button
-              className="pagination-btn"
-              disabled={loading || page + 1 >= totalPages}
-              onClick={() => handleSearch(totalPages - 1, pageSize)}
-            >
-              »
-            </button>
-          </div>
-          <select
-            className="pagination-select"
-            value={pageSize}
-            onChange={(e) => {
-              const size = Number(e.target.value)
-              setPageSize(size)
-              handleSearch(0, size)
-            }}
-          >
-            <option value="10">10/trang</option>
-            <option value="20">20/trang</option>
-            <option value="50">50/trang</option>
-          </select>
-        </div>
+        <Pagination
+          page={page + 1}
+          totalPages={totalPages}
+          pageSize={pageSize}
+          disabled={loading}
+          onPageChange={(p) => handleSearch(p - 1, pageSize)}
+          onPageSizeChange={(size) => { setPageSize(size); handleSearch(0, size) }}
+        />
       </div>
     </div>
   )

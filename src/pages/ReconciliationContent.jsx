@@ -16,6 +16,7 @@ import {
 import { useAuth } from '../context/AuthContext'
 import { getRoutingInfo } from '../utils/routingApi'
 import { getReconciliationStats, exportReconciliationReport } from '../utils/reconciliationApi'
+import Pagination from '../components/common/Pagination'
 
 const ALL_OPTION = { label: 'Tất cả', value: 0 }
 
@@ -53,6 +54,11 @@ function ReconciliationContent() {
   const [statsError, setStatsError] = useState('')
   const [exporting, setExporting] = useState(false)
   const [dateFilterApplied, setDateFilterApplied] = useState(false)
+
+  const [reconPage, setReconPage] = useState(1)
+  const [reconPageSize, setReconPageSize] = useState(10)
+  const [historyPage, setHistoryPage] = useState(1)
+  const [historyPageSize, setHistoryPageSize] = useState(10)
 
   const allSelected = selectedRows.length === RECON_ROWS.length
   const toggleSelectAll = () => setSelectedRows(allSelected ? [] : RECON_ROWS.map((row) => row.id))
@@ -368,26 +374,13 @@ function ReconciliationContent() {
           <Info size={14} /> Hệ thống tự động đối soát theo nhà mạng, brandname và đối tác, các dòng lệch sẽ được đánh dấu Need Review.
         </div>
 
-        <div className="routing-pagination flex-wrap gap-3">
-          <div className="db-page-size">
-            <span>Show</span>
-            <select defaultValue="10" className="pagination-select">
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="50">50</option>
-            </select>
-            <span>Row</span>
-          </div>
-          <div className="pagination-controls">
-            <button className="pagination-btn" disabled>‹</button>
-            {[1, 2, 3, 4, 5].map((n) => (
-              <button key={n} className={`pagination-btn${n === 1 ? ' active' : ''}`}>{n}</button>
-            ))}
-            <span className="db-page-ellipsis">...</span>
-            <button className="pagination-btn">10</button>
-            <button className="pagination-btn">›</button>
-          </div>
-        </div>
+        <Pagination
+          page={reconPage}
+          totalPages={10}
+          pageSize={reconPageSize}
+          onPageChange={setReconPage}
+          onPageSizeChange={(size) => { setReconPageSize(size); setReconPage(1) }}
+        />
       </div>
 
       {/* History */}
@@ -435,27 +428,13 @@ function ReconciliationContent() {
           </table>
         </div>
 
-        <div className="routing-pagination flex-wrap gap-3">
-          <div className="db-page-size">
-            <span>Show</span>
-            <select defaultValue="10" className="pagination-select">
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="50">50</option>
-            </select>
-            <span>Row</span>
-          </div>
-          <div className="pagination-controls">
-            <button className="pagination-btn" disabled>‹</button>
-            <button className="pagination-btn active">1</button>
-            <button className="pagination-btn">2</button>
-            <button className="pagination-btn">3</button>
-            <button className="pagination-btn">4</button>
-            <span className="db-page-ellipsis">...</span>
-            <button className="pagination-btn">10</button>
-            <button className="pagination-btn">›</button>
-          </div>
-        </div>
+        <Pagination
+          page={historyPage}
+          totalPages={10}
+          pageSize={historyPageSize}
+          onPageChange={setHistoryPage}
+          onPageSizeChange={(size) => { setHistoryPageSize(size); setHistoryPage(1) }}
+        />
       </div>
     </div>
   )

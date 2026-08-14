@@ -8,6 +8,7 @@ import {
   CAMPAIGN_APPROVAL_ROWS,
   CAMPAIGN_TYPE_LABELS,
 } from '../constants/customerPortal'
+import Pagination from '../components/common/Pagination'
 
 const ALL_STATUS = { value: 'all', label: 'Tất cả trạng thái' }
 const ALL_BRANDNAME = { value: 'all', label: 'Tất cả Brandname' }
@@ -207,31 +208,13 @@ function CustomerCampaignApprovalContent() {
           </table>
         </div>
 
-        <div className="lk-pagination">
-          <span className="lk-pagination-info">
-            Hiển thị {totalRows === 0 ? 0 : page * pageSize + 1} - {Math.min(totalRows, page * pageSize + pageRows.length)} của {totalRows}
-          </span>
-          <div className="pagination-controls">
-            <button className="pagination-btn" disabled={page === 0} onClick={() => setPage((p) => p - 1)}>‹</button>
-            <button className="pagination-btn active">{page + 1}</button>
-            <button
-              className="pagination-btn"
-              disabled={page + 1 >= totalPages}
-              onClick={() => setPage((p) => p + 1)}
-            >
-              ›
-            </button>
-          </div>
-          <select
-            className="pagination-select"
-            value={pageSize}
-            onChange={(e) => { setPageSize(Number(e.target.value)); setPage(0) }}
-          >
-            <option value="10">10/trang</option>
-            <option value="20">20/trang</option>
-            <option value="50">50/trang</option>
-          </select>
-        </div>
+        <Pagination
+          page={page + 1}
+          totalPages={totalPages}
+          pageSize={pageSize}
+          onPageChange={(p) => setPage(p - 1)}
+          onPageSizeChange={(size) => { setPageSize(size); setPage(0) }}
+        />
       </div>
 
       <Dialog

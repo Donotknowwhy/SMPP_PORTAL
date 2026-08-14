@@ -15,6 +15,7 @@ import {
   AVATAR_COLORS,
   HISTORY_ROWS,
 } from '../constants/accountManagement'
+import Pagination from '../components/common/Pagination'
 
 function HistoryBadge({ label, tone }) {
   if (tone === 'plain') {
@@ -35,6 +36,9 @@ function AccountManagementContent() {
   })
 
   const updateForm = (field, value) => setForm((prev) => ({ ...prev, [field]: value }))
+
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
 
   return (
     <div className="account-management-content">
@@ -204,26 +208,13 @@ function AccountManagementContent() {
           </table>
         </div>
 
-        <div className="routing-pagination flex-wrap gap-3">
-          <div className="db-page-size">
-            <span>Show</span>
-            <select defaultValue="10" className="pagination-select">
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="50">50</option>
-            </select>
-            <span>Row</span>
-          </div>
-          <div className="pagination-controls">
-            <button className="pagination-btn" disabled>‹</button>
-            {[1, 2, 3, 4, 5].map((n) => (
-              <button key={n} className={`pagination-btn${n === 1 ? ' active' : ''}`}>{n}</button>
-            ))}
-            <span className="db-page-ellipsis">...</span>
-            <button className="pagination-btn">10</button>
-            <button className="pagination-btn">›</button>
-          </div>
-        </div>
+        <Pagination
+          page={page}
+          totalPages={10}
+          pageSize={pageSize}
+          onPageChange={setPage}
+          onPageSizeChange={(size) => { setPageSize(size); setPage(1) }}
+        />
       </div>
 
       {/* Change history */}

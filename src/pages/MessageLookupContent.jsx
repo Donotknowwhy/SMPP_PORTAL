@@ -11,6 +11,7 @@ import {
 import { useAuth } from '../context/AuthContext'
 import { getRoutingInfo } from '../utils/routingApi'
 import { lookupMessages } from '../utils/messageLookupApi'
+import Pagination from '../components/common/Pagination'
 
 const ALL_OPTION = { label: 'Tất cả', value: 0 }
 const DEFAULT_FROM_DATE = new Date(2026, 5, 14, 0, 0)
@@ -296,57 +297,14 @@ function MessageLookupContent() {
           </table>
         </div>
 
-        <div className="lk-pagination">
-          <span className="lk-pagination-info">
-            Hiển thị {resultRows.length === 0 ? 0 : page * pageSize + 1} - {page * pageSize + resultRows.length} của {resultTotal}
-          </span>
-          <div className="pagination-controls">
-            <button
-              className="pagination-btn"
-              disabled={page === 0 || resultLoading}
-              onClick={() => handleSearch(0, pageSize)}
-            >
-              «
-            </button>
-            <button
-              className="pagination-btn"
-              disabled={page === 0 || resultLoading}
-              onClick={() => handleSearch(page - 1, pageSize)}
-            >
-              ‹
-            </button>
-            <span className="pagination-page-info">
-              Trang {totalPages === 0 ? 0 : page + 1} / {totalPages}
-            </span>
-            <button
-              className="pagination-btn"
-              disabled={resultLoading || page + 1 >= totalPages}
-              onClick={() => handleSearch(page + 1, pageSize)}
-            >
-              ›
-            </button>
-            <button
-              className="pagination-btn"
-              disabled={resultLoading || page + 1 >= totalPages}
-              onClick={() => handleSearch(totalPages - 1, pageSize)}
-            >
-              »
-            </button>
-          </div>
-          <select
-            className="pagination-select"
-            value={pageSize}
-            onChange={(e) => {
-              const size = Number(e.target.value)
-              setPageSize(size)
-              handleSearch(0, size)
-            }}
-          >
-            <option value="10">10/trang</option>
-            <option value="20">20/trang</option>
-            <option value="50">50/trang</option>
-          </select>
-        </div>
+        <Pagination
+          page={page + 1}
+          totalPages={totalPages}
+          pageSize={pageSize}
+          disabled={resultLoading}
+          onPageChange={(p) => handleSearch(p - 1, pageSize)}
+          onPageSizeChange={(size) => { setPageSize(size); handleSearch(0, size) }}
+        />
       </div>
 
       <Dialog

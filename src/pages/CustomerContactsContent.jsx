@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { toast } from 'react-toastify'
 import { Search, Plus, FileSpreadsheet, Pencil, Trash2, CheckSquare } from 'lucide-react'
 import { CONTACT_GROUPS } from '../constants/customerPortal'
+import Pagination from '../components/common/Pagination'
 
 const NAME_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q']
 const TAGS = ['Đơn hàng #DH001', 'Đơn hàng #DH002', 'Đơn hàng #DH003', 'Đơn hàng #DH005', 'Đơn hàng #DH008', null]
@@ -21,14 +22,6 @@ function generateMockContacts(group, count) {
 }
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50]
-
-function buildPageNumbers(current, total) {
-  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
-  const pages = new Set([1, 2, total - 1, total, current - 1, current, current + 1])
-  return Array.from(pages)
-    .filter((p) => p >= 1 && p <= total)
-    .sort((a, b) => a - b)
-}
 
 function CustomerContactsContent() {
   const [selectedGroupId, setSelectedGroupId] = useState(CONTACT_GROUPS[0].id)
@@ -66,7 +59,6 @@ function CustomerContactsContent() {
   const totalPages = Math.max(1, Math.ceil(totalRows / pageSize))
   const currentPage = Math.min(page, totalPages)
   const pageRows = filteredContacts.slice((currentPage - 1) * pageSize, currentPage * pageSize)
-  const pageNumbers = buildPageNumbers(currentPage, totalPages)
 
   const handleSelectGroup = (id) => {
     setSelectedGroupId(id)
@@ -241,45 +233,14 @@ function CustomerContactsContent() {
             </table>
           </div>
 
-          <div className="cdb-pagination">
-            <div className="cdb-page-size">
-              <span>Show</span>
-              <select
-                value={pageSize}
-                onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1) }}
-              >
-                {PAGE_SIZE_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
-              </select>
-              <span>Row</span>
-            </div>
-            <div className="pagination-controls">
-              <button
-                className="pagination-btn"
-                disabled={currentPage === 1}
-                onClick={() => setPage(currentPage - 1)}
-              >
-                ‹
-              </button>
-              {pageNumbers.map((p, idx) => (
-                <span key={p} style={{ display: 'contents' }}>
-                  {idx > 0 && pageNumbers[idx - 1] !== p - 1 && <span className="cdb-page-ellipsis">…</span>}
-                  <button
-                    className={`pagination-btn${p === currentPage ? ' active' : ''}`}
-                    onClick={() => setPage(p)}
-                  >
-                    {p}
-                  </button>
-                </span>
-              ))}
-              <button
-                className="pagination-btn"
-                disabled={currentPage === totalPages}
-                onClick={() => setPage(currentPage + 1)}
-              >
-                ›
-              </button>
-            </div>
-          </div>
+          <Pagination
+            page={currentPage}
+            totalPages={totalPages}
+            pageSize={pageSize}
+            pageSizeOptions={PAGE_SIZE_OPTIONS}
+            onPageChange={setPage}
+            onPageSizeChange={(size) => { setPageSize(size); setPage(1) }}
+          />
         </div>
       </div>
     </div>

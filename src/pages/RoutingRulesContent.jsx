@@ -20,12 +20,15 @@ import shieldZapIcon from '../assets/icons/shield-zap.svg'
 import fileShieldIcon from '../assets/icons/file-shield-02.svg'
 import editIcon from '../assets/icons/tabler_edit.svg'
 import deleteIcon from '../assets/icons/fluent_delete-24-regular.svg'
+import Pagination from '../components/common/Pagination'
 
 function RoutingRulesContent() {
   const [network, setNetwork] = useState('SkyFi')
   const [primaryProvider, setPrimaryProvider] = useState('ST')
   const [backupProvider, setBackupProvider] = useState('Gapit')
   const [condition, setCondition] = useState('Fail Rate > 10%')
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
 
   const rules = [
     {
@@ -184,19 +187,13 @@ function RoutingRulesContent() {
         </table>
         </div>
 
-        <div className="routing-pagination flex-wrap gap-3">
-          <span className="pagination-info">Hiển thị 1 - 2 của 2</span>
-          <div className="pagination-controls">
-            <button className="pagination-btn" disabled>‹</button>
-            <button className="pagination-btn active">1</button>
-            <button className="pagination-btn" disabled>›</button>
-          </div>
-          <select className="pagination-select">
-            <option value="10">10/trang</option>
-            <option value="20">20/trang</option>
-            <option value="50">50/trang</option>
-          </select>
-        </div>
+        <Pagination
+          page={page}
+          totalPages={1}
+          pageSize={pageSize}
+          onPageChange={setPage}
+          onPageSizeChange={(size) => { setPageSize(size); setPage(1) }}
+        />
       </div>
     </div>
   )
