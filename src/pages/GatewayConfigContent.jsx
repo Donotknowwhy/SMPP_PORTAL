@@ -82,7 +82,13 @@ const DEFAULT_FORM = {
   backup: null,
   tps: 1000,
   priority: 1,
-  status: 'Active',
+  status: 'MANUAL_ACTIVE',
+}
+
+const STATUS_META = {
+  MANUAL_ACTIVE: { label: 'MANUAL_ACTIVE', className: 'manual-active' },
+  PRICE_ACTIVE: { label: 'PRICE_ACTIVE', className: 'price-active' },
+  INACTIVE: { label: 'INACTIVE', className: 'inactive' },
 }
 
 function GatewayConfigContent() {
@@ -130,7 +136,7 @@ function GatewayConfigContent() {
       backup: row.backupProviderId || null,
       tps: row.tps,
       priority: row.priority,
-      status: row.status === 'ACTIVE' ? 'Active' : 'Inactive',
+      status: row.status,
     })
     formCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
@@ -346,7 +352,7 @@ function GatewayConfigContent() {
           backupProviderId: form.backup || null,
           tps: Number(form.tps),
           priority: form.priority,
-          status: form.status === 'Active' ? 'ACTIVE' : 'INACTIVE',
+          status: form.status,
         })
 
     request
@@ -551,9 +557,9 @@ function GatewayConfigContent() {
                   <td>{row.tps}</td>
                   <td>{row.priority}</td>
                   <td>
-                    <span className={`status-badge ${row.status === 'ACTIVE' ? 'active' : 'inactive'}`}>
+                    <span className={`status-badge ${STATUS_META[row.status]?.className || 'inactive'}`}>
                       <span className="status-dot" />
-                      {row.status === 'ACTIVE' ? 'Active' : 'Inactive'}
+                      {STATUS_META[row.status]?.label || row.status}
                     </span>
                   </td>
                   <td>{formatDateTime(row.createdAt)}</td>

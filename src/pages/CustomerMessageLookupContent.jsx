@@ -15,6 +15,10 @@ const ALL_STATUS = { value: 'all', label: 'Tất cả' }
 const STATUS_ICONS = { success: CheckCircle2, failed: XCircle, pending: Clock }
 const STATUS_META = LOOKUP_STATUS_OPTIONS.reduce((acc, s) => ({ ...acc, [s.value]: s }), {})
 
+function getDefaultDate() {
+  return new Date()
+}
+
 function mapStatusKey(rawStatus) {
   const value = (rawStatus || '').toUpperCase()
   if (value === 'SUCCESS') return 'success'
@@ -53,8 +57,8 @@ function CustomerMessageLookupContent() {
   const [keyword, setKeyword] = useState('')
   const [telcoId, setTelcoId] = useState(0)
   const [status, setStatus] = useState('all')
-  const [fromDate, setFromDate] = useState(null)
-  const [toDate, setToDate] = useState(null)
+  const [fromDate, setFromDate] = useState(getDefaultDate)
+  const [toDate, setToDate] = useState(getDefaultDate)
   const [dateFilterApplied, setDateFilterApplied] = useState(false)
 
   const [telcoOptions, setTelcoOptions] = useState([ALL_TELCO])
@@ -102,8 +106,8 @@ function CustomerMessageLookupContent() {
       content: content.trim(),
       telcoId: overrideTelcoId,
       timeType: applyDateFilter ? 1 : 0,
-      startTime: applyDateFilter ? formatDate(from) : undefined,
-      endTime: applyDateFilter ? formatDate(to) : undefined,
+      startTime: formatDate(from),
+      endTime: formatDate(to),
       page: targetPage,
       size: targetPageSize,
     })
@@ -124,19 +128,22 @@ function CustomerMessageLookupContent() {
   }, [authToken])
 
   const handleRefresh = () => {
+    const defaultFrom = getDefaultDate()
+    const defaultTo = getDefaultDate()
     setKeyword('')
     setTelcoId(0)
     setStatus('all')
-    setFromDate(null)
-    setToDate(null)
+    setFromDate(defaultFrom)
+    setToDate(defaultTo)
     setDateFilterApplied(false)
-    handleSearch(0, pageSize, { content: '', telcoId: 0, applyDateFilter: false, from: null, to: null })
+    handleSearch(0, pageSize, { content: '', telcoId: 0, applyDateFilter: false, from: defaultFrom, to: defaultTo })
   }
 
   const mappedRows = useMemo(
     () => rows.map((r) => ({
       id: r.id,
       sentAt: formatDateTime(r.createdAt),
+      deliveryTime: formatDateTime(r.deliveryTime),
       brandname: r.brandName,
       phone: r.phone,
       telco: r.telco,
@@ -158,6 +165,7 @@ function CustomerMessageLookupContent() {
     }
     const exportRows = displayedRows.map((r) => ({
       'Thời gian gửi': r.sentAt,
+      'Thời gian trả về': r.deliveryTime,
       'Brandname': r.brandname,
       'SDT': r.phone,
       'Telco': r.telco,
@@ -273,6 +281,7 @@ function CustomerMessageLookupContent() {
             <thead>
               <tr>
                 <th>Thời gian gửi</th>
+                <th>Thời gian trả về</th>
                 <th>Brandname</th>
                 <th>SDT</th>
                 <th>Telco</th>
@@ -282,13 +291,14 @@ function CustomerMessageLookupContent() {
             </thead>
             <tbody>
               {loading && displayedRows.length === 0 ? (
-                <tr><td colSpan={6} className="gw-table-status">Đang tra cứu...</td></tr>
+                <tr><td colSpan={7} className="gw-table-status">Đang tra cứu...</td></tr>
               ) : !loading && !error && displayedRows.length === 0 ? (
-                <tr><td colSpan={6} className="gw-table-status">Không có bản ghi phù hợp bộ lọc.</td></tr>
+                <tr><td colSpan={7} className="gw-table-status">Không có bản ghi phù hợp bộ lọc.</td></tr>
               ) : (
                 displayedRows.map((r) => (
                   <tr key={r.id}>
                     <td>{r.sentAt}</td>
+                    <td>{r.deliveryTime}</td>
                     <td>{r.brandname}</td>
                     <td>{r.phone}</td>
                     <td>{r.telco}</td>
