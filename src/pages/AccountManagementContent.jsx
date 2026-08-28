@@ -3,6 +3,7 @@ import { InputText } from 'primereact/inputtext'
 import { Password } from 'primereact/password'
 import { Dropdown } from 'primereact/dropdown'
 import { MultiSelect } from 'primereact/multiselect'
+import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog'
 import { toast } from 'react-toastify'
 import { UserCog, UserPlus, CalendarClock, Search, Pencil, Lock, Trash2, FileDown, Save, X } from 'lucide-react'
 import {
@@ -10,7 +11,7 @@ import {
   ROLE_CLASS,
 } from '../constants/accountManagement'
 import { useAuth } from '../context/AuthContext'
-import { getListUser, createAccount, getUserAuditLog } from '../utils/accountApi'
+import { getListUser, createAccount, getUserAuditLog, deleteUser } from '../utils/accountApi'
 import { getRoutingInfo } from '../utils/routingApi'
 import Pagination from '../components/common/Pagination'
 
@@ -90,6 +91,8 @@ function AccountManagementContent() {
   const [auditLoading, setAuditLoading] = useState(false)
   const [auditError, setAuditError] = useState('')
 
+  const [deletingId, setDeletingId] = useState(null)
+
   const refreshAccountList = () => {
     if (!authToken) return
     setAccountLoading(true)
@@ -168,6 +171,34 @@ function AccountManagementContent() {
 
   const handleCancelCreate = () => setForm(DEFAULT_FORM)
 
+  const handleDelete = (id) => {
+    if (!authToken) return
+
+    setDeletingId(id)
+    deleteUser(authToken, id)
+      .then((message) => {
+        toast.success(message || 'Xóa tài khoản thành công.')
+        refreshAccountList()
+        refreshAuditLog()
+      })
+      .catch((err) => toast.error(err.message || 'Không xóa được tài khoản.'))
+      .finally(() => setDeletingId(null))
+  }
+
+  const confirmDelete = (row) => {
+    confirmDialog({
+      message: `Có muốn xóa tài khoản "${row.username}" không?`,
+      header: 'Xác nhận xóa',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Có',
+      rejectLabel: 'Không',
+      acceptClassName: 'p-button-danger',
+      rejectClassName: 'p-button-text',
+      defaultFocus: 'reject',
+      accept: () => handleDelete(row.id),
+    })
+  }
+
   const mappedAccountRows = useMemo(
     () => accountRows.map((r) => ({
       id: r.id,
@@ -196,6 +227,8 @@ function AccountManagementContent() {
 
   return (
     <div className="account-management-content">
+      <ConfirmDialog />
+
       {/* Create / edit account */}
       <div className="gw-card">
         <div className="gw-card-head am-create-head">
@@ -393,7 +426,14 @@ function AccountManagementContent() {
                     <div className="table-actions">
                       <button className="action-btn edit" title="Chỉnh sửa"><Pencil size={16} /></button>
                       <button className="action-btn" title="Khóa"><Lock size={16} /></button>
-                      <button className="action-btn delete" title="Xóa"><Trash2 size={16} /></button>
+                      <button
+                        className="action-btn delete"
+                        title="Xóa"
+                        onClick={() => confirmDelete(row)}
+                        disabled={deletingId === row.id}
+                      >
+                        <Trash2 size={16} />
+                      </button>
                     </div>
                   </td>
                 </tr>

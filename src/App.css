@@ -4491,6 +4491,47 @@ h2 {
   margin-bottom: 1.25rem;
 }
 
+.cd-header-row {
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cd-reload-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.85rem;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  background: var(--white);
+  color: var(--gray-800);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+
+.cd-reload-btn:hover:not(:disabled) {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.cd-reload-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cd-spin {
+  animation: cd-spin-rotate 0.8s linear infinite;
+}
+
+@keyframes cd-spin-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 .cd-filter-row {
   display: flex;
   align-items: flex-end;

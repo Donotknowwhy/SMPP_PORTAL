@@ -3,6 +3,7 @@ import httpClient, { authHeader, safeRequest } from './httpClient'
 const GET_LIST_USER_URL = '/getListUser'
 const CREATE_ACCOUNT_URL = '/createAccount'
 const GET_USER_AUDIT_LOG_URL = '/getUserAuditLog'
+const DELETE_USER_URL = '/deleteUser'
 
 /**
  * Fetch the list of user accounts. Requires a valid Bearer token.
@@ -48,6 +49,22 @@ export async function createAccount({
 
   if (!ok || data?.status !== 1) {
     const msg = data?.message || `HTTP ${httpStatus}: ${statusText}`
+    throw new Error(msg)
+  }
+
+  return data?.message ?? ''
+}
+
+/**
+ * Delete a user account by id. Requires a valid Bearer token.
+ */
+export async function deleteUser(token, id) {
+  const { ok, status, statusText, data } = await safeRequest(
+    httpClient.delete(DELETE_USER_URL, { params: { id }, headers: authHeader(token) }),
+  )
+
+  if (!ok || data?.status !== 1) {
+    const msg = data?.message || `HTTP ${status}: ${statusText}`
     throw new Error(msg)
   }
 
