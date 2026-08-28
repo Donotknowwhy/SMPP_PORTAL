@@ -1,37 +1,61 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import * as XLSX from 'xlsx'
 import { Calendar } from 'primereact/calendar'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { Search, Send, CheckCircle2, XCircle, Wallet, FileSpreadsheet } from 'lucide-react'
-import { BRANDNAME_OPTIONS } from '../constants/customerPortal'
+import { useAuth } from '../context/AuthContext'
+import { getClientOverview, getClientDailyOutput, getClientDeliveryStatus, getClientDetailByDay } from '../utils/homeApi'
+import { getRoutingInfo } from '../utils/routingApi'
 
-const DAILY_VOLUME = [
-  { day: '14/06', success: 3600, failed: 40 },
-  { day: '15/06', success: 3850, failed: 55 },
-  { day: '16/06', success: 3700, failed: 45 },
-  { day: '17/06', success: 4200, failed: 60 },
-  { day: '18/06', success: 3550, failed: 38 },
-  { day: '19/06', success: 3900, failed: 50 },
-  { day: '20/06', success: 4180, failed: 42 },
-]
+const ALL_BRANDNAME_OPTION = { label: 'Tất cả', value: 0 }
 
-const DAILY_DETAIL = [
-  { day: '18/06/2026', brandname: 'MINIME_STORE', viettel: 1600, vinaphone: 1100, mobifone: 900, other: 200, success: 3700, failed: 100 },
-  { day: '19/06/2026', brandname: 'THANH_STORE', viettel: 1500, vinaphone: 1200, mobifone: 850, other: 150, success: 3600, failed: 100 },
-  { day: '20/06/2026', brandname: 'QUANG_STORE', viettel: 1700, vinaphone: 1300, mobifone: 950, other: 180, success: 3980, failed: 150 },
-  { day: '20/06/2026', brandname: 'FASHION_X', viettel: 1650, vinaphone: 1250, mobifone: 900, other: 160, success: 3796, failed: 163 },
-]
+function formatDate(date) {
+  if (!date) return ''
+  const pad = (n) => String(n).padStart(2, '0')
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
+}
+
+function formatDayLabel(dateStr) {
+  if (!dateStr) return ''
+  const [, month, day] = dateStr.split('-')
+  return `${day}/${month}`
+}
+
+function buildDailyVolume(rows) {
+  if (!Array.isArray(rows)) return []
+  return rows.map((r) => ({
+    day: formatDayLabel(r.date),
+    success: r.totalSmsSuccess ?? 0,
+    failed: r.totalSmsFailed ?? 0,
+  }))
+}
+
+function formatFullDayLabel(dateStr) {
+  if (!dateStr) return ''
+  const [year, month, day] = dateStr.split('-')
+  return `${day}/${month}/${year}`
+}
+
+function buildDailyDetail(rows) {
+  if (!Array.isArray(rows)) return []
+  return rows.map((r) => ({
+    day: formatFullDayLabel(r.sendDate),
+    brandname: r.brandName ?? '',
+    viettel: r.vietTel ?? 0,
+    vinaphone: r.vinaPhone ?? 0,
+    mobifone: r.mobiPhone ?? 0,
+    other: r.otherTelco ?? 0,
+    success: r.totalSuccess ?? 0,
+    failed: r.totalFailed ?? 0,
+  }))
+}
 
 const numberFormat = (v) => new Intl.NumberFormat('vi-VN').format(v ?? 0)
 const currencyFormat = (v) => `${new Intl.NumberFormat('vi-VN').format(v ?? 0)} đ`
 
 const DONUT_COLORS = ['#16A34A', '#E31E24']
 
-function SuccessRateDonut({ successCount, failedCount }) {
-  const total = successCount + failedCount
-  const successPct = total ? (successCount / total) * 100 : 0
-  const failedPct = 100 - successPct
-
+function SuccessRateDonut({ successCount, failedCount, successPct, failedPct }) {
   const data = [
     { name: 'Thành công', value: successCount },
     { name: 'Thất bại', value: failedCount },
@@ -87,31 +111,153 @@ function SuccessRateDonut({ successCount, failedCount }) {
 }
 
 function CustomerDashboardContent() {
-  const [brandname, setBrandname] = useState(BRANDNAME_OPTIONS[0].value)
+  const { authToken } = useAuth()
+
+  const [brandNameOptions, setBrandNameOptions] = useState([ALL_BRANDNAME_OPTION])
+  const [brandNameId, setBrandNameId] = useState(0)
   const [fromDate, setFromDate] = useState(new Date(2026, 5, 1))
   const [toDate, setToDate] = useState(new Date(2026, 5, 20))
 
-  const totals = useMemo(() => {
-    const totalSuccess = DAILY_DETAIL.reduce((sum, r) => sum + r.success, 0)
-    const totalFailed = DAILY_DETAIL.reduce((sum, r) => sum + r.failed, 0)
-    const totalSent = totalSuccess + totalFailed
-    const estimatedCost = totalSent * 100
-    return { totalSuccess, totalFailed, totalSent, estimatedCost }
-  }, [])
+  const [overview, setOverview] = useState({ totalSms: 0, totalSmsSuccess: 0, totalSmsFailed: 0, totalCost: 0 })
+  const [overviewLoading, setOverviewLoading] = useState(false)
+  const [overviewError, setOverviewError] = useState('')
+
+  const [dailyOutput, setDailyOutput] = useState([])
+  const [dailyOutputLoading, setDailyOutputLoading] = useState(false)
+  const [dailyOutputError, setDailyOutputError] = useState('')
+
+  const [deliveryRates, setDeliveryRates] = useState({ successRate: 0, failedRate: 0, queuedRate: 0, processRate: 0 })
+  const [deliveryLoading, setDeliveryLoading] = useState(false)
+  const [deliveryError, setDeliveryError] = useState('')
+
+  const [detailByDay, setDetailByDay] = useState([])
+  const [detailLoading, setDetailLoading] = useState(false)
+  const [detailError, setDetailError] = useState('')
+
+  useEffect(() => {
+    if (!authToken) return
+
+    let cancelled = false
+
+    getRoutingInfo(authToken)
+      .then(({ brandNames }) => {
+        if (cancelled) return
+        setBrandNameOptions([ALL_BRANDNAME_OPTION, ...brandNames.map((b) => ({ label: b.brandName, value: b.id }))])
+      })
+      .catch(() => {})
+
+    return () => {
+      cancelled = true
+    }
+  }, [authToken])
+
+  const fetchOverview = ({ from = fromDate, to = toDate, brandId = brandNameId } = {}) => {
+    if (!authToken) return
+
+    setOverviewLoading(true)
+    setOverviewError('')
+
+    getClientOverview({
+      token: authToken,
+      brandNameId: brandId,
+      timeType: from && to ? 1 : 0,
+      startTime: from && to ? formatDate(from) : undefined,
+      endTime: from && to ? formatDate(to) : undefined,
+    })
+      .then((data) => setOverview(data))
+      .catch((err) => setOverviewError(err.message || 'Không tải được dữ liệu tổng quan.'))
+      .finally(() => setOverviewLoading(false))
+  }
+
+  const fetchDailyOutput = ({ from = fromDate, to = toDate, brandId = brandNameId } = {}) => {
+    if (!authToken) return
+
+    setDailyOutputLoading(true)
+    setDailyOutputError('')
+
+    getClientDailyOutput({
+      token: authToken,
+      brandNameId: brandId,
+      timeType: from && to ? 1 : 0,
+      startTime: from && to ? formatDate(from) : undefined,
+      endTime: from && to ? formatDate(to) : undefined,
+    })
+      .then((rows) => setDailyOutput(rows))
+      .catch((err) => setDailyOutputError(err.message || 'Không tải được sản lượng theo ngày.'))
+      .finally(() => setDailyOutputLoading(false))
+  }
+
+  const fetchDeliveryStatus = ({ from = fromDate, to = toDate, brandId = brandNameId } = {}) => {
+    if (!authToken) return
+
+    setDeliveryLoading(true)
+    setDeliveryError('')
+
+    getClientDeliveryStatus({
+      token: authToken,
+      brandNameId: brandId,
+      timeType: from && to ? 1 : 0,
+      startTime: from && to ? formatDate(from) : undefined,
+      endTime: from && to ? formatDate(to) : undefined,
+    })
+      .then((rates) => setDeliveryRates(rates))
+      .catch((err) => setDeliveryError(err.message || 'Không tải được tỷ lệ thành công.'))
+      .finally(() => setDeliveryLoading(false))
+  }
+
+  const fetchDetailByDay = ({ from = fromDate, to = toDate, brandId = brandNameId } = {}) => {
+    if (!authToken) return
+
+    setDetailLoading(true)
+    setDetailError('')
+
+    getClientDetailByDay({
+      token: authToken,
+      brandNameId: brandId,
+      timeType: from && to ? 1 : 0,
+      startTime: from && to ? formatDate(from) : undefined,
+      endTime: from && to ? formatDate(to) : undefined,
+    })
+      .then((rows) => setDetailByDay(rows))
+      .catch((err) => setDetailError(err.message || 'Không tải được thống kê chi tiết theo ngày.'))
+      .finally(() => setDetailLoading(false))
+  }
+
+  useEffect(() => {
+    fetchOverview()
+    fetchDailyOutput()
+    fetchDeliveryStatus()
+    fetchDetailByDay()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authToken])
+
+  const dailyDetail = useMemo(() => buildDailyDetail(detailByDay), [detailByDay])
+
+  const dailyVolume = useMemo(() => buildDailyVolume(dailyOutput), [dailyOutput])
+
+  const totals = useMemo(() => ({
+    totalSent: overview.totalSms,
+    totalSuccess: overview.totalSmsSuccess,
+    totalFailed: overview.totalSmsFailed,
+    estimatedCost: overview.totalCost,
+  }), [overview])
 
   const columnTotals = useMemo(() => ({
-    viettel: DAILY_DETAIL.reduce((s, r) => s + r.viettel, 0),
-    vinaphone: DAILY_DETAIL.reduce((s, r) => s + r.vinaphone, 0),
-    mobifone: DAILY_DETAIL.reduce((s, r) => s + r.mobifone, 0),
-    other: DAILY_DETAIL.reduce((s, r) => s + r.other, 0),
-  }), [])
+    viettel: dailyDetail.reduce((s, r) => s + r.viettel, 0),
+    vinaphone: dailyDetail.reduce((s, r) => s + r.vinaphone, 0),
+    mobifone: dailyDetail.reduce((s, r) => s + r.mobifone, 0),
+    other: dailyDetail.reduce((s, r) => s + r.other, 0),
+  }), [dailyDetail])
 
   const handleFilter = () => {
-    // Bộ lọc hiện dùng dữ liệu mẫu; sẽ được nối API báo cáo sản lượng khách hàng.
+    fetchOverview()
+    fetchDailyOutput()
+    fetchDeliveryStatus()
+    fetchDetailByDay()
   }
 
   const handleExportExcel = () => {
-    const rows = DAILY_DETAIL.map((r) => ({
+    const rows = dailyDetail.map((r) => ({
       'Ngày': r.day,
       'Brandname': r.brandname,
       'Viettel': r.viettel,
@@ -135,7 +281,8 @@ function CustomerDashboardContent() {
     const worksheet = XLSX.utils.json_to_sheet(rows)
     const workbook = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(workbook, worksheet, 'San luong')
-    XLSX.writeFile(workbook, `bao-cao-san-luong-${brandname}.xlsx`)
+    const brandLabel = brandNameOptions.find((o) => o.value === brandNameId)?.label ?? 'tat-ca'
+    XLSX.writeFile(workbook, `bao-cao-san-luong-${brandLabel}.xlsx`)
   }
 
   return (
@@ -150,8 +297,8 @@ function CustomerDashboardContent() {
         <div className="cd-filter-row flex-wrap lg:flex-nowrap">
           <div className="db-date-field">
             <label>Brandname</label>
-            <select value={brandname} onChange={(e) => setBrandname(e.target.value)}>
-              {BRANDNAME_OPTIONS.map((o) => (
+            <select value={brandNameId} onChange={(e) => setBrandNameId(Number(e.target.value))}>
+              {brandNameOptions.map((o) => (
                 <option key={o.value} value={o.value}>{o.label}</option>
               ))}
             </select>
@@ -176,10 +323,11 @@ function CustomerDashboardContent() {
               className="db-calendar"
             />
           </div>
-          <button className="db-search-btn cd-stat-btn" onClick={handleFilter}>
-            <Search size={16} /> Thống kê
+          <button className="db-search-btn cd-stat-btn" onClick={handleFilter} disabled={overviewLoading || dailyOutputLoading || deliveryLoading || detailLoading}>
+            <Search size={16} /> {overviewLoading || dailyOutputLoading || deliveryLoading || detailLoading ? 'Đang tải...' : 'Thống kê'}
           </button>
         </div>
+        {overviewError && <p className="cd-error-text" style={{ color: '#E31E24', marginTop: 8 }}>{overviewError}</p>}
       </div>
 
       <div className="cd-stats-grid">
@@ -218,9 +366,10 @@ function CustomerDashboardContent() {
           <div className="db-chart-head">
             <h3>Sản lượng gửi theo ngày</h3>
           </div>
+          {dailyOutputError && <p className="cd-error-text" style={{ color: '#E31E24' }}>{dailyOutputError}</p>}
           <div className="cd-line-chart-area">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={DAILY_VOLUME} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+              <LineChart data={dailyVolume} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
                 <CartesianGrid vertical={false} stroke="#E5E7EB" strokeDasharray="3 3" />
                 <XAxis dataKey="day" axisLine={{ stroke: '#E5E7EB' }} tickLine={false} tick={{ fontSize: 12, fill: '#4B5563' }} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#9CA3AF' }} tickFormatter={numberFormat} width={40} />
@@ -240,7 +389,13 @@ function CustomerDashboardContent() {
           <div className="db-chart-head">
             <h3>Tỷ lệ thành công</h3>
           </div>
-          <SuccessRateDonut successCount={totals.totalSuccess} failedCount={totals.totalFailed} />
+          {deliveryError && <p className="cd-error-text" style={{ color: '#E31E24' }}>{deliveryError}</p>}
+          <SuccessRateDonut
+            successCount={totals.totalSuccess}
+            failedCount={totals.totalFailed}
+            successPct={deliveryRates.successRate}
+            failedPct={deliveryRates.failedRate}
+          />
         </div>
       </div>
 
@@ -251,6 +406,7 @@ function CustomerDashboardContent() {
             <FileSpreadsheet size={16} /> Xuất file Excel
           </button>
         </div>
+        {detailError && <p className="cd-error-text" style={{ color: '#E31E24' }}>{detailError}</p>}
 
         <div className="db-table-wrap">
           <table className="db-report-table">
@@ -267,7 +423,7 @@ function CustomerDashboardContent() {
               </tr>
             </thead>
             <tbody>
-              {DAILY_DETAIL.map((row, i) => (
+              {dailyDetail.map((row, i) => (
                 <tr key={i}>
                   <td>{row.day}</td>
                   <td><span className="db-brandname-badge">{row.brandname}</span></td>

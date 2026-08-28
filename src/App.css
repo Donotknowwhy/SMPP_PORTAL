@@ -1982,6 +1982,7 @@ h2 {
 
 .table-actions {
   display: flex;
+  justify-content: center;
   gap: 0.5rem;
 }
 
@@ -2371,6 +2372,16 @@ h2 {
 .gw-change-unchanged { color: var(--gray-400); font-weight: 400; }
 .gw-change-from { color: var(--gray-400); }
 .gw-change-to { color: var(--red); font-weight: 600; }
+
+.pm-detail-row { font-size: 0.85rem; margin-bottom: 0.5rem; }
+.pm-detail-changes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--gray-200);
+}
 
 .gw-history-reason {
   display: block;
@@ -2914,8 +2925,47 @@ h2 {
 
 .status-badge.pending .status-dot { background: var(--orange); }
 
-.pm-updated-cell { display: flex; flex-direction: column; gap: 0.1rem; font-size: 0.8rem; }
+.pm-updated-cell { display: flex; flex-direction: column; align-items: center; gap: 0.1rem; font-size: 0.8rem; }
 .pm-updated-by { color: var(--gray-400); font-size: 0.72rem; }
+
+.pm-detail-modal { max-width: 520px; width: 100%; }
+
+.pm-detail-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.pm-detail-price-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.pm-detail-price-table th,
+.pm-detail-price-table td {
+  padding: 0.5rem 0.6rem;
+  border-bottom: 1px solid var(--gray-200);
+  text-align: left;
+}
+
+.pm-detail-price-table th:not(:first-child),
+.pm-detail-price-table td:not(:first-child) {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  width: 30%;
+}
+
+.pm-detail-price-table th {
+  color: var(--gray-400);
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+.pm-detail-price-table td:not(:first-child) { color: var(--gray-800); font-weight: 500; }
 
 .pm-history-btn {
   display: inline-flex;

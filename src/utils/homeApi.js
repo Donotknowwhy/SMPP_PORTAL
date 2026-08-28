@@ -4,6 +4,10 @@ const SMS_TRAFFIC_URL = '/dashboard/smsTraffic'
 const DELIVER_STATUS_URL = '/dashboard/deliverStatus'
 const TOTAL_SMS_OUTPUT_URL = '/dashboard/totalSmsOutput'
 const EXPORT_SMS_OUTPUT_URL = '/dashboard/exportSmsOutput'
+const CLIENT_OVERVIEW_URL = '/dashboard/client/overView'
+const CLIENT_DAILY_OUTPUT_URL = '/dashboard/client/dailyOutput'
+const CLIENT_DELIVERY_STATUS_URL = '/dashboard/client/deliveryStatus'
+const CLIENT_DETAIL_BY_DAY_URL = '/dashboard/client/detailByDay'
 
 /**
  * Fetch SMS traffic broken down by provider -> telco (success/failed counts).
@@ -102,6 +106,128 @@ export async function getTotalSmsOutput({
   const total = payload?.total ?? rows.length
 
   return { rows, total }
+}
+
+/**
+ * Fetch the client dashboard overview totals (sent/success/failed/cost).
+ * Requires a valid Bearer token.
+ */
+export async function getClientOverview({
+  token,
+  brandNameId = 0,
+  timeType = 0,
+  startTime,
+  endTime,
+  signal,
+}) {
+  const { ok, status, statusText, data } = await safeRequest(
+    httpClient.post(
+      CLIENT_OVERVIEW_URL,
+      { timeType, startTime, endTime, brandNameId },
+      { headers: authHeader(token), signal },
+    ),
+  )
+
+  if (!ok || data?.status !== 1) {
+    const msg = data?.message || `HTTP ${status}: ${statusText}`
+    throw new Error(msg)
+  }
+
+  return {
+    totalSms: data?.data?.totalSms ?? 0,
+    totalSmsFailed: data?.data?.totalSmsFailed ?? 0,
+    totalSmsSuccess: data?.data?.totalSmsSuccess ?? 0,
+    totalCost: data?.data?.totalCost ?? 0,
+  }
+}
+
+/**
+ * Fetch the client dashboard daily output (success/failed SMS count per day).
+ * Requires a valid Bearer token.
+ */
+export async function getClientDailyOutput({
+  token,
+  brandNameId = 0,
+  timeType = 0,
+  startTime,
+  endTime,
+  signal,
+}) {
+  const { ok, status, statusText, data } = await safeRequest(
+    httpClient.post(
+      CLIENT_DAILY_OUTPUT_URL,
+      { timeType, startTime, endTime, brandNameId },
+      { headers: authHeader(token), signal },
+    ),
+  )
+
+  if (!ok || data?.status !== 1) {
+    const msg = data?.message || `HTTP ${status}: ${statusText}`
+    throw new Error(msg)
+  }
+
+  return Array.isArray(data?.data) ? data.data : []
+}
+
+/**
+ * Fetch the client dashboard delivery status rates (success/failed/queued/processing).
+ * Requires a valid Bearer token.
+ */
+export async function getClientDeliveryStatus({
+  token,
+  brandNameId = 0,
+  timeType = 0,
+  startTime,
+  endTime,
+  signal,
+}) {
+  const { ok, status, statusText, data } = await safeRequest(
+    httpClient.post(
+      CLIENT_DELIVERY_STATUS_URL,
+      { timeType, startTime, endTime, brandNameId },
+      { headers: authHeader(token), signal },
+    ),
+  )
+
+  if (!ok || data?.status !== 1) {
+    const msg = data?.message || `HTTP ${status}: ${statusText}`
+    throw new Error(msg)
+  }
+
+  return {
+    successRate: data?.data?.successRate ?? 0,
+    failedRate: data?.data?.failedRate ?? 0,
+    queuedRate: data?.data?.queuedRate ?? 0,
+    processRate: data?.data?.processRate ?? 0,
+  }
+}
+
+/**
+ * Fetch the client dashboard detail-by-day report (per-telco breakdown per brandname/day).
+ * Requires a valid Bearer token.
+ */
+export async function getClientDetailByDay({
+  token,
+  brandNameId = 0,
+  timeType = 0,
+  startTime,
+  endTime,
+  signal,
+}) {
+  const { ok, status, statusText, data } = await safeRequest(
+    httpClient.post(
+      CLIENT_DETAIL_BY_DAY_URL,
+      { timeType, startTime, endTime, brandNameId },
+      { headers: authHeader(token), signal },
+    ),
+  )
+
+  if (!ok || data?.status !== 1) {
+    const msg = data?.message || `HTTP ${status}: ${statusText}`
+    throw new Error(msg)
+  }
+
+  return Array.isArray(data?.data) ? data.data : []
 }
 
 /**

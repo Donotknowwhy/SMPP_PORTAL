@@ -9,7 +9,7 @@ import { Tags, Search, Plus, CloudUpload, FileArchive, Info, Send } from 'lucide
 import { BRANDNAME_TYPES } from '../constants/brandnameDeclaration'
 import { useAuth } from '../context/AuthContext'
 import { getRoutingInfo } from '../utils/routingApi'
-import { createBrandname } from '../utils/brandnameApi'
+import { createBrandname, getBrandnameList } from '../utils/brandnameApi'
 
 const BRANDNAME_TYPE_LABELS = BRANDNAME_TYPES.reduce((acc, t) => ({ ...acc, [t.value]: t.label }), {})
 
@@ -39,25 +39,27 @@ function BrandnameDeclarationContent() {
   const [isDragging, setIsDragging] = useState(false)
   const [submitting, setSubmitting] = useState(false)
 
-  const providerNameById = useMemo(
-    () => providerOptions.reduce((acc, p) => ({ ...acc, [p.value]: p.label }), {}),
-    [providerOptions],
-  )
-
   const loadBrandnames = () => {
     if (!authToken) return
 
     setListLoading(true)
     setListError('')
 
-    return getRoutingInfo(authToken)
-      .then(({ providers, brandNames }) => {
-        setProviderOptions(providers.map((p) => ({ label: p.providerName, value: p.id })))
-        setBrandnameList(brandNames)
-      })
+    return getBrandnameList(authToken)
+      .then((list) => setBrandnameList(list))
       .catch((err) => setListError(err.message || 'Không tải được danh sách brandname.'))
       .finally(() => setListLoading(false))
   }
+
+  useEffect(() => {
+    if (!authToken) return
+
+    getRoutingInfo(authToken)
+      .then(({ providers }) => {
+        setProviderOptions(providers.map((p) => ({ label: p.providerName, value: p.id })))
+      })
+      .catch(() => {})
+  }, [authToken])
 
   useEffect(() => {
     loadBrandnames()
@@ -222,7 +224,7 @@ function BrandnameDeclarationContent() {
                   <td>{index + 1}</td>
                   <td><span className="table-network">{b.brandName}</span></td>
                   <td>{BRANDNAME_TYPE_LABELS[b.type] || b.type || '-'}</td>
-                  <td>{providerNameById[b.providerId] || b.providerName || '-'}</td>
+                  <td>{b.provider || '-'}</td>
                 </tr>
               ))}
             </tbody>
