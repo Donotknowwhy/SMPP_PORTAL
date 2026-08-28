@@ -115,8 +115,8 @@ function CustomerDashboardContent() {
 
   const [brandNameOptions, setBrandNameOptions] = useState([ALL_BRANDNAME_OPTION])
   const [brandNameId, setBrandNameId] = useState(0)
-  const [fromDate, setFromDate] = useState(new Date(2026, 5, 1))
-  const [toDate, setToDate] = useState(new Date(2026, 5, 20))
+  const [fromDate, setFromDate] = useState(null)
+  const [toDate, setToDate] = useState(null)
 
   const [overview, setOverview] = useState({ totalSms: 0, totalSmsSuccess: 0, totalSmsFailed: 0, totalCost: 0 })
   const [overviewLoading, setOverviewLoading] = useState(false)
@@ -378,8 +378,8 @@ function CustomerDashboardContent() {
                   formatter={(value) => (value === 'success' ? 'Thành công' : 'Thất bại')}
                   wrapperStyle={{ fontSize: 12 }}
                 />
-                <Line type="monotone" dataKey="success" name="success" stroke="#16A34A" strokeWidth={2} dot={{ r: 3 }} />
-                <Line type="monotone" dataKey="failed" name="failed" stroke="#E31E24" strokeWidth={2} dot={{ r: 3 }} />
+                <Line type="monotone" dataKey="success" name="Thành công" stroke="#16A34A" strokeWidth={2} dot={{ r: 3 }} />
+                <Line type="monotone" dataKey="failed" name="Thất bại" stroke="#E31E24" strokeWidth={2} dot={{ r: 3 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
