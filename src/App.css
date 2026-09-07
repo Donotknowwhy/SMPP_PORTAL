@@ -4647,6 +4647,25 @@ h2 {
   background: var(--gray-50);
 }
 
+.cd-detail-table-wrap {
+  max-height: 480px;
+  overflow-y: auto;
+}
+
+.cd-detail-table-wrap thead th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: var(--gray-50);
+}
+
+.cd-detail-table-wrap tfoot td {
+  position: sticky;
+  bottom: 0;
+  z-index: 3;
+  background: var(--gray-50);
+}
+
 @media (max-width: 1023px) {
   .cd-stats-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));

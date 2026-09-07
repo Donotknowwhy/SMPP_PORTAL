@@ -413,7 +413,7 @@ function CustomerDashboardContent() {
         </div>
         {detailError && <p className="cd-error-text" style={{ color: '#E31E24' }}>{detailError}</p>}
 
-        <div className="db-table-wrap">
+        <div className="db-table-wrap cd-detail-table-wrap">
           <table className="db-report-table">
             <thead>
               <tr>
