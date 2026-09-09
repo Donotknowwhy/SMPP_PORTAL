@@ -5,13 +5,20 @@ import { Dropdown } from 'primereact/dropdown'
 import { MultiSelect } from 'primereact/multiselect'
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog'
 import { toast } from 'react-toastify'
-import { UserCog, UserPlus, CalendarClock, Search, Pencil, Lock, Trash2, FileDown, Save, X } from 'lucide-react'
+import { UserCog, UserPlus, CalendarClock, Search, Pencil, Lock, Trash2, Save, X, Loader2 } from 'lucide-react'
 import {
   ROLE_LABELS,
   ROLE_CLASS,
 } from '../constants/accountManagement'
 import { useAuth } from '../context/AuthContext'
-import { getListUser, createAccount, getUserAuditLog, deleteUser } from '../utils/accountApi'
+import {
+  getListUser,
+  createAccount,
+  updateAccount,
+  getUser,
+  getUserAuditLog,
+  deleteUser,
+} from '../utils/accountApi'
 import { getRoutingInfo } from '../utils/routingApi'
 import Pagination from '../components/common/Pagination'
 
@@ -68,11 +75,39 @@ function formatDateTime(value) {
   return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()} ${pad(date.getHours())}:${pad(date.getMinutes())}`
 }
 
+function normalizeBrandNames(brandName) {
+  if (Array.isArray(brandName)) return brandName.map((b) => String(b).trim()).filter(Boolean)
+  if (!brandName) return []
+  return String(brandName).split(',').map((b) => b.trim()).filter(Boolean)
+}
+
+function resolveBrandNameIds(detail, brandNameOptions = []) {
+  if (Array.isArray(detail?.brandNameId) && detail.brandNameId.length > 0) {
+    return detail.brandNameId
+  }
+  if (Array.isArray(detail?.brandNameList) && detail.brandNameList.length > 0) {
+    return detail.brandNameList
+  }
+  if (detail?.brandNameId != null && detail.brandNameId !== '') {
+    return [detail.brandNameId]
+  }
+
+  const names = normalizeBrandNames(detail?.brandName)
+  if (names.length === 0 || brandNameOptions.length === 0) return []
+
+  const byLabel = new Map(brandNameOptions.map((opt) => [String(opt.label).toLowerCase(), opt.value]))
+  return names
+    .map((name) => byLabel.get(String(name).toLowerCase()))
+    .filter((id) => id != null)
+}
+
 function AccountManagementContent() {
   const { authToken } = useAuth()
 
   const [form, setForm] = useState(DEFAULT_FORM)
+  const [editingId, setEditingId] = useState(null)
   const [submitting, setSubmitting] = useState(false)
+  const [loadingEditId, setLoadingEditId] = useState(null)
 
   const updateForm = (field, value) => setForm((prev) => ({ ...prev, [field]: value }))
 
@@ -88,10 +123,15 @@ function AccountManagementContent() {
   const [pageSize, setPageSize] = useState(10)
 
   const [auditRows, setAuditRows] = useState([])
+  const [auditTotal, setAuditTotal] = useState(0)
+  const [auditTotalPages, setAuditTotalPages] = useState(1)
+  const [auditPage, setAuditPage] = useState(1)
+  const [auditPageSize, setAuditPageSize] = useState(10)
   const [auditLoading, setAuditLoading] = useState(false)
   const [auditError, setAuditError] = useState('')
 
   const [deletingId, setDeletingId] = useState(null)
+  const [lockingId, setLockingId] = useState(null)
 
   const refreshAccountList = () => {
     if (!authToken) return
@@ -104,13 +144,18 @@ function AccountManagementContent() {
       .finally(() => setAccountLoading(false))
   }
 
-  const refreshAuditLog = () => {
+  const refreshAuditLog = ({ page: nextPage = auditPage, limit = auditPageSize } = {}) => {
     if (!authToken) return
     setAuditLoading(true)
     setAuditError('')
 
-    return getUserAuditLog(authToken)
-      .then((rows) => setAuditRows(rows))
+    return getUserAuditLog({ token: authToken, page: nextPage, limit })
+      .then(({ rows, total, totalPage }) => {
+        setAuditRows(rows)
+        setAuditTotal(total)
+        setAuditTotalPages(totalPage)
+        setAuditPage(nextPage)
+      })
       .catch((err) => setAuditError(err.message || 'Không tải được lịch sử thay đổi.'))
       .finally(() => setAuditLoading(false))
   }
@@ -120,7 +165,7 @@ function AccountManagementContent() {
     let cancelled = false
 
     refreshAccountList()
-    refreshAuditLog()
+    refreshAuditLog({ page: 1, limit: auditPageSize })
 
     getRoutingInfo(authToken)
       .then(({ brandNames, providers }) => {
@@ -136,17 +181,25 @@ function AccountManagementContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authToken])
 
-  const handleCreateAccount = () => {
+  const handleCancelCreate = () => {
+    setForm(DEFAULT_FORM)
+    setEditingId(null)
+  }
+
+  const handleSubmitAccount = () => {
     if (!authToken) return
 
-    if (!form.username.trim() || !form.email.trim() || !form.password || !form.fullName.trim()
-      || !form.phone.trim() || !form.role || !form.providerId || form.brandnames.length === 0) {
+    const requiresPassword = !editingId
+    if (!form.username.trim() || !form.email.trim() || !form.fullName.trim()
+      || !form.phone.trim() || !form.role || !form.providerId || form.brandnames.length === 0
+      || (requiresPassword && !form.password)) {
       toast.error('Vui lòng nhập đầy đủ thông tin bắt buộc.')
       return
     }
 
     setSubmitting(true)
-    createAccount({
+
+    const payload = {
       token: authToken,
       username: form.username.trim(),
       email: form.email.trim(),
@@ -158,18 +211,93 @@ function AccountManagementContent() {
       brandNameList: form.brandnames,
       providerId: form.providerId,
       status: form.status,
-    })
+    }
+
+    const request = editingId
+      ? updateAccount({ ...payload, id: editingId })
+      : createAccount(payload)
+
+    request
       .then((message) => {
-        toast.success(message || 'Tạo tài khoản thành công.')
-        setForm(DEFAULT_FORM)
+        toast.success(message || (editingId ? 'Cập nhật tài khoản thành công.' : 'Tạo tài khoản thành công.'))
+        handleCancelCreate()
         refreshAccountList()
-        refreshAuditLog()
+        refreshAuditLog({ page: 1, limit: auditPageSize })
       })
-      .catch((err) => toast.error(err.message || 'Không tạo được tài khoản.'))
+      .catch((err) => toast.error(err.message || (editingId ? 'Không cập nhật được tài khoản.' : 'Không tạo được tài khoản.')))
       .finally(() => setSubmitting(false))
   }
 
-  const handleCancelCreate = () => setForm(DEFAULT_FORM)
+  const handleEdit = (row) => {
+    if (!authToken) return
+
+    setLoadingEditId(row.id)
+    getUser(authToken, row.id)
+      .then((detail) => {
+        if (!detail) throw new Error('Không lấy được chi tiết tài khoản.')
+        const brandnames = resolveBrandNameIds(detail, brandNameOptions)
+        if (brandnames.length === 0 && normalizeBrandNames(detail.brandName).length > 0) {
+          throw new Error('Không map được brandname của tài khoản. Vui lòng chọn lại brandname trước khi lưu.')
+        }
+        setEditingId(detail.id)
+        setForm({
+          username: detail.userName || '',
+          email: detail.email || '',
+          password: '',
+          fullName: detail.fullName || '',
+          phone: detail.phone || '',
+          gender: detail.gender || 'nam',
+          brandnames,
+          role: detail.role || 'ADMIN',
+          providerId: detail.providerId ?? null,
+          status: detail.status === '1' || detail.status === 1 ? 1 : 0,
+        })
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      })
+      .catch((err) => toast.error(err.message || 'Không tải được chi tiết tài khoản.'))
+      .finally(() => setLoadingEditId(null))
+  }
+
+  const handleToggleLock = (row) => {
+    if (!authToken) return
+
+    const nextStatus = row.status === 'active' ? 0 : 1
+    setLockingId(row.id)
+
+    getUser(authToken, row.id)
+      .then((detail) => {
+        if (!detail) throw new Error('Không lấy được chi tiết tài khoản.')
+        const brandNameList = resolveBrandNameIds(detail, brandNameOptions)
+        if (brandNameList.length === 0) {
+          throw new Error('Không đủ thông tin brandname để cập nhật trạng thái tài khoản.')
+        }
+        return updateAccount({
+          token: authToken,
+          id: detail.id,
+          username: detail.userName,
+          email: detail.email,
+          role: detail.role,
+          fullName: detail.fullName,
+          phone: detail.phone,
+          gender: detail.gender,
+          brandNameList,
+          providerId: detail.providerId,
+          status: nextStatus,
+        })
+      })
+      .then((message) => {
+        toast.success(message || (nextStatus === 1 ? 'Mở khóa tài khoản thành công.' : 'Khóa tài khoản thành công.'))
+        setAccountRows((prev) => prev.map((r) => (
+          r.id === row.id ? { ...r, status: String(nextStatus) } : r
+        )))
+        if (editingId === row.id) {
+          setForm((prev) => ({ ...prev, status: nextStatus }))
+        }
+        refreshAuditLog({ page: auditPage, limit: auditPageSize })
+      })
+      .catch((err) => toast.error(err.message || 'Không cập nhật được trạng thái tài khoản.'))
+      .finally(() => setLockingId(null))
+  }
 
   const handleDelete = (id) => {
     if (!authToken) return
@@ -178,8 +306,9 @@ function AccountManagementContent() {
     deleteUser(authToken, id)
       .then((message) => {
         toast.success(message || 'Xóa tài khoản thành công.')
+        if (editingId === id) handleCancelCreate()
         refreshAccountList()
-        refreshAuditLog()
+        refreshAuditLog({ page: 1, limit: auditPageSize })
       })
       .catch((err) => toast.error(err.message || 'Không xóa được tài khoản.'))
       .finally(() => setDeletingId(null))
@@ -206,7 +335,7 @@ function AccountManagementContent() {
       fullName: r.fullName,
       email: r.email,
       role: r.role,
-      brandnames: (r.brandName || '').split(',').map((b) => b.trim()).filter(Boolean),
+      brandnames: normalizeBrandNames(r.brandName),
       status: r.status === '1' || r.status === 1 ? 'active' : 'inactive',
       created: formatDateTime(r.createdAt),
     })),
@@ -216,7 +345,12 @@ function AccountManagementContent() {
   const filteredAccountRows = useMemo(() => {
     const keyword = search.trim().toLowerCase()
     if (!keyword) return mappedAccountRows
-    return mappedAccountRows.filter((r) => (r.username || '').toLowerCase().includes(keyword))
+    return mappedAccountRows.filter((r) => {
+      const haystack = [r.username, r.fullName, r.email, r.role, ...(r.brandnames || [])]
+        .join(' ')
+        .toLowerCase()
+      return haystack.includes(keyword)
+    })
   }, [mappedAccountRows, search])
 
   const totalAccountPages = Math.max(1, Math.ceil(filteredAccountRows.length / pageSize))
@@ -225,11 +359,12 @@ function AccountManagementContent() {
     [filteredAccountRows, page, pageSize],
   )
 
+  const isEditing = editingId != null
+
   return (
     <div className="account-management-content">
       <ConfirmDialog />
 
-      {/* Create / edit account */}
       <div className="gw-card">
         <div className="gw-card-head am-create-head">
           <div className="am-create-head-text">
@@ -237,12 +372,12 @@ function AccountManagementContent() {
               <UserCog size={18} />
             </span>
             <div>
-              <h2 className="gw-card-title">Tạo / Chỉnh sửa tài khoản</h2>
+              <h2 className="gw-card-title">{isEditing ? 'Chỉnh sửa tài khoản' : 'Tạo / Chỉnh sửa tài khoản'}</h2>
               <p className="gw-card-subtitle">Admin tạo account và phân quyền sử dụng hệ thống</p>
             </div>
           </div>
-          <button className="db-export-btn am-create-btn" onClick={handleCreateAccount} disabled={submitting}>
-            <UserPlus size={16} /> {submitting ? 'Đang tạo...' : 'Tạo tài khoản'}
+          <button className="db-export-btn am-create-btn" onClick={handleSubmitAccount} disabled={submitting}>
+            <UserPlus size={16} /> {submitting ? 'Đang lưu...' : (isEditing ? 'Cập nhật tài khoản' : 'Tạo tài khoản')}
           </button>
         </div>
 
@@ -273,7 +408,7 @@ function AccountManagementContent() {
               placeholder="Nhập email"
             />
           </div>
-          
+
           <div className="gw-form-field">
             <label>Họ tên <span className="gw-required">*</span></label>
             <InputText
@@ -283,11 +418,11 @@ function AccountManagementContent() {
             />
           </div>
           <div className="gw-form-field">
-            <label>Mật khẩu <span className="gw-required">*</span></label>
+            <label>Mật khẩu {isEditing ? '' : <span className="gw-required">*</span>}</label>
             <Password
               value={form.password}
               onChange={(e) => updateForm('password', e.target.value)}
-              placeholder="Ít nhất 1 chữ hoa, 1 chữ thường, 1 số, 1 ký tự đặc biệt"
+              placeholder={isEditing ? 'Để trống nếu không đổi mật khẩu' : 'Ít nhất 1 chữ hoa, 1 chữ thường, 1 số, 1 ký tự đặc biệt'}
               toggleMask
               feedback={false}
               className="am-password"
@@ -353,14 +488,13 @@ function AccountManagementContent() {
             <button className="bn-btn-draft p-button" onClick={handleCancelCreate} disabled={submitting}>
               <X size={16} /> Hủy
             </button>
-            <button className="bn-btn-submit p-button" onClick={handleCreateAccount} disabled={submitting}>
-              <Save size={16} /> {submitting ? 'Đang lưu...' : 'Lưu tài khoản'}
+            <button className="bn-btn-submit p-button" onClick={handleSubmitAccount} disabled={submitting}>
+              <Save size={16} /> {submitting ? 'Đang lưu...' : (isEditing ? 'Cập nhật tài khoản' : 'Lưu tài khoản')}
             </button>
           </div>
         </div>
       </div>
 
-      {/* Account list */}
       <div className="routing-table-section gw-table-section">
         <div className="routing-table-header gw-table-header">
           <div className="gw-table-header-text">
@@ -424,8 +558,24 @@ function AccountManagementContent() {
                   <td>{row.created}</td>
                   <td>
                     <div className="table-actions">
-                      <button className="action-btn edit" title="Chỉnh sửa"><Pencil size={16} /></button>
-                      <button className="action-btn" title="Khóa"><Lock size={16} /></button>
+                      <button
+                        className="action-btn edit"
+                        title="Chỉnh sửa"
+                        onClick={() => handleEdit(row)}
+                        disabled={loadingEditId === row.id || submitting}
+                      >
+                        <Pencil size={16} />
+                      </button>
+                      <button
+                        className="action-btn"
+                        title={lockingId === row.id ? 'Đang xử lý...' : (row.status === 'active' ? 'Khóa' : 'Mở khóa')}
+                        onClick={() => handleToggleLock(row)}
+                        disabled={lockingId != null}
+                      >
+                        {lockingId === row.id
+                          ? <Loader2 size={16} className="cd-spin" />
+                          : <Lock size={16} />}
+                      </button>
                       <button
                         className="action-btn delete"
                         title="Xóa"
@@ -452,17 +602,13 @@ function AccountManagementContent() {
         />
       </div>
 
-      {/* Change history */}
       <div className="gw-card">
         <div className="gw-history-head">
           <div className="gw-history-head-text">
             <h2 className="gw-card-title">
-              Lịch sử thay đổi tài khoản <span className="am-count-badge">{auditRows.length} bản ghi</span>
+              Lịch sử thay đổi tài khoản <span className="am-count-badge">{auditTotal} bản ghi</span>
             </h2>
           </div>
-          <button className="db-export-btn am-create-btn">
-            <FileDown size={16} /> Xuất excel
-          </button>
         </div>
 
         {auditError && <p className="gw-table-error">{auditError}</p>}
@@ -488,7 +634,7 @@ function AccountManagementContent() {
                 <tr><td colSpan={7} className="gw-table-status">Chưa có lịch sử thay đổi.</td></tr>
               )}
               {!auditLoading && auditRows.map((row, index) => (
-                <tr key={index}>
+                <tr key={`${row.createdAt}-${row.fullName}-${index}`}>
                   <td>{formatDateTime(row.createdAt)}</td>
                   <td>
                     <div className="am-actor-cell">
@@ -510,6 +656,18 @@ function AccountManagementContent() {
             </tbody>
           </table>
         </div>
+
+        <Pagination
+          page={auditPage}
+          totalPages={auditTotalPages}
+          pageSize={auditPageSize}
+          disabled={auditLoading}
+          onPageChange={(next) => refreshAuditLog({ page: next, limit: auditPageSize })}
+          onPageSizeChange={(size) => {
+            setAuditPageSize(size)
+            refreshAuditLog({ page: 1, limit: size })
+          }}
+        />
       </div>
     </div>
   )

@@ -1,21 +1,21 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Calendar } from 'primereact/calendar'
 import { Dropdown } from 'primereact/dropdown'
 import { toast } from 'react-toastify'
 import {
-  GitCompare, FileDown, Upload,
-  RefreshCw, Search, Download, Info, NotebookPen, Save,
+  GitCompare, RefreshCw, Search, Info, ShieldCheck,
 } from 'lucide-react'
 import {
-  BULK_STATUS_OPTIONS,
   STATUS_OPTIONS,
   STATS_CONFIG,
-  RECON_ROWS,
-  HISTORY_ROWS,
 } from '../constants/reconciliation'
 import { useAuth } from '../context/AuthContext'
 import { getRoutingInfo } from '../utils/routingApi'
-import { getReconciliationStats, exportReconciliationReport } from '../utils/reconciliationApi'
+import {
+  getSummarySms,
+  verifySummarySms,
+  getSummarySmsAuditLogs,
+} from '../utils/reconciliationApi'
 import Pagination from '../components/common/Pagination'
 
 const ALL_OPTION = { label: 'Tất cả', value: 0 }
@@ -26,44 +26,80 @@ function formatDate(date) {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
 }
 
+function formatDisplayDate(value) {
+  if (!value) return '-'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+  const pad = (n) => String(n).padStart(2, '0')
+  return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`
+}
+
+function formatDateTime(value) {
+  if (!value) return '-'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+  const pad = (n) => String(n).padStart(2, '0')
+  return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()} ${pad(date.getHours())}:${pad(date.getMinutes())}`
+}
+
 function formatNumber(value) {
   return new Intl.NumberFormat('vi-VN').format(value ?? 0)
 }
 
-const DEFAULT_FROM_DATE = new Date(2026, 5, 14)
-const DEFAULT_TO_DATE = new Date(2026, 5, 26)
+function formatMoney(value) {
+  return `${formatNumber(value)} đ`
+}
+
+function isVerifiedStatus(status) {
+  const normalized = String(status || '').toUpperCase()
+  return normalized === 'VERIFIED' || normalized === 'RECONCILED'
+}
 
 function ReconciliationContent() {
   const { authToken } = useAuth()
-  const [fromDate, setFromDate] = useState(DEFAULT_FROM_DATE)
-  const [toDate, setToDate] = useState(DEFAULT_TO_DATE)
+  const [fromDate, setFromDate] = useState(null)
+  const [toDate, setToDate] = useState(null)
   const [network, setNetwork] = useState(0)
   const [brandname, setBrandname] = useState(0)
   const [partner, setPartner] = useState(0)
   const [status, setStatus] = useState('')
   const [selectedRows, setSelectedRows] = useState([])
-  const [bulkStatus, setBulkStatus] = useState('')
 
   const [networkOptions, setNetworkOptions] = useState([ALL_OPTION])
   const [brandnameOptions, setBrandnameOptions] = useState([ALL_OPTION])
   const [partnerOptions, setPartnerOptions] = useState([ALL_OPTION])
   const [infoError, setInfoError] = useState('')
 
-  const [stats, setStats] = useState({ totalCost: 0, totalPrice: 0, totalSms: 0, profit: 0 })
-  const [statsLoading, setStatsLoading] = useState(false)
-  const [statsError, setStatsError] = useState('')
-  const [exporting, setExporting] = useState(false)
+  const [rows, setRows] = useState([])
+  const [total, setTotal] = useState(0)
+  const [totalPages, setTotalPages] = useState(1)
+  const [listLoading, setListLoading] = useState(false)
+  const [listError, setListError] = useState('')
+  const [verifying, setVerifying] = useState(false)
   const [dateFilterApplied, setDateFilterApplied] = useState(false)
 
   const [reconPage, setReconPage] = useState(1)
   const [reconPageSize, setReconPageSize] = useState(10)
+
+  const [historyRows, setHistoryRows] = useState([])
+  const [historyTotal, setHistoryTotal] = useState(0)
+  const [historyTotalPages, setHistoryTotalPages] = useState(1)
+  const [historyLoading, setHistoryLoading] = useState(false)
+  const [historyError, setHistoryError] = useState('')
   const [historyPage, setHistoryPage] = useState(1)
   const [historyPageSize, setHistoryPageSize] = useState(10)
 
-  const allSelected = selectedRows.length === RECON_ROWS.length
-  const toggleSelectAll = () => setSelectedRows(allSelected ? [] : RECON_ROWS.map((row) => row.id))
+  const allSelected = rows.length > 0 && selectedRows.length === rows.length
+  const toggleSelectAll = () => setSelectedRows(allSelected ? [] : rows.map((row) => row.id))
   const toggleSelectRow = (id) =>
     setSelectedRows((prev) => (prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id]))
+
+  const stats = useMemo(() => ({
+    totalSms: rows.reduce((sum, row) => sum + (Number(row.totalMessages) || 0), 0),
+    totalPrice: rows.reduce((sum, row) => sum + (Number(row.totalRevenue) || 0), 0),
+    totalCost: rows.reduce((sum, row) => sum + (Number(row.totalCost) || 0), 0),
+    profit: rows.reduce((sum, row) => sum + (Number(row.totalProfit) || 0), 0),
+  }), [rows])
 
   useEffect(() => {
     if (!authToken) return
@@ -87,7 +123,9 @@ function ReconciliationContent() {
     }
   }, [authToken])
 
-  const fetchStats = ({
+  const fetchList = ({
+    page = reconPage,
+    limit = reconPageSize,
     telcoId = network,
     brandNameId = brandname,
     providerId = partner,
@@ -98,11 +136,13 @@ function ReconciliationContent() {
   } = {}) => {
     if (!authToken) return
 
-    setStatsLoading(true)
-    setStatsError('')
+    setListLoading(true)
+    setListError('')
 
-    getReconciliationStats({
+    getSummarySms({
       token: authToken,
+      page,
+      limit,
       telcoId,
       brandNameId,
       providerId,
@@ -111,70 +151,102 @@ function ReconciliationContent() {
       endTime: applyDateFilter ? formatDate(to) : undefined,
       status: statusFilter,
     })
-      .then((result) => setStats(result))
+      .then(({ rows: nextRows, total: nextTotal, totalPage }) => {
+        setRows(nextRows)
+        setTotal(nextTotal)
+        setTotalPages(totalPage)
+        setReconPage(page)
+        setSelectedRows([])
+      })
       .catch((err) => {
-        setStatsError(err.message || 'Không tải được dữ liệu đối soát.')
+        setListError(err.message || 'Không tải được dữ liệu đối soát.')
         toast.error(err.message || 'Không tải được dữ liệu đối soát.')
       })
-      .finally(() => setStatsLoading(false))
+      .finally(() => setListLoading(false))
+  }
+
+  const fetchHistory = ({ page = historyPage, limit = historyPageSize } = {}) => {
+    if (!authToken) return
+
+    setHistoryLoading(true)
+    setHistoryError('')
+
+    getSummarySmsAuditLogs({ token: authToken, page, limit })
+      .then(({ rows: nextRows, total: nextTotal, totalPage }) => {
+        setHistoryRows(nextRows)
+        setHistoryTotal(nextTotal)
+        setHistoryTotalPages(totalPage)
+        setHistoryPage(page)
+      })
+      .catch((err) => {
+        setHistoryError(err.message || 'Không tải được lịch sử đối soát.')
+      })
+      .finally(() => setHistoryLoading(false))
   }
 
   useEffect(() => {
-    fetchStats()
+    if (!authToken) return
+    fetchList({ page: 1, limit: reconPageSize })
+    fetchHistory({ page: 1, limit: historyPageSize })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authToken])
 
   const handleResetFilters = () => {
-    setFromDate(DEFAULT_FROM_DATE)
-    setToDate(DEFAULT_TO_DATE)
+    setFromDate(null)
+    setToDate(null)
     setNetwork(0)
     setBrandname(0)
     setPartner(0)
     setStatus('')
     setDateFilterApplied(false)
 
-    fetchStats({
+    fetchList({
+      page: 1,
+      limit: reconPageSize,
       telcoId: 0,
       brandNameId: 0,
       providerId: 0,
       applyDateFilter: false,
-      from: DEFAULT_FROM_DATE,
-      to: DEFAULT_TO_DATE,
+      from: null,
+      to: null,
       statusFilter: '',
     })
   }
 
-  const handleExport = () => {
-    if (!authToken) return
+  const handleSearch = () => {
+    const hasAnyDate = Boolean(fromDate || toDate)
+    const hasBothDates = Boolean(fromDate && toDate)
+    if (hasAnyDate && !hasBothDates) {
+      toast.error('Vui lòng chọn đủ Từ ngày và Đến ngày.')
+      return
+    }
 
-    setExporting(true)
+    const applyDateFilter = hasBothDates
+    setDateFilterApplied(applyDateFilter)
+    fetchList({ page: 1, limit: reconPageSize, applyDateFilter })
+  }
 
-    exportReconciliationReport({
-      token: authToken,
-      timeType: dateFilterApplied ? 1 : 0,
-      startTime: dateFilterApplied ? formatDate(fromDate) : undefined,
-      endTime: dateFilterApplied ? formatDate(toDate) : undefined,
-    })
-      .then(({ blob, filename }) => {
-        const url = URL.createObjectURL(blob)
-        const link = document.createElement('a')
-        link.href = url
-        link.download = filename
-        document.body.appendChild(link)
-        link.click()
-        link.remove()
-        URL.revokeObjectURL(url)
-        toast.success('Xuất báo cáo đối soát thành công.')
+  const handleVerifySelected = () => {
+    if (!authToken || selectedRows.length === 0) return
+
+    setVerifying(true)
+    Promise.allSettled(selectedRows.map((id) => verifySummarySms(authToken, id)))
+      .then((results) => {
+        const successCount = results.filter((r) => r.status === 'fulfilled').length
+        const failCount = results.length - successCount
+        if (successCount > 0) toast.success(`Đã xác thực ${successCount}/${results.length} bản ghi đối soát.`)
+        if (failCount > 0) {
+          const firstError = results.find((r) => r.status === 'rejected')?.reason
+          toast.error(firstError?.message || `Không xác thực được ${failCount} bản ghi.`)
+        }
+        fetchList({ page: reconPage, limit: reconPageSize })
+        fetchHistory({ page: 1, limit: historyPageSize })
       })
-      .catch((err) => {
-        toast.error(err.message || 'Không xuất được báo cáo đối soát.')
-      })
-      .finally(() => setExporting(false))
+      .finally(() => setVerifying(false))
   }
 
   return (
     <div className="reconciliation-content">
-        {/* Header */}
       <div className="gw-card rc-header-card">
         <div className="gw-card-head am-create-head-text" style={{ marginBottom: 0 }}>
           <span className="gw-card-icon">
@@ -185,17 +257,8 @@ function ReconciliationContent() {
             <p className="gw-card-subtitle">Quản lý đối soát sản lượng SMS Brandname với nhà cung cấp và khách hàng</p>
           </div>
         </div>
-        <div className="rc-header-actions">
-          <button className="bn-btn-draft p-button" onClick={handleExport} disabled={exporting}>
-            <FileDown size={16} /> {exporting ? 'Đang xuất...' : 'Export báo cáo'}
-          </button>
-          <button className="db-export-btn">
-            <Upload size={16} /> Upload file
-          </button>
-        </div>
       </div>
 
-       {/* Filters */}
       <div className="gw-card">
         <h3 className="gw-card-title">Bộ lọc đối soát</h3>
         <p className="gw-card-subtitle" style={{ marginBottom: '1rem' }}>Tìm kiếm dữ liệu đối soát theo thời gian và nhà mạng</p>
@@ -207,7 +270,7 @@ function ReconciliationContent() {
             <label>Từ ngày</label>
             <Calendar
               value={fromDate}
-              onChange={(e) => { setFromDate(e.value); setDateFilterApplied(true) }}
+              onChange={(e) => setFromDate(e.value)}
               dateFormat="dd/mm/yy"
               showIcon
               className="db-calendar db-calendar-inline"
@@ -217,7 +280,7 @@ function ReconciliationContent() {
             <label>Đến ngày</label>
             <Calendar
               value={toDate}
-              onChange={(e) => { setToDate(e.value); setDateFilterApplied(true) }}
+              onChange={(e) => setToDate(e.value)}
               dateFormat="dd/mm/yy"
               showIcon
               className="db-calendar db-calendar-inline"
@@ -242,17 +305,15 @@ function ReconciliationContent() {
         </div>
 
         <div className="rc-filter-actions">
-          <button className="bn-btn-draft p-button" onClick={handleResetFilters} disabled={statsLoading}>
+          <button className="bn-btn-draft p-button" onClick={handleResetFilters} disabled={listLoading}>
             <RefreshCw size={16} /> Làm mới
           </button>
-          <button className="db-export-btn" onClick={fetchStats} disabled={statsLoading}>
-            <Search size={16} /> {statsLoading ? 'Đang tìm...' : 'Tìm kiếm'}
+          <button className="db-export-btn" onClick={handleSearch} disabled={listLoading}>
+            <Search size={16} /> {listLoading ? 'Đang tìm...' : 'Tìm kiếm'}
           </button>
         </div>
       </div>
-    
-      {/* KPI stats */}
-      {statsError && <p className="gw-table-error">{statsError}</p>}
+
       <div className="rc-stats-grid">
         {STATS_CONFIG.map((s) => (
           <div key={s.id} className="rc-stat-card">
@@ -260,57 +321,40 @@ function ReconciliationContent() {
               <s.icon size={18} />
             </span>
             <div className="rc-stat-body">
-              <p className="rc-stat-label">{s.label}</p>
+              <p className="rc-stat-label">{s.label} (trang hiện tại)</p>
               <p className="rc-stat-value">
-                {statsLoading ? '...' : formatNumber(stats[s.key])} <span className="rc-stat-unit">{s.unit}</span>
+                {listLoading ? '...' : formatNumber(stats[s.key])} <span className="rc-stat-unit">{s.unit}</span>
               </p>
             </div>
           </div>
         ))}
       </div>
 
-     
-
-      {/* Reconciliation table */}
       <div className="routing-table-section gw-table-section">
         <div className="routing-table-header gw-table-header">
           <div className="gw-table-header-text">
             <div>
-              <h3 className="table-title">Bảng đối soát sản lượng</h3>
+              <h3 className="table-title">
+                Bảng đối soát sản lượng <span className="am-count-badge">{total} bản ghi</span>
+              </h3>
               <p className="gw-card-subtitle">Đối soát SMS theo nhà mạng/ brandname/ partner</p>
             </div>
           </div>
-          <div className="rc-table-toolbar">
-            {/* <div className="pm-search-field">
-              <input type="text" placeholder="Tìm kiếm đối soát..." />
-              <Search size={16} className="pm-search-icon" />v
-            </div>
-            <button className="db-filter-btn">Tìm <Search size={14} /></button>
-            <input type="text" className="gw-filter-date" defaultValue="14/06/2025" />
-            <input type="text" className="gw-filter-date" defaultValue="26/06/2025" /> */}
-            {/* <button className="bn-btn-draft p-button">
-              <Download size={16} /> Xuất excel
-            </button> */}
-          </div>
         </div>
+
+        {listError && <p className="gw-table-error">{listError}</p>}
 
         <div className="rc-bulk-bar">
           <label className="rc-bulk-checkbox">
-            <input type="checkbox" checked={allSelected} onChange={toggleSelectAll} />
+            <input type="checkbox" checked={allSelected} onChange={toggleSelectAll} disabled={rows.length === 0 || listLoading} />
             Đã chọn {selectedRows.length} bản ghi
           </label>
-          <Dropdown
-            value={bulkStatus}
-            onChange={(e) => setBulkStatus(e.value)}
-            options={BULK_STATUS_OPTIONS}
-            disabled={selectedRows.length === 0}
-            className="bn-dropdown rc-bulk-dropdown"
-          />
-          <button className="bn-btn-draft p-button" disabled={selectedRows.length === 0}>
-            <NotebookPen size={16} /> Thêm ghi chú
-          </button>
-          <button className="db-export-btn gw-save-btn" disabled={selectedRows.length === 0}>
-            <Save size={16} /> Cập nhật
+          <button
+            className="db-export-btn gw-save-btn"
+            disabled={selectedRows.length === 0 || verifying}
+            onClick={handleVerifySelected}
+          >
+            <ShieldCheck size={16} /> {verifying ? 'Đang xác thực...' : 'Xác thực đối soát'}
           </button>
         </div>
 
@@ -319,109 +363,123 @@ function ReconciliationContent() {
             <thead>
               <tr>
                 <th>
-                  <input type="checkbox" checked={allSelected} onChange={toggleSelectAll} />
+                  <input type="checkbox" checked={allSelected} onChange={toggleSelectAll} disabled={rows.length === 0 || listLoading} />
                 </th>
-                <th>Từ ngày</th>
-                <th>Đến ngày</th>
+                <th>Tháng đối soát</th>
                 <th>Tên KH</th>
                 <th>Brandname</th>
                 <th>Nhà mạng</th>
                 <th>Đối tác</th>
                 <th>Sản lượng</th>
-                <th>giá nhập</th>
-                <th>giá bán</th>
-                <th>doanh thu</th>
-                <th>chi phí</th>
+                <th>Giá nhập TB</th>
+                <th>Giá bán TB</th>
+                <th>Doanh thu</th>
+                <th>Chi phí</th>
                 <th>Lợi nhuận</th>
                 <th>Trạng thái</th>
+                <th>Ghi chú</th>
               </tr>
             </thead>
             <tbody>
-              {RECON_ROWS.map((row) => (
-                <tr key={row.id}>
-                  <td>
-                    <input
-                      type="checkbox"
-                      checked={selectedRows.includes(row.id)}
-                      onChange={() => toggleSelectRow(row.id)}
-                    />
-                  </td>
-                  <td>{row.from}</td>
-                  <td>{row.to}</td>
-                  <td>{row.customer}</td>
-                  <td><span className="table-network">{row.brandname}</span></td>
-                  <td>{row.network}</td>
-                  <td>{row.partner}</td>
-                  <td>{row.volume}</td>
-                  <td>{row.buyPrice}</td>
-                  <td>{row.sellPrice}</td>
-                  <td>{row.revenue}</td>
-                  <td>{row.cost}</td>
-                  <td className={row.profitUp ? 'pm-diff-up' : 'pm-diff-down'}>{row.profit}</td>
-                  <td>
-                    <span className={`status-badge ${row.status === 'verified' ? 'active' : 'pending'}`}>
-                      <span className="status-dot" />
-                      {row.status === 'verified' ? 'Verified' : 'Need Review'}
-                    </span>
-                  </td>
-                </tr>
-              ))}
+              {listLoading && (
+                <tr><td colSpan={14} className="gw-table-status">Đang tải dữ liệu đối soát...</td></tr>
+              )}
+              {!listLoading && !listError && rows.length === 0 && (
+                <tr><td colSpan={14} className="gw-table-status">Không có dữ liệu đối soát.</td></tr>
+              )}
+              {!listLoading && rows.map((row) => {
+                const verified = isVerifiedStatus(row.reconciliationStatus)
+                const profit = Number(row.totalProfit) || 0
+                return (
+                  <tr key={row.id}>
+                    <td>
+                      <input
+                        type="checkbox"
+                        checked={selectedRows.includes(row.id)}
+                        onChange={() => toggleSelectRow(row.id)}
+                      />
+                    </td>
+                    <td>{formatDisplayDate(row.summaryMonth)}</td>
+                    <td>{row.fullName || '-'}</td>
+                    <td><span className="table-network">{row.brandName || '-'}</span></td>
+                    <td>{row.telco || '-'}</td>
+                    <td>{row.provider || '-'}</td>
+                    <td>{formatNumber(row.totalMessages)}</td>
+                    <td>{formatMoney(row.avgCostPrice)}</td>
+                    <td>{formatMoney(row.avgSellPrice)}</td>
+                    <td>{formatMoney(row.totalRevenue)}</td>
+                    <td>{formatMoney(row.totalCost)}</td>
+                    <td className={profit >= 0 ? 'pm-diff-up' : 'pm-diff-down'}>{formatMoney(profit)}</td>
+                    <td>
+                      <span className={`status-badge ${verified ? 'active' : 'pending'}`}>
+                        <span className="status-dot" />
+                        {row.reconciliationStatus || row.processStatus || row.status || '-'}
+                      </span>
+                    </td>
+                    <td>{row.note || '-'}</td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>
 
         <div className="rc-note">
-          <Info size={14} /> Hệ thống tự động đối soát theo nhà mạng, brandname và đối tác, các dòng lệch sẽ được đánh dấu Need Review.
+          <Info size={14} /> Hệ thống tự động đối soát theo nhà mạng, brandname và đối tác. Chọn bản ghi rồi bấm &quot;Xác thực đối soát&quot; để gọi API verify.
         </div>
 
         <Pagination
           page={reconPage}
-          totalPages={10}
+          totalPages={totalPages}
           pageSize={reconPageSize}
-          onPageChange={setReconPage}
-          onPageSizeChange={(size) => { setReconPageSize(size); setReconPage(1) }}
+          disabled={listLoading}
+          onPageChange={(next) => fetchList({ page: next, limit: reconPageSize })}
+          onPageSizeChange={(size) => {
+            setReconPageSize(size)
+            fetchList({ page: 1, limit: size })
+          }}
         />
       </div>
 
-      {/* History */}
       <div className="gw-card">
         <div className="gw-history-head">
           <div className="gw-history-head-text">
             <h2 className="gw-card-title">
-              Lịch sử đối soát <span className="am-count-badge">8 bản ghi</span>
+              Lịch sử đối soát <span className="am-count-badge">{historyTotal} bản ghi</span>
             </h2>
-            <p className="gw-card-subtitle">Theo dõi lịch sử upload và xử lý đối soát</p>
+            <p className="gw-card-subtitle">Theo dõi lịch sử xác thực và xử lý đối soát</p>
           </div>
-          {/* <button className="db-export-btn am-create-btn">
-            <FileDown size={16} /> Xuất excel
-          </button> */}
         </div>
+
+        {historyError && <p className="gw-table-error">{historyError}</p>}
 
         <div className="overflow-x-auto">
           <table className="routing-table">
             <thead>
               <tr>
                 <th>Thời gian</th>
-                <th>user</th>
+                <th>Người thực hiện</th>
                 <th>Hành động</th>
-                <th>File</th>
-                <th>Kết quả</th>
-                <th>Ghi chú</th>
+                <th>Summary ID</th>
+                <th>Giá trị trước</th>
+                <th>Giá trị mới</th>
               </tr>
             </thead>
             <tbody>
-              {HISTORY_ROWS.map((row) => (
+              {historyLoading && (
+                <tr><td colSpan={6} className="gw-table-status">Đang tải lịch sử đối soát...</td></tr>
+              )}
+              {!historyLoading && !historyError && historyRows.length === 0 && (
+                <tr><td colSpan={6} className="gw-table-status">Chưa có lịch sử đối soát.</td></tr>
+              )}
+              {!historyLoading && historyRows.map((row) => (
                 <tr key={row.id}>
-                  <td>{row.time}</td>
-                  <td>{row.user}</td>
-                  <td>{row.action}</td>
-                  <td>{row.file}</td>
-                  <td>
-                    <span className={`am-history-badge am-tone-${row.result === 'success' ? 'green' : 'orange'}`}>
-                      {row.result === 'success' ? 'Success' : 'Need Review'}
-                    </span>
-                  </td>
-                  <td>{row.note}</td>
+                  <td>{formatDateTime(row.createdAt)}</td>
+                  <td>{row.fullName || '-'}</td>
+                  <td>{row.actionChange || '-'}</td>
+                  <td>{row.summaryId ?? '-'}</td>
+                  <td>{row.oldValue || '-'}</td>
+                  <td>{row.newValue || '-'}</td>
                 </tr>
               ))}
             </tbody>
@@ -430,10 +488,14 @@ function ReconciliationContent() {
 
         <Pagination
           page={historyPage}
-          totalPages={10}
+          totalPages={historyTotalPages}
           pageSize={historyPageSize}
-          onPageChange={setHistoryPage}
-          onPageSizeChange={(size) => { setHistoryPageSize(size); setHistoryPage(1) }}
+          disabled={historyLoading}
+          onPageChange={(next) => fetchHistory({ page: next, limit: historyPageSize })}
+          onPageSizeChange={(size) => {
+            setHistoryPageSize(size)
+            fetchHistory({ page: 1, limit: size })
+          }}
         />
       </div>
     </div>

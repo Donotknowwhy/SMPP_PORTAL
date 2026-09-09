@@ -27,8 +27,20 @@ export const STATUS_OPTIONS = [
   { label: 'Pending Invite', value: 'pending' },
 ]
 
-export const ROLE_LABELS = { full: 'Toàn quyền', edit: 'Chỉnh sửa', view: 'Chỉ xem' }
-export const ROLE_CLASS = { full: 'am-role-full', edit: 'am-role-edit', view: 'am-role-view' }
+export const ROLE_LABELS = {
+  ADMIN: 'ADMIN',
+  CLIENT: 'CLIENT',
+  full: 'Toàn quyền',
+  edit: 'Chỉnh sửa',
+  view: 'Chỉ xem',
+}
+export const ROLE_CLASS = {
+  ADMIN: 'am-role-full',
+  CLIENT: 'am-role-edit',
+  full: 'am-role-full',
+  edit: 'am-role-edit',
+  view: 'am-role-view',
+}
 
 export const ACCOUNT_ROWS = [
   {
