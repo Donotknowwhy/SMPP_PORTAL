@@ -166,7 +166,7 @@ function BrandnameDeclarationContent() {
 
   return (
     <div className="bn-declaration-content">
-      <div className="routing-table-section gw-table-section">
+      <div className="routing-table-section gw-table-section gw-header-elevated">
         <div className="routing-table-header gw-table-header">
           <div className="gw-table-header-text">
             <span className="table-icon">

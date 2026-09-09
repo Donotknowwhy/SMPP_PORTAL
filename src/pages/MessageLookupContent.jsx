@@ -138,7 +138,7 @@ function MessageLookupContent() {
 
   return (
     <div className="lookup-content">
-      <div className="gw-card">
+      <div className="gw-card gw-header-elevated">
         <div className="gw-card-head">
           <span className="gw-card-icon">
             <FileSearch2 size={18} />
@@ -187,11 +187,16 @@ function MessageLookupContent() {
             Tìm kiếm nâng cao {advancedOpen ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
           </button>
           <div className="lk-toolbar-actions">
-            <button className="bn-btn-draft p-button" onClick={handleReset} disabled={resultLoading}>
-              <RefreshCw size={16} /> Làm mới
+            <button
+              className="db-refresh-icon-btn"
+              onClick={handleReset}
+              disabled={resultLoading}
+              title="Làm mới bộ lọc và tải lại dữ liệu"
+            >
+              <RefreshCw size={16} />
             </button>
-            <button className="db-export-btn" onClick={() => handleSearch(0, pageSize)} disabled={resultLoading}>
-              <Search size={16} /> {resultLoading ? 'Đang tìm...' : 'Tìm kiếm'}
+            <button className="db-search-btn" onClick={() => handleSearch(0, pageSize)} disabled={resultLoading}>
+              <Search size={16} /> {resultLoading ? 'Đang tra cứu...' : 'Tra cứu'}
             </button>
           </div>
         </div>
@@ -234,7 +239,7 @@ function MessageLookupContent() {
       </div>
 
       {/* Results */}
-      <div className="routing-table-section gw-table-section">
+      <div className="routing-table-section gw-table-section gw-header-elevated">
         <div className="routing-table-header gw-table-header">
           <div className="gw-table-header-text">
             <h3 className="table-title">

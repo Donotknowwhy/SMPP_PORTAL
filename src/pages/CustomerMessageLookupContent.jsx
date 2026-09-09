@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import * as XLSX from 'xlsx'
 import { Calendar } from 'primereact/calendar'
 import { toast } from 'react-toastify'
-import { Search, FileSpreadsheet, Info, CheckCircle2, XCircle, Clock, RefreshCw } from 'lucide-react'
+import { Search, FileSpreadsheet, Info, CheckCircle2, XCircle, Clock, RefreshCw, FileSearch2 } from 'lucide-react'
 import { LOOKUP_STATUS_OPTIONS } from '../constants/customerPortal'
 import { useAuth } from '../context/AuthContext'
 import { getRoutingInfo } from '../utils/routingApi'
@@ -182,9 +182,12 @@ function CustomerMessageLookupContent() {
 
   return (
     <div className="cml-page">
-      <div className="cml-header">
-        <h2 className="gw-card-title">Tra cứu tin nhắn</h2>
-        <p className="gw-card-subtitle">Tra cứu lịch sử gửi tin theo số điện thoại, nội dung, loại mạng và thời gian.</p>
+      <div className="cml-header gw-page-header flex items-start gap-3">
+        <span className="gw-card-icon"><FileSearch2 size={18} /></span>
+        <div>
+          <h2 className="gw-card-title">Tra cứu tin nhắn</h2>
+          <p className="gw-card-subtitle">Tra cứu lịch sử gửi tin theo số điện thoại, nội dung, loại mạng và thời gian.</p>
+        </div>
       </div>
 
       <div className="gw-card cml-filter-card">
@@ -248,7 +251,7 @@ function CustomerMessageLookupContent() {
 
           <button
             type="button"
-            className="cml-refresh-btn"
+            className="db-refresh-icon-btn"
             onClick={handleRefresh}
             disabled={loading}
             title="Làm mới bộ lọc và tải lại dữ liệu"
@@ -257,7 +260,7 @@ function CustomerMessageLookupContent() {
           </button>
 
           <button className="db-search-btn cca-search-btn" onClick={() => handleSearch(0, pageSize)} disabled={loading}>
-            <Search size={16} /> {loading ? 'Đang tìm...' : 'Tìm kiếm'}
+            <Search size={16} /> {loading ? 'Đang tra cứu...' : 'Tra cứu'}
           </button>
         </div>
 

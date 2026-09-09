@@ -1846,7 +1846,7 @@ h2 {
 
 .table-title {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: var(--gray-800);
   display: flex;
@@ -2125,7 +2125,7 @@ h2 {
 
 .gw-card-title {
   margin: 0;
-  font-size: 1.05rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: var(--gray-800);
 }
@@ -3735,6 +3735,30 @@ h2 {
 }
 
 /* ============================================================
+   Shared "elevated header" look — matches the Dashboard header
+   (own white background + stronger shadow), reused across every
+   page's title/section header for a consistent, "nổi" appearance.
+   ============================================================ */
+
+/* Add to a container that already has its own card background
+   (.gw-card, .routing-table-section) — just upgrades the shadow. */
+.gw-header-elevated {
+  box-shadow: 0 8px 24px -8px rgba(17, 24, 39, 0.12), var(--shadow-sm);
+  border: 1px solid var(--gray-200);
+}
+
+/* Standalone header block with no existing card wrapper — full treatment.
+   No margin here on purpose: pages already space this block via either
+   their own margin-bottom rule or the page container's flex `gap`. */
+.gw-page-header {
+  background: var(--white);
+  border-radius: var(--radius);
+  border: 1px solid var(--gray-200);
+  box-shadow: 0 8px 24px -8px rgba(17, 24, 39, 0.12), var(--shadow-sm);
+  padding: 1.35rem 1.75rem;
+}
+
+/* ============================================================
    Dashboard v2 (db- prefix)
    ============================================================ */
 
@@ -3757,8 +3781,8 @@ h2 {
 
 .db-title {
   margin: 0;
-  font-size: 1.3rem;
-  font-weight: 800;
+  font-size: 1.1rem;
+  font-weight: 700;
   color: var(--gray-800);
   display: flex;
   align-items: center;
@@ -3767,16 +3791,15 @@ h2 {
 }
 
 .db-title-icon {
-  display: inline-flex;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  background: var(--gray-100);
+  color: var(--red);
+  display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  font-size: 1rem;
-  color: var(--white);
-  background: linear-gradient(135deg, var(--orange), var(--red));
-  box-shadow: 0 6px 14px -3px rgba(227, 30, 36, 0.4);
+  flex-shrink: 0;
 }
 
 .db-subtitle {
@@ -3849,7 +3872,8 @@ h2 {
 }
 
 .db-search-btn {
-  padding: 0.55rem 1.1rem;
+  height: 2.5rem;
+  padding: 0 1.1rem;
   border: none;
   border-radius: var(--radius-sm);
   background: var(--orange);
@@ -3860,12 +3884,37 @@ h2 {
   display: flex;
   align-items: center;
   gap: 0.4rem;
+  flex-shrink: 0;
   transition: filter 0.15s;
 }
 
 .db-search-btn:hover { filter: brightness(1.08); }
 
 .db-search-icon { width: 16px; height: 16px; }
+
+/* Icon-only reload button — paired next to db-search-btn across the project
+   (filter rows, lookup pages, dashboards) so every "reload + search" combo looks the same. */
+.db-refresh-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  background: var(--white);
+  color: var(--gray-600);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.db-refresh-icon-btn:hover:not(:disabled) {
+  border-color: var(--orange);
+  color: var(--orange);
+}
+
+.db-refresh-icon-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* Header-only refinements — override the base look above just inside .db-header,
    so other pages that reuse db-date-field/db-calendar/db-search-btn keep their own style. */
@@ -4014,25 +4063,6 @@ h2 {
   min-width: 140px;
   cursor: pointer;
 }
-
-.db-refresh-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.58rem 1.1rem;
-  border: 1px solid var(--gray-200);
-  border-radius: 99px;
-  background: var(--gray-50);
-  color: var(--gray-600);
-  font-size: 0.82rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
-}
-
-.db-refresh-btn:hover { background: var(--white); border-color: var(--orange); color: var(--orange); transform: translateY(-1px); }
-
-.db-refresh-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
 /* Charts row */
 .db-charts-row {
@@ -4597,40 +4627,6 @@ h2 {
   border: 1px solid var(--gray-200);
 }
 
-.cd-header-row {
-  justify-content: space-between;
-  align-items: center;
-}
-
-.cd-reload-btn {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.58rem 1.1rem;
-  border: 1px solid var(--gray-200);
-  border-radius: 99px;
-  background: var(--gray-50);
-  color: var(--gray-600);
-  font-size: 0.82rem;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
-}
-
-.cd-reload-btn:hover:not(:disabled) {
-  background: var(--white);
-  border-color: var(--orange);
-  color: var(--orange);
-  transform: translateY(-1px);
-}
-
-.cd-reload-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
 .cd-spin {
   animation: cd-spin-rotate 0.8s linear infinite;
 }
@@ -4811,7 +4807,7 @@ h2 {
 
 .cc-page-title {
   margin: 0;
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: var(--gray-800);
 }
@@ -4844,7 +4840,7 @@ h2 {
 
 .cc-section-title {
   margin: 0 0 1rem;
-  font-size: 0.95rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: var(--gray-800);
 }
@@ -5171,12 +5167,6 @@ h2 {
 
 .cca-page { display: flex; flex-direction: column; gap: 1.25rem; padding: 1.5rem 1rem; }
 
-.cca-header {
-  padding: 1.25rem 1.25rem 1rem;
-  margin-bottom: 0.5rem;
-  border-bottom: 1px solid var(--gray-200);
-}
-
 .cca-filter-grid {
   display: flex;
   flex-wrap: wrap;
@@ -5184,6 +5174,8 @@ h2 {
   gap: 0.75rem;
   padding: 1rem 1.25rem 1.5rem;
 }
+
+.cca-filter-card .cca-filter-grid { padding: 0; }
 
 .cca-filter-grid .gw-form-field { min-width: 150px; }
 
@@ -5247,7 +5239,7 @@ h2 {
 
 .cdb-page-title {
   margin: 0;
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: var(--gray-800);
 }
@@ -5454,7 +5446,6 @@ h2 {
   gap: 1.25rem;
 }
 
-.cml-header .gw-card-title { font-size: 1.3rem; }
 .cml-header .gw-card-subtitle { margin-top: 0.35rem; font-size: 0.85rem; }
 
 .cml-filter-grid.cca-filter-grid { padding: 0; align-items: flex-end; }
@@ -5487,29 +5478,4 @@ h2 {
 .cml-table td { vertical-align: top; }
 
 .cml-table .lk-cell-truncate { max-width: 340px; }
-
-.cml-refresh-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  flex-shrink: 0;
-  border: 1px solid var(--gray-200);
-  border-radius: var(--radius-sm);
-  background: var(--white);
-  color: var(--gray-600);
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.cml-refresh-btn:hover:not(:disabled) {
-  border-color: var(--red);
-  color: var(--red);
-}
-
-.cml-refresh-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
 

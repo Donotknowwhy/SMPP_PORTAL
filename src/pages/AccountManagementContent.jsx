@@ -5,7 +5,7 @@ import { Dropdown } from 'primereact/dropdown'
 import { MultiSelect } from 'primereact/multiselect'
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog'
 import { toast } from 'react-toastify'
-import { UserCog, UserPlus, CalendarClock, Search, Pencil, Lock, Trash2, FileDown, Save, X } from 'lucide-react'
+import { UserCog, UserPlus, CalendarClock, Search, Pencil, Lock, Trash2, FileDown, Save, X, Users } from 'lucide-react'
 import {
   ROLE_LABELS,
   ROLE_CLASS,
@@ -232,7 +232,7 @@ function AccountManagementContent() {
       <ConfirmDialog />
 
       {/* Create / edit account */}
-      <div className="gw-card">
+      <div className="gw-card gw-header-elevated">
         <div className="gw-card-head am-create-head">
           <div className="am-create-head-text">
             <span className="gw-card-icon">
@@ -360,9 +360,10 @@ function AccountManagementContent() {
       </div>
 
       {/* Account list */}
-      <div className="routing-table-section gw-table-section">
+      <div className="routing-table-section gw-table-section gw-header-elevated">
         <div className="routing-table-header gw-table-header">
           <div className="gw-table-header-text">
+            <span className="table-icon"><Users size={18} /></span>
             <h3 className="table-title">
               Danh sách tài khoản <span className="am-count-badge">{filteredAccountRows.length} tài khoản</span>
             </h3>
@@ -452,8 +453,9 @@ function AccountManagementContent() {
       </div>
 
       {/* Change history */}
-      <div className="gw-card">
+      <div className="gw-card gw-header-elevated">
         <div className="gw-history-head">
+          <span className="gw-card-icon"><CalendarClock size={18} /></span>
           <div className="gw-history-head-text">
             <h2 className="gw-card-title">
               Lịch sử thay đổi tài khoản <span className="am-count-badge">{auditRows.length} bản ghi</span>

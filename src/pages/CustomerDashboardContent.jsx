@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import * as XLSX from 'xlsx'
 import { Calendar } from 'primereact/calendar'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
-import { Search, Send, CheckCircle2, XCircle, Wallet, FileSpreadsheet, RotateCw, BarChart3, TrendingUp, Percent } from 'lucide-react'
+import { Search, Send, CheckCircle2, XCircle, Wallet, FileSpreadsheet, RefreshCw, BarChart3, TrendingUp, Percent } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { getClientOverview, getClientDailyOutput, getClientDeliveryStatus, getClientDetailByDay } from '../utils/homeApi'
 import { getRoutingInfo } from '../utils/routingApi'
@@ -290,17 +290,12 @@ function CustomerDashboardContent() {
   return (
     <div className="cd-dashboard db-dashboard !px-4 sm:!px-6 lg:!px-8">
       <div className="gw-card cd-filter-card">
-        <div className="gw-card-head cd-header-row">
-          <div className="flex items-center gap-3">
-            <span className="gw-card-icon"><BarChart3 size={18} /></span>
-            <div>
-              <h2 className="gw-card-title">Báo cáo sản lượng khách hàng</h2>
-              <p className="gw-card-subtitle">Theo dõi sản lượng, tỷ lệ thành công và chi phí gửi SMS</p>
-            </div>
+        <div className="gw-card-head">
+          <span className="gw-card-icon"><BarChart3 size={18} /></span>
+          <div>
+            <h2 className="gw-card-title">Báo cáo sản lượng khách hàng</h2>
+            <p className="gw-card-subtitle">Theo dõi sản lượng, tỷ lệ thành công và chi phí gửi SMS</p>
           </div>
-          <button className="cd-reload-btn" onClick={handleFilter} disabled={isLoading} title="Tải lại dữ liệu">
-            <RotateCw size={16} className={isLoading ? 'cd-spin' : ''} /> Tải lại
-          </button>
         </div>
 
         <div className="cd-filter-row flex-wrap lg:flex-nowrap">
@@ -332,8 +327,16 @@ function CustomerDashboardContent() {
               className="db-calendar"
             />
           </div>
+          <button
+            className="db-refresh-icon-btn"
+            onClick={handleFilter}
+            disabled={isLoading}
+            title="Làm mới bộ lọc và tải lại dữ liệu"
+          >
+            <RefreshCw size={16} className={isLoading ? 'cd-spin' : ''} />
+          </button>
           <button className="db-search-btn cd-stat-btn" onClick={handleFilter} disabled={isLoading}>
-            <Search size={16} /> {isLoading ? 'Đang tải...' : 'Thống kê'}
+            <Search size={16} /> {isLoading ? 'Đang tải...' : 'Tra cứu'}
           </button>
         </div>
         {overviewError && <p className="cd-error-text" style={{ color: '#E31E24', marginTop: 8 }}>{overviewError}</p>}
