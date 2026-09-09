@@ -206,7 +206,9 @@ function AccountManagementContent() {
       fullName: r.fullName,
       email: r.email,
       role: r.role,
-      brandnames: (r.brandName || '').split(',').map((b) => b.trim()).filter(Boolean),
+      brandnames: (Array.isArray(r.brandName) ? r.brandName : (r.brandName || '').split(','))
+        .map((b) => String(b).trim())
+        .filter(Boolean),
       status: r.status === '1' || r.status === 1 ? 'active' : 'inactive',
       created: formatDateTime(r.createdAt),
     })),
@@ -344,9 +346,6 @@ function AccountManagementContent() {
           </div>
         </div>
 
-        <div className="am-validity-badge">
-          <CalendarClock size={13} /> Hiệu lực 32 ngày
-        </div>
 
         <div className="am-form-grid am-form-grid-bottom">
           <div className="am-form-actions">

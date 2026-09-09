@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import * as XLSX from 'xlsx'
 import { Calendar } from 'primereact/calendar'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
-import { Search, Send, CheckCircle2, XCircle, Wallet, FileSpreadsheet, RotateCw } from 'lucide-react'
+import { Search, Send, CheckCircle2, XCircle, Wallet, FileSpreadsheet, RotateCw, BarChart3, TrendingUp, Percent } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { getClientOverview, getClientDailyOutput, getClientDeliveryStatus, getClientDetailByDay } from '../utils/homeApi'
 import { getRoutingInfo } from '../utils/routingApi'
@@ -62,7 +62,7 @@ function SuccessRateDonut({ successCount, failedCount, successPct, failedPct }) 
   ]
 
   return (
-    <div className="cd-donut-row flex-wrap sm:flex-nowrap">
+    <div className="cd-donut-row">
       <div className="db-donut">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
@@ -291,8 +291,12 @@ function CustomerDashboardContent() {
     <div className="cd-dashboard db-dashboard !px-4 sm:!px-6 lg:!px-8">
       <div className="gw-card cd-filter-card">
         <div className="gw-card-head cd-header-row">
-          <div>
-            <h2 className="gw-card-title">Báo cáo sản lượng khách hàng</h2>
+          <div className="flex items-center gap-3">
+            <span className="gw-card-icon"><BarChart3 size={18} /></span>
+            <div>
+              <h2 className="gw-card-title">Báo cáo sản lượng khách hàng</h2>
+              <p className="gw-card-subtitle">Theo dõi sản lượng, tỷ lệ thành công và chi phí gửi SMS</p>
+            </div>
           </div>
           <button className="cd-reload-btn" onClick={handleFilter} disabled={isLoading} title="Tải lại dữ liệu">
             <RotateCw size={16} className={isLoading ? 'cd-spin' : ''} /> Tải lại
@@ -369,7 +373,7 @@ function CustomerDashboardContent() {
       <div className="db-charts-row cd-charts-row">
         <div className="db-chart-card cd-line-card">
           <div className="db-chart-head">
-            <h3>Sản lượng gửi theo ngày</h3>
+            <h3><span className="db-chart-icon"><TrendingUp size={15} /></span> Sản lượng gửi theo ngày</h3>
           </div>
           {dailyOutputError && <p className="cd-error-text" style={{ color: '#E31E24' }}>{dailyOutputError}</p>}
           <div className="cd-line-chart-area">
@@ -379,10 +383,7 @@ function CustomerDashboardContent() {
                 <XAxis dataKey="day" axisLine={{ stroke: '#E5E7EB' }} tickLine={false} tick={{ fontSize: 12, fill: '#4B5563' }} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#9CA3AF' }} tickFormatter={numberFormat} width={40} />
                 <Tooltip formatter={(v) => numberFormat(v)} />
-                <Legend
-                  formatter={(value) => (value === 'success' ? 'Thành công' : 'Thất bại')}
-                  wrapperStyle={{ fontSize: 12 }}
-                />
+                <Legend wrapperStyle={{ fontSize: 12 }} />
                 <Line type="monotone" dataKey="success" name="Thành công" stroke="#16A34A" strokeWidth={2} dot={{ r: 3 }} />
                 <Line type="monotone" dataKey="failed" name="Thất bại" stroke="#E31E24" strokeWidth={2} dot={{ r: 3 }} />
               </LineChart>
@@ -392,7 +393,7 @@ function CustomerDashboardContent() {
 
         <div className="db-chart-card db-delivery-card cd-donut-card">
           <div className="db-chart-head">
-            <h3>Tỷ lệ thành công</h3>
+            <h3><span className="db-chart-icon"><Percent size={15} /></span> Tỷ lệ thành công</h3>
           </div>
           {deliveryError && <p className="cd-error-text" style={{ color: '#E31E24' }}>{deliveryError}</p>}
           <SuccessRateDonut

@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useMemo, useState } from 'react'
 import { Calendar } from 'primereact/calendar'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-import { ListSortDescending, Upload } from 'lucide-react'
+import { ListSortDescending, Upload, BarChart3, PieChart } from 'lucide-react'
 import { toast } from 'react-toastify'
 import iconSearch from '../assets/icons/flowbite_search-outline.svg'
 import { STATS } from '../constants/home'
@@ -421,9 +421,9 @@ function HomeContent() {
       {/* Charts row */}
       <div className="db-charts-row">
         {/* Traffic bar chart */}
-        <div className="db-chart-card db-traffic-card w-full h-[380px] sm:h-[420px] md:h-[450px]">
+        <div className="db-chart-card db-traffic-card h-[380px] sm:h-[420px] md:h-[450px]">
           <div className="db-chart-head">
-            <h3>Lưu lượng SMS</h3>
+            <h3><span className="db-chart-icon"><BarChart3 size={15} /></span> Lưu lượng SMS</h3>
             <div className="db-chart-toggles">
               <span className="db-t1-badge">T-1</span>
             </div>
@@ -502,7 +502,7 @@ function HomeContent() {
         {/* Delivery status donut */}
         <div className="db-chart-card db-delivery-card">
           <div className="db-chart-head">
-            <h3>Delivery Status</h3>
+            <h3><span className="db-chart-icon"><PieChart size={15} /></span> Delivery Status</h3>
             <span className="db-t1-badge">T-1</span>
           </div>
           {deliveryError && <p className="gw-table-error">{deliveryError}</p>}
