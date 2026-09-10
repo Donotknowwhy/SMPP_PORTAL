@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Calendar } from 'primereact/calendar'
 import { Dialog } from 'primereact/dialog'
-import { Search, Eye, Clock, FileClock, CheckCircle2, XCircle } from 'lucide-react'
+import { Search, Eye, Clock, FileClock, CheckCircle2, XCircle, ClipboardCheck, ListChecks } from 'lucide-react'
 import {
   BRANDNAME_OPTIONS,
   CAMPAIGN_APPROVAL_STATUSES,
@@ -82,9 +82,13 @@ function CustomerCampaignApprovalContent() {
 
   return (
     <div className="cca-page">
-      <div className="routing-table-section gw-table-section">
-        <div className="cca-header">
-          <h2 className="gw-card-title">Quản lý phê duyệt chiến dịch</h2>
+      <div className="gw-card gw-header-elevated cca-filter-card">
+        <div className="gw-card-head">
+          <span className="gw-card-icon"><ClipboardCheck size={18} /></span>
+          <div>
+            <h2 className="gw-card-title">Quản lý phê duyệt chiến dịch</h2>
+            <p className="gw-card-subtitle">Duyệt nội dung, theo dõi trạng thái và lịch gửi các chiến dịch SMS của khách hàng</p>
+          </div>
         </div>
 
         <div className="cca-filter-grid">
@@ -149,8 +153,19 @@ function CustomerCampaignApprovalContent() {
           </div>
 
           <button className="db-search-btn cca-search-btn" onClick={handleSearch}>
-            Tìm kiếm <Search size={16} />
+            Tra cứu <Search size={16} />
           </button>
+        </div>
+      </div>
+
+      <div className="routing-table-section gw-table-section gw-header-elevated">
+        <div className="routing-table-header gw-table-header">
+          <div className="gw-table-header-text">
+            <span className="table-icon"><ListChecks size={18} /></span>
+            <h3 className="table-title">
+              Danh sách chiến dịch <span className="am-count-badge">{totalRows} chiến dịch</span>
+            </h3>
+          </div>
         </div>
 
         <div className="overflow-x-auto">

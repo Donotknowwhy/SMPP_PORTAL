@@ -374,7 +374,7 @@ function GatewayConfigContent() {
       <ConfirmDialog />
 
       {/* Form card */}
-      <div className="gw-card" ref={formCardRef}>
+      <div className="gw-card gw-header-elevated" ref={formCardRef}>
         <div className="gw-card-head">
           <span className="gw-card-icon">
             <Router size={18} />
@@ -595,7 +595,7 @@ function GatewayConfigContent() {
       </div>
 
       {/* History */}
-      <div className="gw-card gw-history-card">
+      <div className="gw-card gw-history-card gw-header-elevated">
         <div className="gw-history-head">
           <span className="gw-card-icon">
             <History size={18} />

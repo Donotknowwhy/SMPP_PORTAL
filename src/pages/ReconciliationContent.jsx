@@ -3,7 +3,7 @@ import { Calendar } from 'primereact/calendar'
 import { Dropdown } from 'primereact/dropdown'
 import { toast } from 'react-toastify'
 import {
-  GitCompare, RefreshCw, Search, Info, ShieldCheck,
+  GitCompare, RefreshCw, Search, Info, ShieldCheck, History, ListChecks,
 } from 'lucide-react'
 import {
   STATUS_OPTIONS,
@@ -247,7 +247,8 @@ function ReconciliationContent() {
 
   return (
     <div className="reconciliation-content">
-      <div className="gw-card rc-header-card">
+      {/* Header */}
+      <div className="gw-card rc-header-card gw-header-elevated">
         <div className="gw-card-head am-create-head-text" style={{ marginBottom: 0 }}>
           <span className="gw-card-icon">
             <GitCompare size={18} />
@@ -259,9 +260,15 @@ function ReconciliationContent() {
         </div>
       </div>
 
-      <div className="gw-card">
-        <h3 className="gw-card-title">Bộ lọc đối soát</h3>
-        <p className="gw-card-subtitle" style={{ marginBottom: '1rem' }}>Tìm kiếm dữ liệu đối soát theo thời gian và nhà mạng</p>
+      {/* Filters */}
+      <div className="gw-card gw-header-elevated">
+        <div className="flex items-start gap-3" style={{ marginBottom: '1rem' }}>
+          <span className="gw-card-icon"><Search size={18} /></span>
+          <div>
+            <h3 className="gw-card-title" style={{ margin: 0 }}>Bộ lọc đối soát</h3>
+            <p className="gw-card-subtitle" style={{ margin: '0.2rem 0 0' }}>Tìm kiếm dữ liệu đối soát theo thời gian và nhà mạng</p>
+          </div>
+        </div>
 
         {infoError && <p className="gw-table-error">{infoError}</p>}
 
@@ -330,9 +337,11 @@ function ReconciliationContent() {
         ))}
       </div>
 
-      <div className="routing-table-section gw-table-section">
+      {/* Reconciliation table */}
+      <div className="routing-table-section gw-table-section gw-header-elevated">
         <div className="routing-table-header gw-table-header">
           <div className="gw-table-header-text">
+            <span className="table-icon"><ListChecks size={18} /></span>
             <div>
               <h3 className="table-title">
                 Bảng đối soát sản lượng <span className="am-count-badge">{total} bản ghi</span>
@@ -441,8 +450,10 @@ function ReconciliationContent() {
         />
       </div>
 
-      <div className="gw-card">
+      {/* History */}
+      <div className="gw-card gw-header-elevated">
         <div className="gw-history-head">
+          <span className="gw-card-icon"><History size={18} /></span>
           <div className="gw-history-head-text">
             <h2 className="gw-card-title">
               Lịch sử đối soát <span className="am-count-badge">{historyTotal} bản ghi</span>

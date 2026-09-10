@@ -5,7 +5,7 @@ import { Dropdown } from 'primereact/dropdown'
 import { MultiSelect } from 'primereact/multiselect'
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog'
 import { toast } from 'react-toastify'
-import { UserCog, UserPlus, CalendarClock, Search, Pencil, Lock, Trash2, Save, X, Loader2 } from 'lucide-react'
+import { UserCog, UserPlus, CalendarClock, Search, Pencil, Lock, Trash2, Save, X, Loader2, Users } from 'lucide-react'
 import {
   ROLE_LABELS,
   ROLE_CLASS,
@@ -365,7 +365,8 @@ function AccountManagementContent() {
     <div className="account-management-content">
       <ConfirmDialog />
 
-      <div className="gw-card">
+      {/* Create / edit account */}
+      <div className="gw-card gw-header-elevated">
         <div className="gw-card-head am-create-head">
           <div className="am-create-head-text">
             <span className="gw-card-icon">
@@ -479,9 +480,6 @@ function AccountManagementContent() {
           </div>
         </div>
 
-        <div className="am-validity-badge">
-          <CalendarClock size={13} /> Hiệu lực 32 ngày
-        </div>
 
         <div className="am-form-grid am-form-grid-bottom">
           <div className="am-form-actions">
@@ -495,9 +493,11 @@ function AccountManagementContent() {
         </div>
       </div>
 
-      <div className="routing-table-section gw-table-section">
+      {/* Account list */}
+      <div className="routing-table-section gw-table-section gw-header-elevated">
         <div className="routing-table-header gw-table-header">
           <div className="gw-table-header-text">
+            <span className="table-icon"><Users size={18} /></span>
             <h3 className="table-title">
               Danh sách tài khoản <span className="am-count-badge">{filteredAccountRows.length} tài khoản</span>
             </h3>
@@ -602,8 +602,10 @@ function AccountManagementContent() {
         />
       </div>
 
-      <div className="gw-card">
+      {/* Change history */}
+      <div className="gw-card gw-header-elevated">
         <div className="gw-history-head">
+          <span className="gw-card-icon"><CalendarClock size={18} /></span>
           <div className="gw-history-head-text">
             <h2 className="gw-card-title">
               Lịch sử thay đổi tài khoản <span className="am-count-badge">{auditTotal} bản ghi</span>

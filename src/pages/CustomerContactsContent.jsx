@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { toast } from 'react-toastify'
-import { Search, Plus, FileSpreadsheet, Pencil, Trash2, CheckSquare } from 'lucide-react'
+import { Search, Plus, FileSpreadsheet, Pencil, Trash2, CheckSquare, BookUser } from 'lucide-react'
 import { CONTACT_GROUPS } from '../constants/customerPortal'
 import Pagination from '../components/common/Pagination'
 
@@ -100,7 +100,10 @@ function CustomerContactsContent() {
 
   return (
     <div className="cdb-page">
-      <h2 className="cdb-page-title">Quản lý danh bạ &amp; khách hàng</h2>
+      <div className="gw-page-header flex items-center gap-3">
+        <span className="gw-card-icon"><BookUser size={18} /></span>
+        <h2 className="cdb-page-title" style={{ margin: 0 }}>Quản lý danh bạ &amp; khách hàng</h2>
+      </div>
 
       <div className="cdb-layout">
         {/* Groups panel */}

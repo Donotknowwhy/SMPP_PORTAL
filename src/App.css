@@ -1846,7 +1846,7 @@ h2 {
 
 .table-title {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: var(--gray-800);
   display: flex;
@@ -2125,7 +2125,7 @@ h2 {
 
 .gw-card-title {
   margin: 0;
-  font-size: 1.05rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: var(--gray-800);
 }
@@ -2584,7 +2584,8 @@ h2 {
   padding: 0.5rem 0.75rem;
   border: 1px solid var(--gray-200);
   border-radius: var(--radius-sm);
-  font-size: 0.85rem;
+  font-size: 0.875rem;
+  font-family: inherit;
   outline: none;
 }
 
@@ -3147,12 +3148,16 @@ h2 {
   white-space: normal !important;
   overflow: visible !important;
   text-overflow: initial !important;
+  font-size: 0.875rem;
+  font-family: inherit;
 }
 
 .am-multiselect .p-multiselect-label.p-multiselect-label-empty {
   visibility: visible !important;
   color: var(--gray-400);
   padding: 0.6rem 0.75rem !important;
+  font-size: 0.875rem;
+  font-family: inherit;
 }
 
 .am-multiselect .p-multiselect-token {
@@ -3730,36 +3735,78 @@ h2 {
 }
 
 /* ============================================================
+   Shared "elevated header" look — matches the Dashboard header
+   (own white background + stronger shadow), reused across every
+   page's title/section header for a consistent, "nổi" appearance.
+   ============================================================ */
+
+/* Add to a container that already has its own card background
+   (.gw-card, .routing-table-section) — just upgrades the shadow. */
+.gw-header-elevated {
+  box-shadow: 0 8px 24px -8px rgba(17, 24, 39, 0.12), var(--shadow-sm);
+  border: 1px solid var(--gray-200);
+}
+
+/* Standalone header block with no existing card wrapper — full treatment.
+   No margin here on purpose: pages already space this block via either
+   their own margin-bottom rule or the page container's flex `gap`. */
+.gw-page-header {
+  background: var(--white);
+  border-radius: var(--radius);
+  border: 1px solid var(--gray-200);
+  box-shadow: 0 8px 24px -8px rgba(17, 24, 39, 0.12), var(--shadow-sm);
+  padding: 1.35rem 1.75rem;
+}
+
+/* ============================================================
    Dashboard v2 (db- prefix)
    ============================================================ */
 
 .db-dashboard { padding: 1.5rem 2rem; }
 
 .db-header {
+  position: relative;
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   margin-bottom: 1.5rem;
-  gap: 1rem;
+  gap: 1.25rem;
   flex-wrap: wrap;
+  padding: 1.35rem 1.75rem;
+  border-radius: var(--radius);
+  background: var(--white);
+  box-shadow: 0 8px 24px -8px rgba(17, 24, 39, 0.12), var(--shadow-sm);
+  border: 1px solid var(--gray-200);
 }
 
 .db-title {
   margin: 0;
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: var(--gray-800);
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.65rem;
+  letter-spacing: -0.01em;
 }
 
-.db-title-icon { font-size: 1.1rem; color: var(--gray-600); }
+.db-title-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  background: var(--gray-100);
+  color: var(--red);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
 
 .db-subtitle {
-  margin: 0.2rem 0 0;
+  margin: 0.3rem 0 0;
   font-size: 0.8rem;
   color: var(--gray-400);
+  font-weight: 500;
 }
 
 .db-date-filters { display: flex; align-items: flex-end; gap: 0.75rem; }
@@ -3825,7 +3872,8 @@ h2 {
 }
 
 .db-search-btn {
-  padding: 0.55rem 1.1rem;
+  height: 2.5rem;
+  padding: 0 1.1rem;
   border: none;
   border-radius: var(--radius-sm);
   background: var(--orange);
@@ -3836,12 +3884,97 @@ h2 {
   display: flex;
   align-items: center;
   gap: 0.4rem;
+  flex-shrink: 0;
   transition: filter 0.15s;
 }
 
 .db-search-btn:hover { filter: brightness(1.08); }
 
 .db-search-icon { width: 16px; height: 16px; }
+
+/* Icon-only reload button — paired next to db-search-btn across the project
+   (filter rows, lookup pages, dashboards) so every "reload + search" combo looks the same. */
+.db-refresh-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  background: var(--white);
+  color: var(--gray-600);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.db-refresh-icon-btn:hover:not(:disabled) {
+  border-color: var(--orange);
+  color: var(--orange);
+}
+
+.db-refresh-icon-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Header-only refinements — override the base look above just inside .db-header,
+   so other pages that reuse db-date-field/db-calendar/db-search-btn keep their own style. */
+.db-header .db-date-field { gap: 0.35rem; }
+
+.db-header .db-date-field label {
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.db-header .db-date-field input,
+.db-header .db-date-field select {
+  padding: 0.55rem 0.8rem;
+  background: var(--gray-50);
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.db-header .db-date-field input:focus,
+.db-header .db-date-field select:focus {
+  border-color: var(--orange);
+  background: var(--white);
+}
+
+.db-header .db-calendar .p-inputtext {
+  padding: 0.55rem 0.8rem;
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+  background: var(--gray-50);
+}
+
+.db-header .db-calendar .p-inputtext:focus {
+  border-color: var(--orange);
+  box-shadow: 0 0 0 1px var(--orange);
+  background: var(--white);
+}
+
+.db-header .db-calendar .p-datepicker-trigger {
+  background: var(--gray-50);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.db-header .db-calendar .p-datepicker-trigger:hover {
+  background: var(--gray-200);
+  color: var(--orange);
+}
+
+.db-header .db-search-btn {
+  padding: 0.58rem 1.2rem;
+  background: linear-gradient(135deg, var(--orange), #FB923C);
+  font-weight: 700;
+  box-shadow: 0 8px 18px -6px rgba(245, 158, 11, 0.5);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+
+.db-header .db-search-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+  box-shadow: 0 10px 22px -6px rgba(245, 158, 11, 0.6);
+}
+
+.db-header .db-search-btn:active { transform: translateY(0); }
 
 /* Stat cards */
 .db-stats-grid {
@@ -3931,25 +4064,6 @@ h2 {
   cursor: pointer;
 }
 
-.db-refresh-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 99px;
-  background: var(--orange);
-  color: var(--white);
-  font-size: 0.82rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: filter 0.15s;
-}
-
-.db-refresh-btn:hover { filter: brightness(1.08); }
-
-.db-refresh-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-
 /* Charts row */
 .db-charts-row {
   display: grid;
@@ -3959,11 +4073,20 @@ h2 {
   align-items: stretch;
 }
 
+/* Home dashboard (portal quản trị) only — put traffic + delivery charts side by side.
+   Scoped with :not(.cd-charts-row) so the customer report page (cd-charts-row) keeps its own layout. */
+@media (min-width: 960px) {
+  .db-charts-row:not(.cd-charts-row) {
+    grid-template-columns: 1.4fr 1fr;
+  }
+}
+
 .db-chart-card {
   background: var(--white);
   border-radius: var(--radius);
   padding: 1.25rem;
   box-shadow: var(--shadow-sm);
+  min-width: 0;
 }
 
 .db-traffic-card {
@@ -3983,7 +4106,19 @@ h2 {
   margin-bottom: 0.75rem;
 }
 
-.db-chart-head h3 { margin: 0; font-size: 0.95rem; font-weight: 700; color: var(--gray-800); }
+.db-chart-head h3 { margin: 0; font-size: 0.95rem; font-weight: 700; color: var(--gray-800); display: flex; align-items: center; gap: 0.5rem; }
+
+.db-chart-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: var(--gray-100, #f3f4f6);
+  color: var(--red);
+  flex-shrink: 0;
+}
 
 .db-t1-badge {
   font-size: 0.72rem;
@@ -4415,7 +4550,6 @@ h2 {
 
 @media (max-width: 1200px) {
   .db-stats-grid { grid-template-columns: repeat(auto-fill, 292px); }
-  .db-charts-row { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 768px) {
@@ -4489,38 +4623,8 @@ h2 {
 
 .cd-filter-card {
   margin-bottom: 1.25rem;
-}
-
-.cd-header-row {
-  justify-content: space-between;
-  align-items: center;
-}
-
-.cd-reload-btn {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.45rem 0.85rem;
+  box-shadow: 0 8px 24px -8px rgba(17, 24, 39, 0.12), var(--shadow-sm);
   border: 1px solid var(--gray-200);
-  border-radius: var(--radius-sm);
-  background: var(--white);
-  color: var(--gray-800);
-  font-size: 0.8rem;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.15s;
-}
-
-.cd-reload-btn:hover:not(:disabled) {
-  border-color: var(--red);
-  color: var(--red);
-}
-
-.cd-reload-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
 }
 
 .cd-spin {
@@ -4615,15 +4719,26 @@ h2 {
 .cd-donut-card {
   display: flex;
   flex-direction: column;
+  min-height: 340px;
 }
 
 .cd-donut-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  align-content: center;
   justify-content: center;
-  gap: 2rem;
+  gap: 1.5rem 2rem;
   flex: 1;
+  padding: 0.5rem 0;
 }
+
+/* Narrower donut column (Customer report chart row is 2fr/1fr) — trim the
+   donut + legend so they never need to squeeze/wrap their inner text. */
+.cd-donut-row .db-donut { width: 190px; height: 190px; }
+.cd-donut-row .db-donut-hole { width: 120px; height: 120px; }
+.cd-donut-row .db-donut-value { font-size: 1.85rem; }
+.cd-donut-row .db-delivery-legend { min-width: 170px; gap: 0.9rem; }
 
 .cd-table-head {
   display: flex;
@@ -4692,7 +4807,7 @@ h2 {
 
 .cc-page-title {
   margin: 0;
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: var(--gray-800);
 }
@@ -4725,7 +4840,7 @@ h2 {
 
 .cc-section-title {
   margin: 0 0 1rem;
-  font-size: 0.95rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: var(--gray-800);
 }
@@ -5052,12 +5167,6 @@ h2 {
 
 .cca-page { display: flex; flex-direction: column; gap: 1.25rem; padding: 1.5rem 1rem; }
 
-.cca-header {
-  padding: 1.25rem 1.25rem 1rem;
-  margin-bottom: 0.5rem;
-  border-bottom: 1px solid var(--gray-200);
-}
-
 .cca-filter-grid {
   display: flex;
   flex-wrap: wrap;
@@ -5065,6 +5174,8 @@ h2 {
   gap: 0.75rem;
   padding: 1rem 1.25rem 1.5rem;
 }
+
+.cca-filter-card .cca-filter-grid { padding: 0; }
 
 .cca-filter-grid .gw-form-field { min-width: 150px; }
 
@@ -5128,7 +5239,7 @@ h2 {
 
 .cdb-page-title {
   margin: 0;
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: var(--gray-800);
 }
@@ -5335,7 +5446,6 @@ h2 {
   gap: 1.25rem;
 }
 
-.cml-header .gw-card-title { font-size: 1.3rem; }
 .cml-header .gw-card-subtitle { margin-top: 0.35rem; font-size: 0.85rem; }
 
 .cml-filter-grid.cca-filter-grid { padding: 0; align-items: flex-end; }
@@ -5368,29 +5478,4 @@ h2 {
 .cml-table td { vertical-align: top; }
 
 .cml-table .lk-cell-truncate { max-width: 340px; }
-
-.cml-refresh-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  flex-shrink: 0;
-  border: 1px solid var(--gray-200);
-  border-radius: var(--radius-sm);
-  background: var(--white);
-  color: var(--gray-600);
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.cml-refresh-btn:hover:not(:disabled) {
-  border-color: var(--red);
-  color: var(--red);
-}
-
-.cml-refresh-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
 

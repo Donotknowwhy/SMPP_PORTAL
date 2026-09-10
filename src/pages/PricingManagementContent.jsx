@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { BadgeDollarSign, CloudUpload, Search, History, ListChecks, Eye, X } from 'lucide-react'
+import { BadgeDollarSign, CloudUpload, Search, History, ListChecks, Eye, X, Tags } from 'lucide-react'
 import { HISTORY_ITEMS } from '../constants/pricingManagement'
 import Pagination from '../components/common/Pagination'
 import { useAuth } from '../context/AuthContext'
@@ -171,7 +171,7 @@ function PricingManagementContent() {
   return (
     <div className="pricing-management-content">
       {/* Header card */}
-      <div className="gw-card pm-header-card">
+      <div className="gw-card pm-header-card gw-header-elevated">
         <div className="gw-card-head" style={{ marginBottom: 0 }}>
           <span className="gw-card-icon">
             <BadgeDollarSign size={18} />
@@ -187,9 +187,10 @@ function PricingManagementContent() {
       </div>
 
       {/* Price table */}
-      <div className="routing-table-section gw-table-section">
+      <div className="routing-table-section gw-table-section gw-header-elevated">
         <div className="routing-table-header gw-table-header">
           <div className="gw-table-header-text">
+            <span className="table-icon"><Tags size={18} /></span>
             <div>
               <h3 className="table-title">Bảng giá SMS Brandname</h3>
               <p className="gw-card-subtitle">Quản lý giá gửi nhận/ giá bán theo nhà mạng</p>
@@ -276,7 +277,7 @@ function PricingManagementContent() {
       <PriceDetailModal item={detailItem} onClose={() => setDetailItem(null)} />
 
       {/* History */}
-      <div className="gw-card pm-history-card">
+      <div className="gw-card pm-history-card gw-header-elevated">
         <div className="gw-history-head">
           <span className="gw-card-icon">
             <History size={18} />

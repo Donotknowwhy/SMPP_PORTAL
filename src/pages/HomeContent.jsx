@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useMemo, useState } from 'react'
 import { Calendar } from 'primereact/calendar'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-import { ListSortDescending, Upload } from 'lucide-react'
+import { ListSortDescending, Upload, BarChart3, PieChart, RefreshCw, LayoutDashboard } from 'lucide-react'
 import { toast } from 'react-toastify'
 import iconSearch from '../assets/icons/flowbite_search-outline.svg'
 import { STATS } from '../constants/home'
@@ -357,7 +357,7 @@ function HomeContent() {
       <div className="db-header">
         <div>
           <h1 className="db-title">
-            <span className="db-title-icon">☰</span> Dashboard
+            <span className="db-title-icon"><LayoutDashboard size={18} /></span> Dashboard
           </h1>
           <p className="db-subtitle">Dữ liệu ngày T-1</p>
         </div>
@@ -392,11 +392,16 @@ function HomeContent() {
               className="db-calendar"
             />
           </div>
-          <button className="db-search-btn" onClick={() => fetchDashboard()} disabled={trafficLoading || deliveryLoading}>
-            Tìm <img src={iconSearch} alt="Tìm" className="db-search-icon" />
+          <button
+            className="db-refresh-icon-btn"
+            onClick={resetDashboardFilters}
+            disabled={trafficLoading || deliveryLoading}
+            title="Làm mới bộ lọc và tải lại dữ liệu"
+          >
+            <RefreshCw size={16} />
           </button>
-          <button className="db-refresh-btn" onClick={resetDashboardFilters} disabled={trafficLoading || deliveryLoading}>
-            ↻ Làm mới
+          <button className="db-search-btn" onClick={() => fetchDashboard()} disabled={trafficLoading || deliveryLoading}>
+            Tra cứu <img src={iconSearch} alt="Tra cứu" className="db-search-icon" />
           </button>
         </div>
       </div>
@@ -421,9 +426,9 @@ function HomeContent() {
       {/* Charts row */}
       <div className="db-charts-row">
         {/* Traffic bar chart */}
-        <div className="db-chart-card db-traffic-card w-full h-[380px] sm:h-[420px] md:h-[450px]">
+        <div className="db-chart-card db-traffic-card h-[380px] sm:h-[420px] md:h-[450px]">
           <div className="db-chart-head">
-            <h3>Lưu lượng SMS</h3>
+            <h3><span className="db-chart-icon"><BarChart3 size={15} /></span> Lưu lượng SMS</h3>
             <div className="db-chart-toggles">
               <span className="db-t1-badge">T-1</span>
             </div>
@@ -502,7 +507,7 @@ function HomeContent() {
         {/* Delivery status donut */}
         <div className="db-chart-card db-delivery-card">
           <div className="db-chart-head">
-            <h3>Delivery Status</h3>
+            <h3><span className="db-chart-icon"><PieChart size={15} /></span> Delivery Status</h3>
             <span className="db-t1-badge">T-1</span>
           </div>
           {deliveryError && <p className="gw-table-error">{deliveryError}</p>}

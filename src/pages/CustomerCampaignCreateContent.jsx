@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react'
 import { Calendar } from 'primereact/calendar'
 import { toast } from 'react-toastify'
-import { Upload, Download, Save, Info, X } from 'lucide-react'
+import { Upload, Download, Save, Info, X, Send } from 'lucide-react'
 import {
   BRANDNAME_OPTIONS,
   CAMPAIGN_MESSAGE_TYPES,
@@ -84,9 +84,12 @@ function CustomerCampaignCreateContent() {
 
   return (
     <div className="cc-page">
-      <div className="cc-page-header">
-        <h2 className="cc-page-title">Tạo chiến dịch gửi tin</h2>
-        <p className="cc-page-subtitle">Thiết lập nội dung, người nhận và thời gian gửi cho chiến dịch SMS</p>
+      <div className="cc-page-header gw-page-header flex items-start gap-3">
+        <span className="gw-card-icon"><Send size={18} /></span>
+        <div>
+          <h2 className="cc-page-title">Tạo chiến dịch gửi tin</h2>
+          <p className="cc-page-subtitle">Thiết lập nội dung, người nhận và thời gian gửi cho chiến dịch SMS</p>
+        </div>
       </div>
 
       <div className="cc-layout">
