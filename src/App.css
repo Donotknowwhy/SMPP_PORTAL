@@ -2864,6 +2864,12 @@ h2 {
   white-space: nowrap;
 }
 
+.pm-upload-btn:disabled,
+.pm-history-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .pm-search-field {
   position: relative;
   display: flex;
@@ -2931,6 +2937,8 @@ h2 {
 
 .pm-detail-modal { max-width: 520px; width: 100%; }
 
+.pm-edit-modal { max-width: 640px; width: 100%; }
+
 .pm-detail-summary {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -2968,6 +2976,37 @@ h2 {
 
 .pm-detail-price-table td:not(:first-child) { color: var(--gray-800); font-weight: 500; }
 
+.pm-edit-table-wrap {
+  max-height: 420px;
+  overflow: auto;
+}
+
+.pm-edit-price-table input {
+  width: 100%;
+  min-width: 90px;
+  box-sizing: border-box;
+  padding: 0.45rem 0.55rem;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  color: var(--gray-800);
+  text-align: right;
+  font: inherit;
+}
+
+.pm-edit-price-table input:focus {
+  outline: none;
+  border-color: var(--red);
+  box-shadow: 0 0 0 3px rgba(227, 30, 36, 0.1);
+}
+
+.pm-edit-price-table input:disabled { background: var(--gray-100); }
+
+.pm-form-error {
+  margin: 0.75rem 0 0;
+  color: var(--red);
+  font-size: 0.82rem;
+}
+
 .pm-history-btn {
   display: inline-flex;
   align-items: center;
@@ -2986,6 +3025,13 @@ h2 {
 .pm-history-list {
   display: flex;
   flex-direction: column;
+}
+
+.pm-history-state {
+  padding: 1.5rem 1rem;
+  color: var(--gray-400);
+  font-size: 0.9rem;
+  text-align: center;
 }
 
 .pm-history-item {
@@ -3053,8 +3099,10 @@ h2 {
 
 @media (max-width: 640px) {
   .pm-header-card { flex-direction: column; align-items: stretch; }
+  .pm-search-field { width: 100%; }
   .pm-search-field input { width: 100%; }
   .pm-history-compare { flex-wrap: wrap; }
+  .pm-detail-summary { grid-template-columns: 1fr; }
 }
 
 /* ============================================================
@@ -5478,4 +5526,3 @@ h2 {
 .cml-table td { vertical-align: top; }
 
 .cml-table .lk-cell-truncate { max-width: 340px; }
-
