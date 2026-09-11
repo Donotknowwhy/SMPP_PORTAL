@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Calendar } from 'primereact/calendar'
 import { Dropdown } from 'primereact/dropdown'
 import { toast } from 'react-toastify'
 import {
@@ -19,12 +18,6 @@ import {
 import Pagination from '../components/common/Pagination'
 
 const ALL_OPTION = { label: 'Tất cả', value: 0 }
-
-function formatDate(date) {
-  if (!date) return ''
-  const pad = (n) => String(n).padStart(2, '0')
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
-}
 
 function formatDisplayDate(value) {
   if (!value) return '-'
@@ -57,16 +50,12 @@ function isVerifiedStatus(status) {
 
 function ReconciliationContent() {
   const { authToken } = useAuth()
-  const [fromDate, setFromDate] = useState(null)
-  const [toDate, setToDate] = useState(null)
   const [network, setNetwork] = useState(0)
-  const [brandname, setBrandname] = useState(0)
   const [partner, setPartner] = useState(0)
   const [status, setStatus] = useState('')
   const [selectedRows, setSelectedRows] = useState([])
 
   const [networkOptions, setNetworkOptions] = useState([ALL_OPTION])
-  const [brandnameOptions, setBrandnameOptions] = useState([ALL_OPTION])
   const [partnerOptions, setPartnerOptions] = useState([ALL_OPTION])
   const [infoError, setInfoError] = useState('')
 
@@ -76,8 +65,6 @@ function ReconciliationContent() {
   const [listLoading, setListLoading] = useState(false)
   const [listError, setListError] = useState('')
   const [verifying, setVerifying] = useState(false)
-  const [dateFilterApplied, setDateFilterApplied] = useState(false)
-
   const [reconPage, setReconPage] = useState(1)
   const [reconPageSize, setReconPageSize] = useState(10)
 
@@ -108,10 +95,9 @@ function ReconciliationContent() {
     setInfoError('')
 
     getRoutingInfo(authToken)
-      .then(({ brandNames, telcos, providers }) => {
+      .then(({ telcos, providers }) => {
         if (cancelled) return
         setNetworkOptions([ALL_OPTION, ...telcos.map((t) => ({ label: t.telco, value: t.id }))])
-        setBrandnameOptions([ALL_OPTION, ...brandNames.map((b) => ({ label: b.brandName, value: b.id }))])
         setPartnerOptions([ALL_OPTION, ...providers.map((p) => ({ label: p.providerName, value: p.id }))])
       })
       .catch((err) => {
@@ -127,11 +113,7 @@ function ReconciliationContent() {
     page = reconPage,
     limit = reconPageSize,
     telcoId = network,
-    brandNameId = brandname,
     providerId = partner,
-    applyDateFilter = dateFilterApplied,
-    from = fromDate,
-    to = toDate,
     statusFilter = status,
   } = {}) => {
     if (!authToken) return
@@ -144,11 +126,8 @@ function ReconciliationContent() {
       page,
       limit,
       telcoId,
-      brandNameId,
       providerId,
-      timeType: applyDateFilter ? 1 : 0,
-      startTime: applyDateFilter ? formatDate(from) : undefined,
-      endTime: applyDateFilter ? formatDate(to) : undefined,
+      timeType: 0,
       status: statusFilter,
     })
       .then(({ rows: nextRows, total: nextTotal, totalPage }) => {
@@ -192,38 +171,21 @@ function ReconciliationContent() {
   }, [authToken])
 
   const handleResetFilters = () => {
-    setFromDate(null)
-    setToDate(null)
     setNetwork(0)
-    setBrandname(0)
     setPartner(0)
     setStatus('')
-    setDateFilterApplied(false)
 
     fetchList({
       page: 1,
       limit: reconPageSize,
       telcoId: 0,
-      brandNameId: 0,
       providerId: 0,
-      applyDateFilter: false,
-      from: null,
-      to: null,
       statusFilter: '',
     })
   }
 
   const handleSearch = () => {
-    const hasAnyDate = Boolean(fromDate || toDate)
-    const hasBothDates = Boolean(fromDate && toDate)
-    if (hasAnyDate && !hasBothDates) {
-      toast.error('Vui lòng chọn đủ Từ ngày và Đến ngày.')
-      return
-    }
-
-    const applyDateFilter = hasBothDates
-    setDateFilterApplied(applyDateFilter)
-    fetchList({ page: 1, limit: reconPageSize, applyDateFilter })
+    fetchList({ page: 1, limit: reconPageSize })
   }
 
   const handleVerifySelected = () => {
@@ -260,67 +222,6 @@ function ReconciliationContent() {
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="gw-card gw-header-elevated">
-        <div className="flex items-start gap-3" style={{ marginBottom: '1rem' }}>
-          <span className="gw-card-icon"><Search size={18} /></span>
-          <div>
-            <h3 className="gw-card-title" style={{ margin: 0 }}>Bộ lọc đối soát</h3>
-            <p className="gw-card-subtitle" style={{ margin: '0.2rem 0 0' }}>Tìm kiếm dữ liệu đối soát theo thời gian và nhà mạng</p>
-          </div>
-        </div>
-
-        {infoError && <p className="gw-table-error">{infoError}</p>}
-
-        <div className="rc-filter-grid">
-          <div className="gw-form-field">
-            <label>Từ ngày</label>
-            <Calendar
-              value={fromDate}
-              onChange={(e) => setFromDate(e.value)}
-              dateFormat="dd/mm/yy"
-              showIcon
-              className="db-calendar db-calendar-inline"
-            />
-          </div>
-          <div className="gw-form-field">
-            <label>Đến ngày</label>
-            <Calendar
-              value={toDate}
-              onChange={(e) => setToDate(e.value)}
-              dateFormat="dd/mm/yy"
-              showIcon
-              className="db-calendar db-calendar-inline"
-            />
-          </div>
-          <div className="gw-form-field">
-            <label>Nhà mạng</label>
-            <Dropdown value={network} onChange={(e) => setNetwork(e.value)} options={networkOptions} className="bn-dropdown" />
-          </div>
-          <div className="gw-form-field">
-            <label>Brandname</label>
-            <Dropdown value={brandname} onChange={(e) => setBrandname(e.value)} options={brandnameOptions} className="bn-dropdown" />
-          </div>
-          <div className="gw-form-field">
-            <label>Đối tác</label>
-            <Dropdown value={partner} onChange={(e) => setPartner(e.value)} options={partnerOptions} className="bn-dropdown" />
-          </div>
-          <div className="gw-form-field">
-            <label>Trạng thái</label>
-            <Dropdown value={status} onChange={(e) => setStatus(e.value)} options={STATUS_OPTIONS} className="bn-dropdown" />
-          </div>
-        </div>
-
-        <div className="rc-filter-actions">
-          <button className="bn-btn-draft p-button" onClick={handleResetFilters} disabled={listLoading}>
-            <RefreshCw size={16} /> Làm mới
-          </button>
-          <button className="db-export-btn" onClick={handleSearch} disabled={listLoading}>
-            <Search size={16} /> {listLoading ? 'Đang tìm...' : 'Tìm kiếm'}
-          </button>
-        </div>
-      </div>
-
       <div className="rc-stats-grid">
         {STATS_CONFIG.map((s) => (
           <div key={s.id} className="rc-stat-card">
@@ -335,6 +236,42 @@ function ReconciliationContent() {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Compact filters */}
+      <div className="gw-card gw-header-elevated rc-filter-card">
+        <div className="rc-filter-heading">
+          <span className="gw-card-icon"><Search size={18} /></span>
+          <div>
+            <h3 className="gw-card-title" style={{ margin: 0 }}>Bộ lọc đối soát</h3>
+            <p className="gw-card-subtitle" style={{ margin: '0.2rem 0 0' }}>Lọc theo nhà mạng, đối tác và trạng thái</p>
+          </div>
+        </div>
+
+        {infoError && <p className="gw-table-error">{infoError}</p>}
+
+        <div className="rc-compact-filter-row">
+          <div className="gw-form-field">
+            <label>Nhà mạng</label>
+            <Dropdown value={network} onChange={(e) => setNetwork(e.value)} options={networkOptions} className="bn-dropdown" />
+          </div>
+          <div className="gw-form-field">
+            <label>Đối tác</label>
+            <Dropdown value={partner} onChange={(e) => setPartner(e.value)} options={partnerOptions} className="bn-dropdown" />
+          </div>
+          <div className="gw-form-field">
+            <label>Trạng thái</label>
+            <Dropdown value={status} onChange={(e) => setStatus(e.value)} options={STATUS_OPTIONS} className="bn-dropdown" />
+          </div>
+          <div className="rc-filter-actions">
+            <button className="bn-btn-draft p-button" onClick={handleResetFilters} disabled={listLoading}>
+              <RefreshCw size={16} /> Làm mới
+            </button>
+            <button className="db-export-btn" onClick={handleSearch} disabled={listLoading}>
+              <Search size={16} /> {listLoading ? 'Đang tìm...' : 'Tìm kiếm'}
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Reconciliation table */}

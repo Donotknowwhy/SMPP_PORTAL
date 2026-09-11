@@ -13,7 +13,7 @@ const MENU_GROUPS = [
     label: 'Portal quản trị',
     icon: Building2,
     items: [
-      { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+      { id: 'dashboard', label: 'Báo cáo thống kê', icon: LayoutDashboard },
       { id: 'gateway', label: 'Cấu hình gateway', icon: Router },
       { id: 'brandname', label: 'Khai báo SMS Brandname', icon: Smartphone },
       { id: 'pricing', label: 'Quản lý bảng giá nhập/ giá bán', icon: BadgeDollarSign },

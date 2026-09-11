@@ -3472,17 +3472,26 @@ h2 {
 .rc-stat-unit { font-size: 0.8rem; font-weight: 500; color: var(--gray-400); }
 .rc-stat-trend { margin: 0; font-size: 0.74rem; color: var(--success); font-weight: 500; }
 
-.rc-filter-grid {
+.rc-filter-card { padding: 1rem 1.25rem; }
+
+.rc-filter-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+}
+
+.rc-compact-filter-row {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 1rem;
-  margin-bottom: 1rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  align-items: end;
+  gap: 0.75rem;
 }
 
 .rc-filter-actions {
   display: flex;
-  justify-content: flex-end;
   gap: 0.6rem;
+  padding-bottom: 1px;
 }
 
 .rc-filter-actions .p-button,
@@ -3568,14 +3577,17 @@ h2 {
 
 @media (max-width: 1100px) {
   .rc-stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .rc-filter-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .rc-compact-filter-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .rc-filter-actions { justify-content: flex-end; }
 }
 
 @media (max-width: 640px) {
   .rc-header-card { flex-direction: column; align-items: stretch; }
   .rc-header-actions { flex-direction: column; }
   .rc-stats-grid { grid-template-columns: 1fr; }
-  .rc-filter-grid { grid-template-columns: 1fr; }
+  .rc-compact-filter-row { grid-template-columns: 1fr; }
+  .rc-filter-actions { justify-content: stretch; }
+  .rc-filter-actions > * { flex: 1; justify-content: center; }
 }
 
 /* ============================================================
@@ -4434,7 +4446,6 @@ h2 {
 
 .db-calendar-inline.p-calendar { width: 150px; flex-shrink: 0; }
 
-.rc-filter-grid .db-calendar-inline.p-calendar,
 .lk-basic-grid .db-calendar-inline.p-calendar {
   width: 100%;
   flex-shrink: 1;
@@ -5496,7 +5507,10 @@ h2 {
 
 .cml-header .gw-card-subtitle { margin-top: 0.35rem; font-size: 0.85rem; }
 
-.cml-filter-grid.cca-filter-grid { padding: 0; align-items: flex-end; }
+.cml-filter-grid.cca-filter-grid {
+  padding: 0;
+  align-items: end;
+}
 
 .cml-search-field { flex: 1.4; min-width: 220px; }
 

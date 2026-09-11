@@ -357,9 +357,9 @@ function HomeContent() {
       <div className="db-header">
         <div>
           <h1 className="db-title">
-            <span className="db-title-icon"><LayoutDashboard size={18} /></span> Dashboard
+            <span className="db-title-icon"><LayoutDashboard size={18} /></span> Tổng quan gửi SMS Brandname
           </h1>
-          <p className="db-subtitle">Dữ liệu ngày T-1</p>
+          <p className="db-subtitle">Theo dõi số lượng và xu hướng gửi SMS theo thời gian T-1</p>
         </div>
         <div className="db-date-filters flex-wrap sm:flex-nowrap">
           <div className="db-date-field">
@@ -507,7 +507,7 @@ function HomeContent() {
         {/* Delivery status donut */}
         <div className="db-chart-card db-delivery-card">
           <div className="db-chart-head">
-            <h3><span className="db-chart-icon"><PieChart size={15} /></span> Delivery Status</h3>
+            <h3><span className="db-chart-icon"><PieChart size={15} /></span> Trạng thái gửi SMS</h3>
             <span className="db-t1-badge">T-1</span>
           </div>
           {deliveryError && <p className="gw-table-error">{deliveryError}</p>}

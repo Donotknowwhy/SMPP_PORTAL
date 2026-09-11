@@ -33,7 +33,7 @@ function formatDateTime(value) {
 
 function MessageLookupContent() {
   const { authToken } = useAuth()
-  const [advancedOpen, setAdvancedOpen] = useState(true)
+  const [advancedOpen, setAdvancedOpen] = useState(false)
   const [phone, setPhone] = useState('')
   const [content, setContent] = useState('')
   const [fromDate, setFromDate] = useState(DEFAULT_FROM_DATE)
@@ -138,19 +138,19 @@ function MessageLookupContent() {
 
   return (
     <div className="lookup-content">
-      <div className="gw-card gw-header-elevated">
-        <div className="gw-card-head">
-          <span className="gw-card-icon">
-            <FileSearch2 size={18} />
-          </span>
-          <div>
-            <h2 className="gw-card-title">Tra cứu chi tiết tin nhắn</h2>
-            <p className="gw-card-subtitle">
-              Tra cứu lịch sử SMS và kết quả Delivery Report (DLR) theo MsgID, số điện thoại, Brandname, nhà mạng, đối tác và thời gian
-            </p>
-          </div>
+      <div className="gw-page-header lk-header flex items-start gap-3">
+        <span className="gw-card-icon">
+          <FileSearch2 size={18} />
+        </span>
+        <div>
+          <h2 className="gw-card-title">Tra cứu chi tiết tin nhắn</h2>
+          <p className="gw-card-subtitle">
+            Tra cứu lịch sử SMS và kết quả Delivery Report (DLR) theo MsgID, số điện thoại, Brandname, nhà mạng, đối tác và thời gian
+          </p>
         </div>
+      </div>
 
+      <div className="gw-card gw-header-elevated lk-filter-card">
         <div className="lk-basic-grid">
           <div className="gw-form-field">
             <label>Số điện thoại</label>
