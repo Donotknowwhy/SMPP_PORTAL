@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import {
   LayoutDashboard, Router, Smartphone, BadgeDollarSign, UserCog,
-  GitCompare, FileSearch2, Waypoints, Film, User, LogOut,
+  GitCompare, FileSearch2, User, LogOut,
   Building2, Users, Send, ClipboardCheck, BookUser, History,
   ChevronRight, ChevronDown,
 } from 'lucide-react'
@@ -9,9 +9,9 @@ import {
 const MENU_GROUPS = [
   {
     id: 'admin',
-    number: 4,
-    label: 'Portal quản trị',
+    label: 'Quản trị SMS Brandname',
     icon: Building2,
+    roles: ['ADMIN'],
     items: [
       { id: 'dashboard', label: 'Báo cáo thống kê', icon: LayoutDashboard },
       { id: 'gateway', label: 'Cấu hình gateway', icon: Router },
@@ -20,15 +20,13 @@ const MENU_GROUPS = [
       { id: 'account', label: 'Quản lý tài khoản', icon: UserCog },
       { id: 'reconcile', label: 'Đổi soát', icon: GitCompare },
       { id: 'lookup', label: 'Tra cứu tin nhắn', icon: FileSearch2 },
-      { id: 'routing', label: 'Rule tự động Routing', icon: Waypoints },
-      { id: 'motion', label: 'Motion', icon: Film },
     ],
   },
   {
     id: 'customer',
-    number: 3,
-    label: 'Portal khách hàng (Customer Portal)',
+    label: 'Dịch vụ SMS Brandname',
     icon: Users,
+    roles: ['CLIENT'],
     items: [
       { id: 'customer/dashboard', label: 'Dashboard khách hàng', icon: LayoutDashboard },
       { id: 'customer/campaigns/new', label: 'Tạo chiến dịch gửi tin', icon: Send },
@@ -40,13 +38,17 @@ const MENU_GROUPS = [
   },
 ]
 
-function Sidebar({ activeMenu, onChangeMenu, username, onLogout }) {
+function Sidebar({ activeMenu, onChangeMenu, username, role, onLogout }) {
   const [collapsed, setCollapsed] = useState(false)
+  const availableMenuGroups = role
+    ? MENU_GROUPS.filter((group) => group.roles.includes(role))
+    : MENU_GROUPS
 
-  const activeGroupId = MENU_GROUPS.find((g) => g.items.some((i) => i.id === activeMenu))?.id || 'customer'
+  const activeGroupId = availableMenuGroups.find((g) => g.items.some((i) => i.id === activeMenu))?.id || availableMenuGroups[0]?.id
   const [openGroups, setOpenGroups] = useState(() => new Set([activeGroupId]))
 
   useEffect(() => {
+    if (!activeGroupId) return
     setOpenGroups((prev) => new Set(prev).add(activeGroupId))
   }, [activeGroupId])
 
@@ -74,7 +76,7 @@ function Sidebar({ activeMenu, onChangeMenu, username, onLogout }) {
         </button>
       </div>
       <nav className="sidebar-nav">
-        {MENU_GROUPS.map((group) => {
+        {availableMenuGroups.map((group) => {
           const isOpen = openGroups.has(group.id)
           const isActiveGroup = group.id === activeGroupId
           return (
@@ -88,7 +90,7 @@ function Sidebar({ activeMenu, onChangeMenu, username, onLogout }) {
                   <group.icon size={18} />
                 </span>
                 <span className={`sidebar-group-label ${labelClass}`}>
-                  {group.number}. {group.label}
+                  {group.label}
                 </span>
                 <span className={`sidebar-group-chevron ${labelClass}`}>
                   {isOpen ? <ChevronDown size={15} /> : <ChevronRight size={15} />}

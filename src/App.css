@@ -2101,7 +2101,7 @@ h2 {
   background: var(--white);
   border-radius: var(--radius);
   box-shadow: var(--shadow-sm);
-  padding: 1.25rem 1.5rem;
+  padding: 1.25rem;
 }
 
 .gw-card-head {
@@ -3492,10 +3492,22 @@ h2 {
   display: flex;
   gap: 0.6rem;
   padding-bottom: 1px;
+  align-items: center;
 }
 
 .rc-filter-actions .p-button,
 .rc-filter-actions .bn-btn-draft { width: auto; }
+
+.rc-filter-actions .db-export-btn {
+  min-width: 8.5rem;
+  height: 2.5rem;
+  padding: 0 1.6rem;
+  justify-content: center;
+}
+
+.rc-filter-actions .db-refresh-icon-btn {
+  flex: 0 0 auto;
+}
 
 .rc-table-toolbar {
   display: flex;
@@ -3815,7 +3827,7 @@ h2 {
   border-radius: var(--radius);
   border: 1px solid var(--gray-200);
   box-shadow: 0 8px 24px -8px rgba(17, 24, 39, 0.12), var(--shadow-sm);
-  padding: 1.35rem 1.75rem;
+  padding: 1.35rem 1.25rem;
 }
 
 /* ============================================================
@@ -3832,7 +3844,7 @@ h2 {
   margin-bottom: 1.5rem;
   gap: 1.25rem;
   flex-wrap: wrap;
-  padding: 1.35rem 1.75rem;
+  padding: 1.35rem 1.25rem;
   border-radius: var(--radius);
   background: var(--white);
   box-shadow: 0 8px 24px -8px rgba(17, 24, 39, 0.12), var(--shadow-sm);
@@ -3933,7 +3945,8 @@ h2 {
 
 .db-search-btn {
   height: 2.5rem;
-  padding: 0 1.1rem;
+  min-width: 8.5rem;
+  padding: 0 1.6rem;
   border: none;
   border-radius: var(--radius-sm);
   background: var(--orange);
@@ -3943,6 +3956,7 @@ h2 {
   cursor: pointer;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.4rem;
   flex-shrink: 0;
   transition: filter 0.15s;
@@ -4021,7 +4035,8 @@ h2 {
 }
 
 .db-header .db-search-btn {
-  padding: 0.58rem 1.2rem;
+  min-width: 8.5rem;
+  padding: 0.58rem 1.6rem;
   background: linear-gradient(135deg, var(--orange), #FB923C);
   font-weight: 700;
   box-shadow: 0 8px 18px -6px rgba(245, 158, 11, 0.5);
@@ -4226,6 +4241,13 @@ h2 {
 }
 
 .db-bar-mini-legend > div { display: flex; align-items: center; gap: 0.4rem; }
+
+.db-bar-mini-legend .db-legend-square {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  margin-top: 0;
+}
 
 .db-bar-chart { display: flex; gap: 0.5rem; height: 100%; }
 
@@ -4699,7 +4721,6 @@ h2 {
   display: flex;
   align-items: flex-end;
   gap: 0.9rem;
-  margin-top: 0.75rem;
 }
 
 .cd-stat-btn {

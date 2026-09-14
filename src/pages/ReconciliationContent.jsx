@@ -52,7 +52,7 @@ function ReconciliationContent() {
   const { authToken } = useAuth()
   const [network, setNetwork] = useState(0)
   const [partner, setPartner] = useState(0)
-  const [status, setStatus] = useState('')
+  const [status, setStatus] = useState(null)
   const [selectedRows, setSelectedRows] = useState([])
 
   const [networkOptions, setNetworkOptions] = useState([ALL_OPTION])
@@ -173,14 +173,14 @@ function ReconciliationContent() {
   const handleResetFilters = () => {
     setNetwork(0)
     setPartner(0)
-    setStatus('')
+    setStatus(null)
 
     fetchList({
       page: 1,
       limit: reconPageSize,
       telcoId: 0,
       providerId: 0,
-      statusFilter: '',
+      statusFilter: null,
     })
   }
 
@@ -264,8 +264,13 @@ function ReconciliationContent() {
             <Dropdown value={status} onChange={(e) => setStatus(e.value)} options={STATUS_OPTIONS} className="bn-dropdown" />
           </div>
           <div className="rc-filter-actions">
-            <button className="bn-btn-draft p-button" onClick={handleResetFilters} disabled={listLoading}>
-              <RefreshCw size={16} /> Làm mới
+            <button
+              className="db-refresh-icon-btn"
+              onClick={handleResetFilters}
+              disabled={listLoading}
+              title="Làm mới bộ lọc"
+            >
+              <RefreshCw size={16} />
             </button>
             <button className="db-export-btn" onClick={handleSearch} disabled={listLoading}>
               <Search size={16} /> {listLoading ? 'Đang tìm...' : 'Tìm kiếm'}

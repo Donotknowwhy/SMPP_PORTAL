@@ -498,7 +498,7 @@ function HomeContent() {
           <div className="db-bar-mini-legend">
             {providers.map((p) => (
               <div key={p}>
-                <span className="db-legend-dot" style={{ background: providerColors[p] }} /> {p} {providerTotals[p]}
+                <span className="db-legend-square" style={{ background: providerColors[p] }} /> {p} {providerTotals[p]}
               </div>
             ))}
           </div>

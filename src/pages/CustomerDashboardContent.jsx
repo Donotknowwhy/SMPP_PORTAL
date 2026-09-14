@@ -9,6 +9,16 @@ import { getRoutingInfo } from '../utils/routingApi'
 
 const ALL_BRANDNAME_OPTION = { label: 'Tất cả', value: 0 }
 
+function getCurrentMonthStart() {
+  const now = new Date()
+  return new Date(now.getFullYear(), now.getMonth(), 1)
+}
+
+function getCurrentMonthEnd() {
+  const now = new Date()
+  return new Date(now.getFullYear(), now.getMonth() + 1, 0)
+}
+
 function formatDate(date) {
   if (!date) return ''
   const pad = (n) => String(n).padStart(2, '0')
@@ -115,8 +125,8 @@ function CustomerDashboardContent() {
 
   const [brandNameOptions, setBrandNameOptions] = useState([ALL_BRANDNAME_OPTION])
   const [brandNameId, setBrandNameId] = useState(0)
-  const [fromDate, setFromDate] = useState(null)
-  const [toDate, setToDate] = useState(null)
+  const [fromDate, setFromDate] = useState(getCurrentMonthStart)
+  const [toDate, setToDate] = useState(getCurrentMonthEnd)
 
   const [overview, setOverview] = useState({ totalSms: 0, totalSmsSuccess: 0, totalSmsFailed: 0, totalCost: 0 })
   const [overviewLoading, setOverviewLoading] = useState(false)
@@ -297,7 +307,40 @@ function CustomerDashboardContent() {
             <p className="gw-card-subtitle">Theo dõi sản lượng, tỷ lệ thành công và chi phí gửi SMS</p>
           </div>
         </div>
+      </div>
 
+      <div className="cd-stats-grid">
+        <div className="cd-stat-card cd-stat-blue">
+          <span className="cd-stat-icon"><Send size={20} /></span>
+          <div className="cd-stat-body">
+            <div className="cd-stat-value">{numberFormat(totals.totalSent)}</div>
+            <div className="cd-stat-label">Tổng tin gửi</div>
+          </div>
+        </div>
+        <div className="cd-stat-card cd-stat-green">
+          <span className="cd-stat-icon"><CheckCircle2 size={20} /></span>
+          <div className="cd-stat-body">
+            <div className="cd-stat-value">{numberFormat(totals.totalSuccess)}</div>
+            <div className="cd-stat-label">Tin thành công</div>
+          </div>
+        </div>
+        <div className="cd-stat-card cd-stat-red">
+          <span className="cd-stat-icon"><XCircle size={20} /></span>
+          <div className="cd-stat-body">
+            <div className="cd-stat-value">{numberFormat(totals.totalFailed)}</div>
+            <div className="cd-stat-label">Tin thất bại</div>
+          </div>
+        </div>
+        <div className="cd-stat-card cd-stat-amber">
+          <span className="cd-stat-icon"><Wallet size={20} /></span>
+          <div className="cd-stat-body">
+            <div className="cd-stat-value">{currencyFormat(totals.estimatedCost)}</div>
+            <div className="cd-stat-label">Tổng chi phí dự kiến</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="gw-card cd-filter-card">
         <div className="cd-filter-row flex-wrap lg:flex-nowrap">
           <div className="db-date-field">
             <label>Brandname</label>
@@ -340,37 +383,6 @@ function CustomerDashboardContent() {
           </button>
         </div>
         {overviewError && <p className="cd-error-text" style={{ color: '#E31E24', marginTop: 8 }}>{overviewError}</p>}
-      </div>
-
-      <div className="cd-stats-grid">
-        <div className="cd-stat-card cd-stat-blue">
-          <span className="cd-stat-icon"><Send size={20} /></span>
-          <div className="cd-stat-body">
-            <div className="cd-stat-value">{numberFormat(totals.totalSent)}</div>
-            <div className="cd-stat-label">Tổng tin gửi</div>
-          </div>
-        </div>
-        <div className="cd-stat-card cd-stat-green">
-          <span className="cd-stat-icon"><CheckCircle2 size={20} /></span>
-          <div className="cd-stat-body">
-            <div className="cd-stat-value">{numberFormat(totals.totalSuccess)}</div>
-            <div className="cd-stat-label">Tin thành công</div>
-          </div>
-        </div>
-        <div className="cd-stat-card cd-stat-red">
-          <span className="cd-stat-icon"><XCircle size={20} /></span>
-          <div className="cd-stat-body">
-            <div className="cd-stat-value">{numberFormat(totals.totalFailed)}</div>
-            <div className="cd-stat-label">Tin thất bại</div>
-          </div>
-        </div>
-        <div className="cd-stat-card cd-stat-amber">
-          <span className="cd-stat-icon"><Wallet size={20} /></span>
-          <div className="cd-stat-body">
-            <div className="cd-stat-value">{currencyFormat(totals.estimatedCost)}</div>
-            <div className="cd-stat-label">Tổng chi phí dự kiến</div>
-          </div>
-        </div>
       </div>
 
       <div className="db-charts-row cd-charts-row">

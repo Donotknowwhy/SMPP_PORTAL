@@ -5,7 +5,7 @@ const SEND_URL = '/send'
 
 /**
  * Authenticate with the SMS gateway.
- * Returns { token, username } on success, throws on failure.
+ * Returns { token, username, role } on success, throws on failure.
  */
 export async function loginSms(username, password) {
   const { ok, status, statusText, data } = await safeRequest(
@@ -22,7 +22,11 @@ export async function loginSms(username, password) {
     throw new Error('Không nhận được token từ server.')
   }
 
-  return { token, username: data?.data?.username ?? username }
+  return {
+    token,
+    username: data?.data?.username ?? username,
+    role: data?.data?.role ?? null,
+  }
 }
 
 /**
