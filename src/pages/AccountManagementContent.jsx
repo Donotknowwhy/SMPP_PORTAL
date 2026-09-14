@@ -622,18 +622,16 @@ function AccountManagementContent() {
                 <th>Thời gian</th>
                 <th>Người thực hiện</th>
                 <th>Hành động</th>
-                <th>Chi tiết thay đổi</th>
-                <th>Giá trị trước đó</th>
                 <th>Giá trị mới</th>
                 <th>Đối tác</th>
               </tr>
             </thead>
             <tbody>
               {auditLoading && (
-                <tr><td colSpan={7} className="gw-table-status">Đang tải lịch sử thay đổi...</td></tr>
+                <tr><td colSpan={5} className="gw-table-status">Đang tải lịch sử thay đổi...</td></tr>
               )}
               {!auditLoading && !auditError && auditRows.length === 0 && (
-                <tr><td colSpan={7} className="gw-table-status">Chưa có lịch sử thay đổi.</td></tr>
+                <tr><td colSpan={5} className="gw-table-status">Chưa có lịch sử thay đổi.</td></tr>
               )}
               {!auditLoading && auditRows.map((row, index) => (
                 <tr key={`${row.createdAt}-${row.fullName}-${index}`}>
@@ -649,8 +647,6 @@ function AccountManagementContent() {
                     </div>
                   </td>
                   <td><span className="am-action-label">{row.actionChange || '-'}</span></td>
-                  <td>{row.changeField || '-'}</td>
-                  <td>{row.oldValue || '-'}</td>
                   <td>{row.newValue || '-'}</td>
                   <td>{row.providerName || '-'}</td>
                 </tr>

@@ -19,8 +19,8 @@ export default function LoginPage({ onLoginSuccess }) {
 
     setLoading(true)
     try {
-      const { token, username: loggedInUser } = await loginSms(username.trim(), password)
-      onLoginSuccess(token, loggedInUser)
+      const { token, username: loggedInUser, role } = await loginSms(username.trim(), password)
+      onLoginSuccess(token, loggedInUser, role)
     } catch (err) {
       setError(err.message || 'Đăng nhập thất bại. Vui lòng thử lại.')
     } finally {

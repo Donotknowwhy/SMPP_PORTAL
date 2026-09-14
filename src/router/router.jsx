@@ -58,8 +58,8 @@ function LoginRoute() {
     return <Navigate to="/" replace />
   }
 
-  const handleLoginSuccess = (token, username) => {
-    login(token, username)
+  const handleLoginSuccess = (token, username, role) => {
+    login(token, username, role)
     navigate('/', { replace: true })
   }
 

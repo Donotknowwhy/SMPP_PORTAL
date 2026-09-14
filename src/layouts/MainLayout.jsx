@@ -9,7 +9,7 @@ import { useAuth } from '../context/AuthContext'
 import { initialProviders } from '../data/initialProviders'
 
 function MainLayout() {
-  const { authUsername, logout } = useAuth()
+  const { authUsername, authRole, logout } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -114,7 +114,7 @@ function MainLayout() {
       <TopNav activeMenu={activeMenu} onChangeMenu={onChangeMenu} onGoHome={onGoHome} username={authUsername} onLogout={logout} />
 
       <div className="app-body">
-        <Sidebar activeMenu={activeMenu} onChangeMenu={onChangeMenu} username={authUsername} onLogout={logout} />
+        <Sidebar activeMenu={activeMenu} onChangeMenu={onChangeMenu} username={authUsername} role={authRole} onLogout={logout} />
 
         <main className="main-content">
           <div className="container">

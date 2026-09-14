@@ -1,7 +1,7 @@
 import { MessageCircle, FileText, Building2, TrendingDown } from 'lucide-react'
 
 export const STATUS_OPTIONS = [
-  { label: 'Tất cả', value: '' },
+  { label: 'Tất cả', value: null },
   { label: 'Need Review', value: 'NEED_REVIEW' },
   { label: 'Verified', value: 'VERIFIED' },
 ]
