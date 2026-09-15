@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Dropdown } from 'primereact/dropdown'
+import { Dialog } from 'primereact/dialog'
 import { toast } from 'react-toastify'
 import {
   GitCompare, RefreshCw, Search, Info, ShieldCheck, History, ListChecks,
@@ -48,6 +49,10 @@ function isVerifiedStatus(status) {
   return normalized === 'VERIFIED' || normalized === 'RECONCILED'
 }
 
+function isCompletedStatus(status) {
+  return String(status || '').toUpperCase() === 'COMPLETED'
+}
+
 function ReconciliationContent() {
   const { authToken } = useAuth()
   const [network, setNetwork] = useState(0)
@@ -65,6 +70,8 @@ function ReconciliationContent() {
   const [listLoading, setListLoading] = useState(false)
   const [listError, setListError] = useState('')
   const [verifying, setVerifying] = useState(false)
+  const [verifyDialogVisible, setVerifyDialogVisible] = useState(false)
+  const [verifyNote, setVerifyNote] = useState('')
   const [reconPage, setReconPage] = useState(1)
   const [reconPageSize, setReconPageSize] = useState(10)
 
@@ -76,8 +83,12 @@ function ReconciliationContent() {
   const [historyPage, setHistoryPage] = useState(1)
   const [historyPageSize, setHistoryPageSize] = useState(10)
 
-  const allSelected = rows.length > 0 && selectedRows.length === rows.length
-  const toggleSelectAll = () => setSelectedRows(allSelected ? [] : rows.map((row) => row.id))
+  const selectableRowIds = useMemo(
+    () => rows.filter((row) => isCompletedStatus(row.status)).map((row) => row.id),
+    [rows],
+  )
+  const allSelected = selectableRowIds.length > 0 && selectedRows.length === selectableRowIds.length
+  const toggleSelectAll = () => setSelectedRows(allSelected ? [] : selectableRowIds)
   const toggleSelectRow = (id) =>
     setSelectedRows((prev) => (prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id]))
 
@@ -188,24 +199,46 @@ function ReconciliationContent() {
     fetchList({ page: 1, limit: reconPageSize })
   }
 
+  const openVerifyDialog = () => {
+    if (selectedRows.length === 0) return
+    setVerifyNote('')
+    setVerifyDialogVisible(true)
+  }
+
+  const closeVerifyDialog = () => {
+    if (verifying) return
+    setVerifyDialogVisible(false)
+    setVerifyNote('')
+  }
+
   const handleVerifySelected = () => {
     if (!authToken || selectedRows.length === 0) return
 
     setVerifying(true)
-    Promise.allSettled(selectedRows.map((id) => verifySummarySms(authToken, id)))
-      .then((results) => {
-        const successCount = results.filter((r) => r.status === 'fulfilled').length
-        const failCount = results.length - successCount
-        if (successCount > 0) toast.success(`Đã xác thực ${successCount}/${results.length} bản ghi đối soát.`)
-        if (failCount > 0) {
-          const firstError = results.find((r) => r.status === 'rejected')?.reason
-          toast.error(firstError?.message || `Không xác thực được ${failCount} bản ghi.`)
-        }
+    verifySummarySms({ token: authToken, ids: selectedRows, note: verifyNote.trim() })
+      .then((message) => {
+        toast.success(message || `Đã xác thực ${selectedRows.length} bản ghi đối soát.`)
+        setVerifyDialogVisible(false)
+        setVerifyNote('')
         fetchList({ page: reconPage, limit: reconPageSize })
         fetchHistory({ page: 1, limit: historyPageSize })
       })
+      .catch((err) => {
+        toast.error(err.message || 'Không xác thực được các bản ghi đối soát.')
+      })
       .finally(() => setVerifying(false))
   }
+
+  const verifyDialogFooter = (
+    <div className="rc-verify-dialog-actions">
+      <button type="button" className="bn-btn-draft p-button" onClick={closeVerifyDialog} disabled={verifying}>
+        Hủy
+      </button>
+      <button type="button" className="db-export-btn gw-save-btn" onClick={handleVerifySelected} disabled={verifying}>
+        <ShieldCheck size={16} /> {verifying ? 'Đang xác thực...' : 'Xác thực đối soát'}
+      </button>
+    </div>
+  )
 
   return (
     <div className="reconciliation-content">
@@ -297,13 +330,13 @@ function ReconciliationContent() {
 
         <div className="rc-bulk-bar">
           <label className="rc-bulk-checkbox">
-            <input type="checkbox" checked={allSelected} onChange={toggleSelectAll} disabled={rows.length === 0 || listLoading} />
+            <input type="checkbox" checked={allSelected} onChange={toggleSelectAll} disabled={selectableRowIds.length === 0 || listLoading} />
             Đã chọn {selectedRows.length} bản ghi
           </label>
           <button
             className="db-export-btn gw-save-btn"
             disabled={selectedRows.length === 0 || verifying}
-            onClick={handleVerifySelected}
+            onClick={openVerifyDialog}
           >
             <ShieldCheck size={16} /> {verifying ? 'Đang xác thực...' : 'Xác thực đối soát'}
           </button>
@@ -314,7 +347,7 @@ function ReconciliationContent() {
             <thead>
               <tr>
                 <th>
-                  <input type="checkbox" checked={allSelected} onChange={toggleSelectAll} disabled={rows.length === 0 || listLoading} />
+                  <input type="checkbox" checked={allSelected} onChange={toggleSelectAll} disabled={selectableRowIds.length === 0 || listLoading} />
                 </th>
                 <th>Tháng đối soát</th>
                 <th>Tên KH</th>
@@ -327,28 +360,32 @@ function ReconciliationContent() {
                 <th>Doanh thu</th>
                 <th>Chi phí</th>
                 <th>Lợi nhuận</th>
-                <th>Trạng thái</th>
+                <th>Kết quả đối soát</th>
+                <th>Trạng thái xử lý</th>
                 <th>Ghi chú</th>
               </tr>
             </thead>
             <tbody>
               {listLoading && (
-                <tr><td colSpan={14} className="gw-table-status">Đang tải dữ liệu đối soát...</td></tr>
+                <tr><td colSpan={15} className="gw-table-status">Đang tải dữ liệu đối soát...</td></tr>
               )}
               {!listLoading && !listError && rows.length === 0 && (
-                <tr><td colSpan={14} className="gw-table-status">Không có dữ liệu đối soát.</td></tr>
+                <tr><td colSpan={15} className="gw-table-status">Không có dữ liệu đối soát.</td></tr>
               )}
               {!listLoading && rows.map((row) => {
                 const verified = isVerifiedStatus(row.reconciliationStatus)
+                const canVerify = isCompletedStatus(row.status)
                 const profit = Number(row.totalProfit) || 0
                 return (
                   <tr key={row.id}>
                     <td>
-                      <input
-                        type="checkbox"
-                        checked={selectedRows.includes(row.id)}
-                        onChange={() => toggleSelectRow(row.id)}
-                      />
+                      {canVerify && (
+                        <input
+                          type="checkbox"
+                          checked={selectedRows.includes(row.id)}
+                          onChange={() => toggleSelectRow(row.id)}
+                        />
+                      )}
                     </td>
                     <td>{formatDisplayDate(row.summaryMonth)}</td>
                     <td>{row.fullName || '-'}</td>
@@ -364,7 +401,13 @@ function ReconciliationContent() {
                     <td>
                       <span className={`status-badge ${verified ? 'active' : 'pending'}`}>
                         <span className="status-dot" />
-                        {row.reconciliationStatus || row.processStatus || row.status || '-'}
+                        {row.reconciliationStatus || '-'}
+                      </span>
+                    </td>
+                    <td>
+                      <span className={`status-badge ${canVerify ? 'active' : 'pending'}`}>
+                        <span className="status-dot" />
+                        {row.processStatus || '-'}
                       </span>
                     </td>
                     <td>{row.note || '-'}</td>
@@ -391,6 +434,31 @@ function ReconciliationContent() {
           }}
         />
       </div>
+
+      <Dialog
+        header="Xác thực đối soát"
+        visible={verifyDialogVisible}
+        onHide={closeVerifyDialog}
+        footer={verifyDialogFooter}
+        className="rc-verify-dialog"
+        closable={!verifying}
+        dismissableMask={!verifying}
+      >
+        <div className="rc-verify-dialog-body">
+          <p>Bạn đang xác thực <strong>{selectedRows.length}</strong> bản ghi đối soát.</p>
+          <div className="gw-form-field">
+            <label htmlFor="reconciliation-verify-note">Ghi chú <span className="cc-optional">(không bắt buộc)</span></label>
+            <textarea
+              id="reconciliation-verify-note"
+              value={verifyNote}
+              onChange={(e) => setVerifyNote(e.target.value)}
+              placeholder="Nhập ghi chú cho các bản ghi đã chọn"
+              rows={4}
+              disabled={verifying}
+            />
+          </div>
+        </div>
+      </Dialog>
 
       {/* History */}
       <div className="gw-card gw-header-elevated">

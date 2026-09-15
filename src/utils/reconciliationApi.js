@@ -50,14 +50,14 @@ export async function getSummarySms({
 }
 
 /**
- * Mark a reconciliation summary row as verified.
+ * Mark selected reconciliation summary rows as verified with an optional note.
  * Requires a valid Bearer token.
  */
-export async function verifySummarySms(token, summaryId) {
+export async function verifySummarySms({ token, ids, note }) {
   const { ok, status, statusText, data } = await safeRequest(
     httpClient.patch(
-      `${SUMMARY_SMS_URL}/${summaryId}/verify`,
-      {},
+      `${SUMMARY_SMS_URL}/verify`,
+      { ids, note },
       { headers: authHeader(token) },
     ),
   )
