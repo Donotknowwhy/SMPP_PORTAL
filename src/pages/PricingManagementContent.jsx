@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   BadgeDollarSign,
   CloudUpload,
+  Download,
   Search,
   History,
   RefreshCw,
@@ -374,15 +375,24 @@ function PricingManagementContent() {
             <p className="gw-card-subtitle">Cấu hình giá theo đối tác/provider</p>
           </div>
         </div>
-        <input ref={fileInputRef} type="file" accept=".xlsx" hidden onChange={handleImport} />
-        <button
-          type="button"
-          className="pm-upload-btn"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={importing || !authToken}
-        >
-          <CloudUpload size={16} /> {importing ? 'Đang upload...' : 'Upload bảng giá'}
-        </button>
+        <div className="pm-header-actions">
+          <a
+            className="pm-template-btn"
+            href="/templates/pricing-template.xlsx"
+            download="Template bảng giá.xlsx"
+          >
+            <Download size={16} /> Tải template bảng giá
+          </a>
+          <input ref={fileInputRef} type="file" accept=".xlsx" hidden onChange={handleImport} />
+          <button
+            type="button"
+            className="pm-upload-btn"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={importing || !authToken}
+          >
+            <CloudUpload size={16} /> {importing ? 'Đang upload...' : 'Upload bảng giá'}
+          </button>
+        </div>
       </div>
 
       <div className="routing-table-section gw-table-section gw-header-elevated">
