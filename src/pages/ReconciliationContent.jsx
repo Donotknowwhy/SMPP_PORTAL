@@ -57,7 +57,7 @@ function ReconciliationContent() {
   const { authToken } = useAuth()
   const [network, setNetwork] = useState(0)
   const [partner, setPartner] = useState(0)
-  const [status, setStatus] = useState(null)
+  const [status, setStatus] = useState(0)
   const [selectedRows, setSelectedRows] = useState([])
 
   const [networkOptions, setNetworkOptions] = useState([ALL_OPTION])
@@ -184,14 +184,14 @@ function ReconciliationContent() {
   const handleResetFilters = () => {
     setNetwork(0)
     setPartner(0)
-    setStatus(null)
+    setStatus(0)
 
     fetchList({
       page: 1,
       limit: reconPageSize,
       telcoId: 0,
       providerId: 0,
-      statusFilter: null,
+      statusFilter: 0,
     })
   }
 
@@ -346,22 +346,22 @@ function ReconciliationContent() {
           <table className="routing-table rc-recon-table">
             <thead>
               <tr>
-                <th>
+                <th className="rc-sticky-col rc-sticky-select">
                   <input type="checkbox" checked={allSelected} onChange={toggleSelectAll} disabled={selectableRowIds.length === 0 || listLoading} />
                 </th>
-                <th>Tháng đối soát</th>
-                <th>Tên KH</th>
-                <th>Brandname</th>
-                <th>Nhà mạng</th>
-                <th>Đối tác</th>
+                <th className="rc-sticky-col rc-sticky-month">Tháng đối soát</th>
+                <th className="rc-sticky-col rc-sticky-customer">Tên KH</th>
+                <th className="rc-sticky-col rc-sticky-brandname">Brandname</th>
+                <th className="rc-sticky-col rc-sticky-telco">Nhà mạng</th>
+                <th className="rc-sticky-col rc-sticky-partner">Đối tác</th>
+                <th className="rc-sticky-col rc-sticky-result">Kết quả đối soát</th>
+                <th className="rc-sticky-col rc-sticky-process">Trạng thái xử lý</th>
                 <th>Sản lượng</th>
                 <th>Giá nhập TB</th>
                 <th>Giá bán TB</th>
                 <th>Doanh thu</th>
                 <th>Chi phí</th>
                 <th>Lợi nhuận</th>
-                <th>Kết quả đối soát</th>
-                <th>Trạng thái xử lý</th>
                 <th>Ghi chú</th>
               </tr>
             </thead>
@@ -378,7 +378,7 @@ function ReconciliationContent() {
                 const profit = Number(row.totalProfit) || 0
                 return (
                   <tr key={row.id}>
-                    <td>
+                    <td className="rc-sticky-col rc-sticky-select">
                       {canVerify && (
                         <input
                           type="checkbox"
@@ -387,29 +387,29 @@ function ReconciliationContent() {
                         />
                       )}
                     </td>
-                    <td>{formatDisplayDate(row.summaryMonth)}</td>
-                    <td>{row.fullName || '-'}</td>
-                    <td><span className="table-network">{row.brandName || '-'}</span></td>
-                    <td>{row.telco || '-'}</td>
-                    <td>{row.provider || '-'}</td>
+                    <td className="rc-sticky-col rc-sticky-month">{formatDisplayDate(row.summaryMonth)}</td>
+                    <td className="rc-sticky-col rc-sticky-customer">{row.fullName || '-'}</td>
+                    <td className="rc-sticky-col rc-sticky-brandname"><span className="table-network">{row.brandName || '-'}</span></td>
+                    <td className="rc-sticky-col rc-sticky-telco">{row.telco || '-'}</td>
+                    <td className="rc-sticky-col rc-sticky-partner">{row.provider || '-'}</td>
+                    <td className="rc-sticky-col rc-sticky-result">
+                      <span className={`status-badge ${verified ? 'active' : 'pending'}`}>
+                        <span className="status-dot" />
+                        {row.reconciliationStatus || '-'}
+                      </span>
+                    </td>
+                    <td className="rc-sticky-col rc-sticky-process">
+                      <span className={`status-badge ${canVerify ? 'active' : 'pending'}`}>
+                        <span className="status-dot" />
+                        {row.processStatus || '-'}
+                      </span>
+                    </td>
                     <td>{formatNumber(row.totalMessages)}</td>
                     <td>{formatMoney(row.avgCostPrice)}</td>
                     <td>{formatMoney(row.avgSellPrice)}</td>
                     <td>{formatMoney(row.totalRevenue)}</td>
                     <td>{formatMoney(row.totalCost)}</td>
                     <td className={profit >= 0 ? 'pm-diff-up' : 'pm-diff-down'}>{formatMoney(profit)}</td>
-                    <td>
-                      <span className={`status-badge ${verified ? 'active' : 'pending'}`}>
-                        <span className="status-dot" />
-                        {row.reconciliationStatus || '-'}
-                      </span>
-                    </td>
-                    <td>
-                      <span className={`status-badge ${canVerify ? 'active' : 'pending'}`}>
-                        <span className="status-dot" />
-                        {row.processStatus || '-'}
-                      </span>
-                    </td>
                     <td>{row.note || '-'}</td>
                   </tr>
                 )

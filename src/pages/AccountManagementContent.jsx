@@ -5,7 +5,7 @@ import { Dropdown } from 'primereact/dropdown'
 import { MultiSelect } from 'primereact/multiselect'
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog'
 import { toast } from 'react-toastify'
-import { UserCog, UserPlus, CalendarClock, Search, Pencil, Lock, Trash2, Save, X, Loader2, Users } from 'lucide-react'
+import { UserCog, UserPlus, CalendarClock, Search, Pencil, Lock, Trash2, Save, RefreshCw, Loader2, Users } from 'lucide-react'
 import {
   ROLE_LABELS,
   ROLE_CLASS,
@@ -484,7 +484,7 @@ function AccountManagementContent() {
         <div className="am-form-grid am-form-grid-bottom">
           <div className="am-form-actions">
             <button className="bn-btn-draft p-button" onClick={handleCancelCreate} disabled={submitting}>
-              <X size={16} /> Hủy
+              <RefreshCw size={16} /> Làm mới
             </button>
             <button className="bn-btn-submit p-button" onClick={handleSubmitAccount} disabled={submitting}>
               <Save size={16} /> {submitting ? 'Đang lưu...' : (isEditing ? 'Cập nhật tài khoản' : 'Lưu tài khoản')}

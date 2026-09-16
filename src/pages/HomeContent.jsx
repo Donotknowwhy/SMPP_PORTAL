@@ -42,12 +42,15 @@ function buildTrafficChart(rows) {
 
   if (!Array.isArray(rows)) return { chartData: [], providers: [] }
 
-  rows.forEach(({ provider, smsTrafficList }) => {
-    if (!providers.includes(provider)) providers.push(provider)
+  rows.forEach(({ provider, providerCode, smsTrafficList }) => {
+    const providerKey = providerCode || provider
+    if (!providerKey) return
+
+    if (!providers.includes(providerKey)) providers.push(providerKey)
     ;(smsTrafficList || []).forEach(({ telco, success, failed }) => {
       const entry = telcoMap.get(telco) || { label: telco }
-      entry[`${provider}__success`] = (entry[`${provider}__success`] || 0) + (success || 0)
-      entry[`${provider}__failed`] = (entry[`${provider}__failed`] || 0) + (failed || 0)
+      entry[`${providerKey}__success`] = (entry[`${providerKey}__success`] || 0) + (success || 0)
+      entry[`${providerKey}__failed`] = (entry[`${providerKey}__failed`] || 0) + (failed || 0)
       telcoMap.set(telco, entry)
     })
   })
@@ -379,6 +382,7 @@ function HomeContent() {
               placeholder="DD/MM/YYYY"
               showIcon
               className="db-calendar"
+              panelClassName="db-datepicker-panel"
             />
           </div>
           <div className="db-date-field">
@@ -390,6 +394,7 @@ function HomeContent() {
               placeholder="DD/MM/YYYY"
               showIcon
               className="db-calendar"
+              panelClassName="db-datepicker-panel"
             />
           </div>
           <button
@@ -447,7 +452,7 @@ function HomeContent() {
                 style={{ minWidth: `${Math.max(chartData.length * Math.max(providers.length, 1) * 42, 100)}px` }}
               >
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartData} margin={{ top: 0, right: 8, left: 0, bottom: 24 }} barGap={3} barCategoryGap="20%">
+                  <BarChart data={chartData} margin={{ top: 0, right: 8, left: 0, bottom: 24 }} barGap={3} barCategoryGap="35%">
                     <CartesianGrid vertical={false} stroke="#E5E7EB" strokeDasharray="3 3" />
                     <XAxis
                       dataKey="label"
@@ -467,7 +472,12 @@ function HomeContent() {
                       tick={{ fontSize: 11, fill: '#9CA3AF' }}
                       width={36}
                     />
-                    <Tooltip formatter={(v) => new Intl.NumberFormat('vi-VN').format(v)} />
+                    <Tooltip
+                      formatter={(v) => new Intl.NumberFormat('vi-VN').format(v)}
+                      contentStyle={{ fontSize: 11 }}
+                      itemStyle={{ fontSize: 11 }}
+                      labelStyle={{ fontSize: 11 }}
+                    />
                     {providers.map((p) => (
                       <Fragment key={p}>
                         <Bar
@@ -476,7 +486,7 @@ function HomeContent() {
                           stackId={p}
                           fill={providerColors[p]}
                           radius={[0, 0, 0, 0]}
-                          barSize={14}
+                          barSize={10}
                         />
                         <Bar
                           dataKey={`${p}__failed`}
@@ -485,7 +495,7 @@ function HomeContent() {
                           fill={providerColors[p]}
                           fillOpacity={0.35}
                           radius={[3, 3, 0, 0]}
-                          barSize={14}
+                          barSize={10}
                         />
                       </Fragment>
                     ))}
@@ -498,7 +508,7 @@ function HomeContent() {
           <div className="db-bar-mini-legend">
             {providers.map((p) => (
               <div key={p}>
-                <span className="db-legend-square" style={{ background: providerColors[p] }} /> {p} {providerTotals[p]}
+                <span className="db-legend-square" style={{ background: providerColors[p] }} /> {p} - {numberFormat(providerTotals[p])}
               </div>
             ))}
           </div>
@@ -575,8 +585,14 @@ function HomeContent() {
           <button className="db-export-btn" onClick={handleExport} disabled={exporting}>
             {exporting ? 'Đang xuất...' : 'Kết xuất báo cáo'} <Upload size={16} />
           </button>
-          <button className="bn-btn-draft p-button" onClick={resetReportFilters} disabled={reportLoading}>
-            Xoá bộ lọc
+          <button
+            className="db-refresh-icon-btn"
+            onClick={resetReportFilters}
+            disabled={reportLoading}
+            title="Xoá bộ lọc và tải lại dữ liệu"
+            aria-label="Xoá bộ lọc và tải lại dữ liệu"
+          >
+            <RefreshCw size={16} />
           </button>
         </div>
 

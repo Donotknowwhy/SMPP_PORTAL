@@ -2849,6 +2849,33 @@ h2 {
   flex-wrap: wrap;
 }
 
+.pm-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.pm-template-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1rem;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  background: var(--white);
+  color: var(--gray-700);
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.pm-template-btn:hover {
+  border-color: var(--orange);
+  color: var(--orange);
+}
+
 .pm-upload-btn {
   display: inline-flex;
   align-items: center;
@@ -3519,6 +3546,36 @@ h2 {
 .rc-recon-table th,
 .rc-recon-table td { white-space: nowrap; }
 
+.rc-recon-table {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.rc-recon-table .rc-sticky-col {
+  position: sticky;
+  z-index: 1;
+  background: var(--white);
+  box-sizing: border-box;
+}
+
+.rc-recon-table th.rc-sticky-col {
+  z-index: 2;
+  background: var(--gray-50);
+}
+
+.rc-sticky-select { left: 0; width: 2.4rem; min-width: 2.4rem; padding-right: 0.45rem !important; padding-left: 0.45rem !important; text-align: center !important; }
+.rc-sticky-month { left: 2.4rem; width: 6.25rem; min-width: 6.25rem; max-width: 6.25rem; overflow: hidden; text-overflow: ellipsis; padding-right: 0.55rem !important; padding-left: 0.55rem !important; }
+.rc-sticky-customer { left: 8.65rem; width: 9rem; min-width: 9rem; max-width: 9rem; overflow: hidden; text-overflow: ellipsis; }
+.rc-sticky-brandname { left: 17.65rem; width: 8.5rem; min-width: 8.5rem; max-width: 8.5rem; overflow: hidden; text-overflow: ellipsis; }
+.rc-sticky-telco { left: 26.15rem; width: 7rem; min-width: 7rem; max-width: 7rem; overflow: hidden; text-overflow: ellipsis; }
+.rc-sticky-partner { left: 33.15rem; width: 7.5rem; min-width: 7.5rem; max-width: 7.5rem; overflow: hidden; text-overflow: ellipsis; }
+.rc-sticky-result { left: 40.65rem; width: 9rem; min-width: 9rem; max-width: 9rem; overflow: hidden; }
+.rc-sticky-process { left: 49.65rem; width: 9rem; min-width: 9rem; max-width: 9rem; overflow: hidden; box-shadow: 5px 0 8px -6px rgba(17, 24, 39, 0.45); }
+.rc-sticky-result .status-badge,
+.rc-sticky-process .status-badge { max-width: 100%; overflow: hidden; text-overflow: ellipsis; vertical-align: bottom; }
+
 .rc-bulk-bar {
   display: flex;
   flex-wrap: nowrap;
@@ -4038,8 +4095,33 @@ h2 {
 
 .db-header .db-calendar .p-inputtext:focus {
   border-color: var(--orange);
-  box-shadow: 0 0 0 1px var(--orange);
+  box-shadow: none;
   background: var(--white);
+}
+
+.db-header .db-calendar.p-focus,
+.db-header .db-calendar:focus-within {
+  border-radius: var(--radius-sm);
+  outline: 1px solid var(--orange);
+  outline-offset: 0;
+}
+
+.db-header .db-calendar.p-focus .p-inputtext,
+.db-header .db-calendar.p-focus .p-datepicker-trigger,
+.db-header .db-calendar:focus-within .p-inputtext,
+.db-header .db-calendar:focus-within .p-datepicker-trigger {
+  border-color: var(--orange);
+}
+
+.db-header .p-calendar:not(.p-calendar-disabled).p-focus > .p-inputtext,
+.db-header .db-calendar.p-focus > .p-inputtext:enabled:focus,
+.db-header .db-calendar .p-datepicker-trigger:enabled:focus {
+  outline: none;
+  box-shadow: none !important;
+}
+
+.db-header .db-calendar:focus-within .p-inputtext {
+  box-shadow: none;
 }
 
 .db-header .db-calendar .p-datepicker-trigger {
@@ -4050,6 +4132,78 @@ h2 {
 .db-header .db-calendar .p-datepicker-trigger:hover {
   background: var(--gray-200);
   color: var(--orange);
+}
+
+/* Dashboard date-picker panel: match the compact filter controls instead of
+   inheriting the broad default PrimeReact calendar treatment. */
+.db-datepicker-panel.p-datepicker {
+  width: 17.5rem;
+  margin-top: 0.35rem;
+  padding: 0.65rem;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.14);
+}
+
+.db-datepicker-panel .p-datepicker-header {
+  padding: 0.15rem 0 0.65rem;
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.db-datepicker-panel .p-datepicker-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--gray-700);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.db-datepicker-panel .p-datepicker-prev,
+.db-datepicker-panel .p-datepicker-next {
+  width: 1.85rem;
+  height: 1.85rem;
+  border-radius: 50%;
+  color: var(--gray-600);
+}
+
+.db-datepicker-panel .p-datepicker-prev:hover,
+.db-datepicker-panel .p-datepicker-next:hover {
+  background: #fff3e0;
+  color: var(--orange);
+}
+
+.db-datepicker-panel .p-datepicker-calendar {
+  margin: 0.45rem 0 0;
+  font-size: 0.82rem;
+}
+
+.db-datepicker-panel .p-datepicker-calendar th {
+  padding: 0.35rem;
+  color: var(--gray-600);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.db-datepicker-panel .p-datepicker-calendar td {
+  padding: 0.1rem;
+}
+
+.db-datepicker-panel .p-datepicker-calendar td > span {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  color: var(--gray-700);
+}
+
+.db-datepicker-panel .p-datepicker-calendar td > span:hover {
+  background: #fff3e0;
+  color: var(--orange);
+}
+
+.db-datepicker-panel .p-datepicker-calendar td > span.p-highlight {
+  background: var(--orange);
+  color: var(--white);
 }
 
 .db-header .db-search-btn {
