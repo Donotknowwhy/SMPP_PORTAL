@@ -5019,26 +5019,41 @@ h2 {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
-  gap: 0.9rem;
+  gap: 1rem;
 }
 
 .cd-filter-row .db-date-field {
   min-width: 0;
-  flex: 0 1 auto;
+  flex: 0 0 auto;
+  width: 190px;
 }
 
 .cd-filter-row .db-date-field select {
+  width: 100%;
+  min-width: 0;
   max-width: 100%;
+  box-sizing: border-box;
 }
 
 .cd-filter-row .db-calendar.p-calendar {
-  width: min(190px, 100%);
+  width: 100%;
   max-width: 100%;
+  margin: 0;
+}
+
+.cd-filter-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
 }
 
 .cd-filter-row .db-refresh-icon-btn,
-.cd-filter-row .db-search-btn {
+.cd-filter-row .db-search-btn,
+.cd-filter-actions .db-refresh-icon-btn,
+.cd-filter-actions .db-search-btn {
   flex-shrink: 0;
+  margin: 0;
 }
 
 .cd-stat-btn {

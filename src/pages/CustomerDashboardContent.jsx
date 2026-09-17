@@ -490,17 +490,19 @@ function CustomerDashboardContent() {
               panelClassName="db-datepicker-panel"
             />
           </div>
-          <button
-            className="db-refresh-icon-btn"
-            onClick={handleFilter}
-            disabled={isLoading}
-            title="Làm mới bộ lọc và tải lại dữ liệu"
-          >
-            <RefreshCw size={16} className={isLoading ? 'cd-spin' : ''} />
-          </button>
-          <button className="db-search-btn cd-stat-btn" onClick={handleFilter} disabled={isLoading}>
-            <Search size={16} /> {isLoading ? 'Đang tải...' : 'Tra cứu'}
-          </button>
+          <div className="cd-filter-actions">
+            <button
+              className="db-refresh-icon-btn"
+              onClick={handleFilter}
+              disabled={isLoading}
+              title="Làm mới bộ lọc và tải lại dữ liệu"
+            >
+              <RefreshCw size={16} className={isLoading ? 'cd-spin' : ''} />
+            </button>
+            <button className="db-search-btn cd-stat-btn" onClick={handleFilter} disabled={isLoading}>
+              <Search size={16} /> {isLoading ? 'Đang tải...' : 'Tra cứu'}
+            </button>
+          </div>
         </div>
         {overviewError && <p className="cd-error-text" style={{ color: '#E31E24', marginTop: 8 }}>{overviewError}</p>}
       </div>

@@ -394,17 +394,19 @@ function HomeContent() {
               panelClassName="db-datepicker-panel"
             />
           </div>
-          <button
-            className="db-refresh-icon-btn"
-            onClick={resetDashboardFilters}
-            disabled={trafficLoading || deliveryLoading}
-            title="Làm mới bộ lọc và tải lại dữ liệu"
-          >
-            <RefreshCw size={16} />
-          </button>
-          <button className="db-search-btn cd-stat-btn" onClick={() => fetchDashboard()} disabled={trafficLoading || deliveryLoading}>
-            Tra cứu <img src={iconSearch} alt="Tra cứu" className="db-search-icon" />
-          </button>
+          <div className="cd-filter-actions">
+            <button
+              className="db-refresh-icon-btn"
+              onClick={resetDashboardFilters}
+              disabled={trafficLoading || deliveryLoading}
+              title="Làm mới bộ lọc và tải lại dữ liệu"
+            >
+              <RefreshCw size={16} />
+            </button>
+            <button className="db-search-btn cd-stat-btn" onClick={() => fetchDashboard()} disabled={trafficLoading || deliveryLoading}>
+              Tra cứu <img src={iconSearch} alt="Tra cứu" className="db-search-icon" />
+            </button>
+          </div>
         </div>
       </div>
 
