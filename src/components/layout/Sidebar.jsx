@@ -28,7 +28,7 @@ const MENU_GROUPS = [
     icon: Users,
     roles: ['CLIENT'],
     items: [
-      { id: 'customer/dashboard', label: 'Dashboard khách hàng', icon: LayoutDashboard },
+      { id: 'customer/dashboard', label: 'Báo cáo thống kê', icon: LayoutDashboard },
       { id: 'customer/campaigns/new', label: 'Tạo chiến dịch gửi tin', icon: Send },
       { id: 'customer/campaigns/approval', label: 'Quản lý phê duyệt chiến dịch', icon: ClipboardCheck },
       { id: 'customer/contacts', label: 'Quản lý danh bạ', icon: BookUser },

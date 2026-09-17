@@ -342,29 +342,26 @@ function HomeContent() {
 
   const visibleValue = (row, p) => (row[`${p}__success`] || 0) + (row[`${p}__failed`] || 0)
 
-  const providerTotals = useMemo(
-    () =>
-      Object.fromEntries(
-        providers.map((p) => [p, chartData.reduce((sum, row) => sum + visibleValue(row, p), 0)]),
-      ),
-    [chartData, providers],
-  )
-
   const trafficMax = Math.max(1, ...chartData.flatMap((row) => providers.map((p) => visibleValue(row, p))))
 
   const reportTotalPages = Math.max(1, Math.ceil(reportTotal / reportSize))
 
   return (
     <div className="db-dashboard !px-4 sm:!px-6 lg:!px-8">
-      {/* Header */}
-      <div className="db-header">
-        <div>
-          <h1 className="db-title">
-            <span className="db-title-icon"><LayoutDashboard size={18} /></span> Tổng quan gửi SMS Brandname
-          </h1>
-          <p className="db-subtitle">Theo dõi số lượng và xu hướng gửi SMS theo thời gian T-1</p>
+      {/* Title — same card pattern as customer dashboard */}
+      <div className="gw-card cd-filter-card">
+        <div className="gw-card-head !mb-0">
+          <span className="gw-card-icon"><LayoutDashboard size={18} /></span>
+          <div>
+            <h2 className="gw-card-title">Tổng quan gửi SMS Brandname</h2>
+            <p className="gw-card-subtitle">Theo dõi số lượng và xu hướng gửi SMS theo thời gian T-1</p>
+          </div>
         </div>
-        <div className="db-date-filters flex-wrap sm:flex-nowrap">
+      </div>
+
+      {/* Filters — separate full-width row so zoom/narrow viewports wrap without clipping */}
+      <div className="gw-card cd-filter-card">
+        <div className="cd-filter-row flex-wrap lg:flex-nowrap">
           <div className="db-date-field">
             <label>Brandname</label>
             <select value={dashboardBrandNameId} onChange={(e) => setDashboardBrandNameId(Number(e.target.value))}>
@@ -405,7 +402,7 @@ function HomeContent() {
           >
             <RefreshCw size={16} />
           </button>
-          <button className="db-search-btn" onClick={() => fetchDashboard()} disabled={trafficLoading || deliveryLoading}>
+          <button className="db-search-btn cd-stat-btn" onClick={() => fetchDashboard()} disabled={trafficLoading || deliveryLoading}>
             Tra cứu <img src={iconSearch} alt="Tra cứu" className="db-search-icon" />
           </button>
         </div>
@@ -466,14 +463,15 @@ function HomeContent() {
                     />
                     <YAxis
                       domain={[0, trafficMax]}
-                      tickFormatter={(v) => new Intl.NumberFormat('vi-VN').format(v)}
+                      allowDecimals={false}
+                      tickFormatter={(v) => new Intl.NumberFormat('vi-VN').format(Math.round(v))}
                       axisLine={false}
                       tickLine={false}
                       tick={{ fontSize: 11, fill: '#9CA3AF' }}
                       width={36}
                     />
                     <Tooltip
-                      formatter={(v) => new Intl.NumberFormat('vi-VN').format(v)}
+                      formatter={(v) => new Intl.NumberFormat('vi-VN').format(Math.round(v))}
                       contentStyle={{ fontSize: 11 }}
                       itemStyle={{ fontSize: 11 }}
                       labelStyle={{ fontSize: 11 }}
@@ -508,7 +506,7 @@ function HomeContent() {
           <div className="db-bar-mini-legend">
             {providers.map((p) => (
               <div key={p}>
-                <span className="db-legend-square" style={{ background: providerColors[p] }} /> {p} - {numberFormat(providerTotals[p])}
+                <span className="db-legend-square" style={{ background: providerColors[p] }} /> {p}
               </div>
             ))}
           </div>
@@ -564,6 +562,7 @@ function HomeContent() {
               dateFormat="dd/mm/yy"
               showIcon
               className="db-calendar db-calendar-inline"
+              panelClassName="db-datepicker-panel"
             />
           </div>
           <div className="db-date-field db-date-field-inline">
@@ -574,6 +573,7 @@ function HomeContent() {
               dateFormat="dd/mm/yy"
               showIcon
               className="db-calendar db-calendar-inline"
+              panelClassName="db-datepicker-panel"
             />
           </div>
         </div>

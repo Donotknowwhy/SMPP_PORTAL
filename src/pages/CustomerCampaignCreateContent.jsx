@@ -264,6 +264,7 @@ function CustomerCampaignCreateContent() {
                   showIcon
                   disabled={scheduleMode !== 'scheduled'}
                   className="db-calendar"
+                  panelClassName="db-datepicker-panel"
                 />
               </div>
               <div className="gw-form-field">
@@ -277,6 +278,7 @@ function CustomerCampaignCreateContent() {
                   showIcon
                   disabled={scheduleMode !== 'scheduled'}
                   className="db-calendar"
+                  panelClassName="db-datepicker-panel"
                 />
               </div>
             </div>

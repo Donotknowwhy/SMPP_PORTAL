@@ -168,6 +168,7 @@ function MessageLookupContent() {
               dateFormat="dd/mm/yy"
               showIcon
               className="db-calendar db-calendar-inline lk-calendar"
+              panelClassName="db-datepicker-panel"
             />
           </div>
           <div className="gw-form-field">
@@ -178,6 +179,7 @@ function MessageLookupContent() {
               dateFormat="dd/mm/yy"
               showIcon
               className="db-calendar db-calendar-inline lk-calendar"
+              panelClassName="db-datepicker-panel"
             />
           </div>
         </div>

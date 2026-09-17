@@ -3,7 +3,7 @@ import { Dropdown } from 'primereact/dropdown'
 import { Dialog } from 'primereact/dialog'
 import { toast } from 'react-toastify'
 import {
-  GitCompare, RefreshCw, Search, Info, ShieldCheck, History, ListChecks,
+  GitCompare, RefreshCw, Search, Info, ShieldCheck, History, ListChecks, Eye,
 } from 'lucide-react'
 import {
   STATUS_OPTIONS,
@@ -20,12 +20,12 @@ import Pagination from '../components/common/Pagination'
 
 const ALL_OPTION = { label: 'Tất cả', value: 0 }
 
-function formatDisplayDate(value) {
+function formatMonthYear(value) {
   if (!value) return '-'
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return value
   const pad = (n) => String(n).padStart(2, '0')
-  return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`
+  return `${pad(date.getMonth() + 1)}/${date.getFullYear()}`
 }
 
 function formatDateTime(value) {
@@ -44,13 +44,33 @@ function formatMoney(value) {
   return `${formatNumber(value)} đ`
 }
 
-function isVerifiedStatus(status) {
-  const normalized = String(status || '').toUpperCase()
-  return normalized === 'VERIFIED' || normalized === 'RECONCILED'
-}
-
 function isCompletedStatus(status) {
   return String(status || '').toUpperCase() === 'COMPLETED'
+}
+
+const RECON_DETAIL_FIELDS = [
+  { key: 'summaryMonth', label: 'Tháng cước', format: 'month' },
+  { key: 'fullName', label: 'Khách hàng' },
+  { key: 'brandName', label: 'Brandname' },
+  { key: 'telco', label: 'Nhà mạng' },
+  { key: 'provider', label: 'Đối tác' },
+  { key: 'reconciliationStatus', label: 'Kết quả đối soát' },
+  { key: 'processStatus', label: 'Trạng thái' },
+  { key: 'totalMessages', label: 'Sản lượng', format: 'number' },
+  { key: 'avgCostPrice', label: 'Giá nhập', format: 'money' },
+  { key: 'avgSellPrice', label: 'Giá bán', format: 'money' },
+  { key: 'totalRevenue', label: 'Doanh thu', format: 'money' },
+  { key: 'totalCost', label: 'Chi phí', format: 'money' },
+  { key: 'totalProfit', label: 'Lợi nhuận', format: 'money' },
+  { key: 'note', label: 'Ghi chú' },
+]
+
+function formatReconDetailValue(row, field) {
+  const value = row?.[field.key]
+  if (field.format === 'month') return formatMonthYear(value)
+  if (field.format === 'number') return formatNumber(value)
+  if (field.format === 'money') return formatMoney(value)
+  return value || '-'
 }
 
 function ReconciliationContent() {
@@ -59,6 +79,7 @@ function ReconciliationContent() {
   const [partner, setPartner] = useState(0)
   const [status, setStatus] = useState(0)
   const [selectedRows, setSelectedRows] = useState([])
+  const [detailRow, setDetailRow] = useState(null)
 
   const [networkOptions, setNetworkOptions] = useState([ALL_OPTION])
   const [partnerOptions, setPartnerOptions] = useState([ALL_OPTION])
@@ -346,39 +367,32 @@ function ReconciliationContent() {
           <table className="routing-table rc-recon-table">
             <thead>
               <tr>
-                <th className="rc-sticky-col rc-sticky-select">
+                <th className="rc-col-select">
                   <input type="checkbox" checked={allSelected} onChange={toggleSelectAll} disabled={selectableRowIds.length === 0 || listLoading} />
                 </th>
-                <th className="rc-sticky-col rc-sticky-month">Tháng đối soát</th>
-                <th className="rc-sticky-col rc-sticky-customer">Tên KH</th>
-                <th className="rc-sticky-col rc-sticky-brandname">Brandname</th>
-                <th className="rc-sticky-col rc-sticky-telco">Nhà mạng</th>
-                <th className="rc-sticky-col rc-sticky-partner">Đối tác</th>
-                <th className="rc-sticky-col rc-sticky-result">Kết quả đối soát</th>
-                <th className="rc-sticky-col rc-sticky-process">Trạng thái xử lý</th>
+                <th>Tháng cước</th>
+                <th>Khách hàng</th>
+                <th>Brandname</th>
+                <th>Nhà mạng</th>
+                <th>Đối tác</th>
+                <th>Trạng thái</th>
                 <th>Sản lượng</th>
-                <th>Giá nhập TB</th>
-                <th>Giá bán TB</th>
                 <th>Doanh thu</th>
-                <th>Chi phí</th>
-                <th>Lợi nhuận</th>
-                <th>Ghi chú</th>
+                <th>Chi tiết</th>
               </tr>
             </thead>
             <tbody>
               {listLoading && (
-                <tr><td colSpan={15} className="gw-table-status">Đang tải dữ liệu đối soát...</td></tr>
+                <tr><td colSpan={10} className="gw-table-status">Đang tải dữ liệu đối soát...</td></tr>
               )}
               {!listLoading && !listError && rows.length === 0 && (
-                <tr><td colSpan={15} className="gw-table-status">Không có dữ liệu đối soát.</td></tr>
+                <tr><td colSpan={10} className="gw-table-status">Không có dữ liệu đối soát.</td></tr>
               )}
               {!listLoading && rows.map((row) => {
-                const verified = isVerifiedStatus(row.reconciliationStatus)
                 const canVerify = isCompletedStatus(row.status)
-                const profit = Number(row.totalProfit) || 0
                 return (
                   <tr key={row.id}>
-                    <td className="rc-sticky-col rc-sticky-select">
+                    <td className="rc-col-select">
                       {canVerify && (
                         <input
                           type="checkbox"
@@ -387,30 +401,29 @@ function ReconciliationContent() {
                         />
                       )}
                     </td>
-                    <td className="rc-sticky-col rc-sticky-month">{formatDisplayDate(row.summaryMonth)}</td>
-                    <td className="rc-sticky-col rc-sticky-customer">{row.fullName || '-'}</td>
-                    <td className="rc-sticky-col rc-sticky-brandname"><span className="table-network">{row.brandName || '-'}</span></td>
-                    <td className="rc-sticky-col rc-sticky-telco">{row.telco || '-'}</td>
-                    <td className="rc-sticky-col rc-sticky-partner">{row.provider || '-'}</td>
-                    <td className="rc-sticky-col rc-sticky-result">
-                      <span className={`status-badge ${verified ? 'active' : 'pending'}`}>
-                        <span className="status-dot" />
-                        {row.reconciliationStatus || '-'}
-                      </span>
-                    </td>
-                    <td className="rc-sticky-col rc-sticky-process">
+                    <td>{formatMonthYear(row.summaryMonth)}</td>
+                    <td>{row.fullName || '-'}</td>
+                    <td><span className="table-network">{row.brandName || '-'}</span></td>
+                    <td>{row.telco || '-'}</td>
+                    <td>{row.provider || '-'}</td>
+                    <td>
                       <span className={`status-badge ${canVerify ? 'active' : 'pending'}`}>
                         <span className="status-dot" />
                         {row.processStatus || '-'}
                       </span>
                     </td>
                     <td>{formatNumber(row.totalMessages)}</td>
-                    <td>{formatMoney(row.avgCostPrice)}</td>
-                    <td>{formatMoney(row.avgSellPrice)}</td>
                     <td>{formatMoney(row.totalRevenue)}</td>
-                    <td>{formatMoney(row.totalCost)}</td>
-                    <td className={profit >= 0 ? 'pm-diff-up' : 'pm-diff-down'}>{formatMoney(profit)}</td>
-                    <td>{row.note || '-'}</td>
+                    <td>
+                      <button
+                        type="button"
+                        className="lk-detail-link lk-detail-icon-btn"
+                        onClick={() => setDetailRow(row)}
+                        title="Xem chi tiết"
+                      >
+                        <Eye size={16} />
+                      </button>
+                    </td>
                   </tr>
                 )
               })}
@@ -458,6 +471,33 @@ function ReconciliationContent() {
             />
           </div>
         </div>
+      </Dialog>
+
+      <Dialog
+        header="Chi tiết đối soát"
+        visible={!!detailRow}
+        onHide={() => setDetailRow(null)}
+        className="rc-detail-dialog"
+        dismissableMask
+      >
+        {detailRow && (
+          <div className="rc-detail-list">
+            {RECON_DETAIL_FIELDS.map((field) => {
+              const profit = Number(detailRow.totalProfit) || 0
+              const isProfit = field.key === 'totalProfit'
+              return (
+                <div key={field.key} className="rc-detail-row">
+                  <span className="rc-detail-label">{field.label}</span>
+                  <span
+                    className={`rc-detail-value${isProfit ? (profit >= 0 ? ' pm-diff-up' : ' pm-diff-down') : ''}`}
+                  >
+                    {formatReconDetailValue(detailRow, field)}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+        )}
       </Dialog>
 
       {/* History */}
