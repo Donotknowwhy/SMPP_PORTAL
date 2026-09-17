@@ -81,9 +81,9 @@ function DonutDelivery({ segments }) {
   }
 
   return (
-    <div className="db-donut-row flex-wrap sm:flex-nowrap">
+    <div className="db-donut-row flex-wrap">
       <div className="db-donut">
-        <svg width={DONUT_SIZE} height={DONUT_SIZE} viewBox={`0 0 ${DONUT_SIZE} ${DONUT_SIZE}`}>
+        <svg viewBox={`0 0 ${DONUT_SIZE} ${DONUT_SIZE}`} width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
           <g transform={`rotate(-90 ${DONUT_SIZE / 2} ${DONUT_SIZE / 2})`}>
             <circle
               cx={DONUT_SIZE / 2}
@@ -361,7 +361,7 @@ function HomeContent() {
 
       {/* Filters — separate full-width row so zoom/narrow viewports wrap without clipping */}
       <div className="gw-card cd-filter-card">
-        <div className="cd-filter-row flex-wrap lg:flex-nowrap">
+        <div className="cd-filter-row flex-wrap">
           <div className="db-date-field">
             <label>Brandname</label>
             <select value={dashboardBrandNameId} onChange={(e) => setDashboardBrandNameId(Number(e.target.value))}>
