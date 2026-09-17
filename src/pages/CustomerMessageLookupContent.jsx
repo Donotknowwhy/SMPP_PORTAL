@@ -234,6 +234,7 @@ function CustomerMessageLookupContent() {
               placeholder="dd/mm/yyyy"
               showIcon
               className="db-calendar"
+              panelClassName="db-datepicker-panel"
             />
           </div>
 
@@ -246,6 +247,7 @@ function CustomerMessageLookupContent() {
               placeholder="dd/mm/yyyy"
               showIcon
               className="db-calendar"
+              panelClassName="db-datepicker-panel"
             />
           </div>
 

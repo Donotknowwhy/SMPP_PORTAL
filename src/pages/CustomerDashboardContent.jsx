@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import * as XLSX from 'xlsx'
+import * as XLSX from 'xlsx-js-style'
 import { Calendar } from 'primereact/calendar'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { Search, Send, CheckCircle2, XCircle, Wallet, FileSpreadsheet, RefreshCw, BarChart3, TrendingUp, Percent } from 'lucide-react'
@@ -8,6 +8,92 @@ import { getClientOverview, getClientDailyOutput, getClientDeliveryStatus, getCl
 import { getRoutingInfo } from '../utils/routingApi'
 
 const ALL_BRANDNAME_OPTION = { label: 'Tất cả', value: 0 }
+
+const EXCEL_HEADERS = [
+  'Ngày',
+  'Brandname',
+  'Viettel',
+  'VinaPhone',
+  'MobiFone',
+  'Mạng Khác',
+  'Tổng thành công',
+  'Tổng thất bại',
+]
+
+const EXCEL_BORDER = {
+  top: { style: 'thin', color: { rgb: '9CA3AF' } },
+  bottom: { style: 'thin', color: { rgb: '9CA3AF' } },
+  left: { style: 'thin', color: { rgb: '9CA3AF' } },
+  right: { style: 'thin', color: { rgb: '9CA3AF' } },
+}
+
+const EXCEL_HEADER_STYLE = {
+  fill: { patternType: 'solid', fgColor: { rgb: 'F9FAFB' } },
+  font: { bold: true, color: { rgb: '4B5563' }, sz: 11, name: 'Calibri' },
+  alignment: { horizontal: 'left', vertical: 'center', indent: 1 },
+  border: EXCEL_BORDER,
+}
+
+const EXCEL_BODY_STYLE = {
+  fill: { patternType: 'solid', fgColor: { rgb: 'FFFFFF' } },
+  font: { color: { rgb: '1F2937' }, sz: 11, name: 'Calibri' },
+  alignment: { horizontal: 'left', vertical: 'center', indent: 1 },
+  border: EXCEL_BORDER,
+}
+
+const EXCEL_SUCCESS_STYLE = {
+  ...EXCEL_BODY_STYLE,
+  font: { bold: true, color: { rgb: '2563EB' }, sz: 11, name: 'Calibri' },
+  border: EXCEL_BORDER,
+}
+
+const EXCEL_FAIL_STYLE = {
+  ...EXCEL_BODY_STYLE,
+  font: { bold: true, color: { rgb: 'E31E24' }, sz: 11, name: 'Calibri' },
+  border: EXCEL_BORDER,
+}
+
+const EXCEL_TOTAL_STYLE = {
+  fill: { patternType: 'solid', fgColor: { rgb: 'F9FAFB' } },
+  font: { bold: true, color: { rgb: '1F2937' }, sz: 11, name: 'Calibri' },
+  alignment: { horizontal: 'left', vertical: 'center', indent: 1 },
+  border: EXCEL_BORDER,
+}
+
+const EXCEL_TOTAL_SUCCESS_STYLE = {
+  ...EXCEL_TOTAL_STYLE,
+  font: { bold: true, color: { rgb: '2563EB' }, sz: 11, name: 'Calibri' },
+  border: EXCEL_BORDER,
+}
+
+const EXCEL_TOTAL_FAIL_STYLE = {
+  ...EXCEL_TOTAL_STYLE,
+  font: { bold: true, color: { rgb: 'E31E24' }, sz: 11, name: 'Calibri' },
+  border: EXCEL_BORDER,
+}
+
+const EXCEL_COL_WIDTHS = [
+  { wch: 14 },
+  { wch: 18 },
+  { wch: 12 },
+  { wch: 12 },
+  { wch: 12 },
+  { wch: 12 },
+  { wch: 16 },
+  { wch: 14 },
+]
+
+function getCellStyle(rowIndex, colIndex, lastRowIndex) {
+  if (rowIndex === 0) return EXCEL_HEADER_STYLE
+  if (rowIndex === lastRowIndex) {
+    if (colIndex === 6) return EXCEL_TOTAL_SUCCESS_STYLE
+    if (colIndex === 7) return EXCEL_TOTAL_FAIL_STYLE
+    return EXCEL_TOTAL_STYLE
+  }
+  if (colIndex === 6) return EXCEL_SUCCESS_STYLE
+  if (colIndex === 7) return EXCEL_FAIL_STYLE
+  return EXCEL_BODY_STYLE
+}
 
 function getCurrentMonthStart() {
   const now = new Date()
@@ -269,32 +355,64 @@ function CustomerDashboardContent() {
   }
 
   const handleExportExcel = () => {
-    const rows = dailyDetail.map((r) => ({
-      'Ngày': r.day,
-      'Brandname': r.brandname,
-      'Viettel': r.viettel,
-      'VinaPhone': r.vinaphone,
-      'MobiFone': r.mobifone,
-      'Mạng Khác': r.other,
-      'Tổng thành công': r.success,
-      'Tổng thất bại': r.failed,
-    }))
-    rows.push({
-      'Ngày': 'Tổng cộng',
-      'Brandname': '',
-      'Viettel': columnTotals.viettel,
-      'VinaPhone': columnTotals.vinaphone,
-      'MobiFone': columnTotals.mobifone,
-      'Mạng Khác': columnTotals.other,
-      'Tổng thành công': totals.totalSuccess,
-      'Tổng thất bại': totals.totalFailed,
-    })
+    const bodyRows = dailyDetail.map((r) => [
+      r.day,
+      r.brandname,
+      r.viettel,
+      r.vinaphone,
+      r.mobifone,
+      r.other,
+      r.success,
+      r.failed,
+    ])
+    const totalRow = [
+      'Tổng cộng',
+      '',
+      columnTotals.viettel,
+      columnTotals.vinaphone,
+      columnTotals.mobifone,
+      columnTotals.other,
+      totals.totalSuccess,
+      totals.totalFailed,
+    ]
+    const aoa = [EXCEL_HEADERS, ...bodyRows, totalRow]
+    const worksheet = XLSX.utils.aoa_to_sheet(aoa)
+    const lastRowIndex = aoa.length - 1
+    const numericCols = new Set([2, 3, 4, 5, 6, 7])
 
-    const worksheet = XLSX.utils.json_to_sheet(rows)
+    for (let r = 0; r <= lastRowIndex; r += 1) {
+      for (let c = 0; c < EXCEL_HEADERS.length; c += 1) {
+        const address = XLSX.utils.encode_cell({ r, c })
+        if (!worksheet[address]) {
+          worksheet[address] = { t: 's', v: '' }
+        }
+        const cell = worksheet[address]
+        cell.s = getCellStyle(r, c, lastRowIndex)
+        if (r > 0 && numericCols.has(c) && typeof cell.v === 'number') {
+          cell.t = 'n'
+          cell.z = '#,##0'
+          cell.s = {
+            ...cell.s,
+            numFmt: '#,##0',
+          }
+        }
+      }
+    }
+
+    worksheet['!cols'] = EXCEL_COL_WIDTHS
+    worksheet['!rows'] = aoa.map(() => ({ hpt: 22 }))
+    worksheet['!merges'] = [{ s: { r: lastRowIndex, c: 0 }, e: { r: lastRowIndex, c: 1 } }]
+    if (!worksheet['!ref']) {
+      worksheet['!ref'] = XLSX.utils.encode_range({
+        s: { r: 0, c: 0 },
+        e: { r: lastRowIndex, c: EXCEL_HEADERS.length - 1 },
+      })
+    }
+
     const workbook = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(workbook, worksheet, 'San luong')
     const brandLabel = brandNameOptions.find((o) => o.value === brandNameId)?.label ?? 'tat-ca'
-    XLSX.writeFile(workbook, `bao-cao-san-luong-${brandLabel}.xlsx`)
+    XLSX.writeFile(workbook, `bao-cao-san-luong-${brandLabel}.xlsx`, { cellStyles: true })
   }
 
   return (
@@ -303,7 +421,7 @@ function CustomerDashboardContent() {
         <div className="gw-card-head">
           <span className="gw-card-icon"><BarChart3 size={18} /></span>
           <div>
-            <h2 className="gw-card-title">Báo cáo sản lượng khách hàng</h2>
+            <h2 className="gw-card-title">Báo cáo thống kê</h2>
             <p className="gw-card-subtitle">Theo dõi sản lượng, tỷ lệ thành công và chi phí gửi SMS</p>
           </div>
         </div>
@@ -358,6 +476,7 @@ function CustomerDashboardContent() {
               dateFormat="dd/mm/yy"
               showIcon
               className="db-calendar"
+              panelClassName="db-datepicker-panel"
             />
           </div>
           <div className="db-date-field">
@@ -368,6 +487,7 @@ function CustomerDashboardContent() {
               dateFormat="dd/mm/yy"
               showIcon
               className="db-calendar"
+              panelClassName="db-datepicker-panel"
             />
           </div>
           <button
@@ -396,8 +516,15 @@ function CustomerDashboardContent() {
               <LineChart data={dailyVolume} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
                 <CartesianGrid vertical={false} stroke="#E5E7EB" strokeDasharray="3 3" />
                 <XAxis dataKey="day" axisLine={{ stroke: '#E5E7EB' }} tickLine={false} tick={{ fontSize: 12, fill: '#4B5563' }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#9CA3AF' }} tickFormatter={numberFormat} width={40} />
-                <Tooltip formatter={(v) => numberFormat(v)} />
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 11, fill: '#9CA3AF' }}
+                  allowDecimals={false}
+                  tickFormatter={(v) => numberFormat(Math.round(v))}
+                  width={40}
+                />
+                <Tooltip formatter={(v) => numberFormat(Math.round(v))} />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
                 <Line type="monotone" dataKey="success" name="Thành công" stroke="#16A34A" strokeWidth={2} dot={{ r: 3 }} />
                 <Line type="monotone" dataKey="failed" name="Thất bại" stroke="#E31E24" strokeWidth={2} dot={{ r: 3 }} />

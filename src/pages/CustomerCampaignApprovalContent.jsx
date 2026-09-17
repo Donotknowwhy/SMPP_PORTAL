@@ -122,6 +122,7 @@ function CustomerCampaignApprovalContent() {
               hourFormat="24"
               showIcon
               className="db-calendar cca-calendar"
+              panelClassName="db-datepicker-panel"
             />
           </div>
 
@@ -135,6 +136,7 @@ function CustomerCampaignApprovalContent() {
               hourFormat="24"
               showIcon
               className="db-calendar cca-calendar"
+              panelClassName="db-datepicker-panel"
             />
           </div>
 
