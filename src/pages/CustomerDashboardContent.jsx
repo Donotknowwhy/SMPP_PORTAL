@@ -459,7 +459,7 @@ function CustomerDashboardContent() {
       </div>
 
       <div className="gw-card cd-filter-card">
-        <div className="cd-filter-row flex-wrap lg:flex-nowrap">
+        <div className="cd-filter-row flex-wrap">
           <div className="db-date-field">
             <label>Brandname</label>
             <select value={brandNameId} onChange={(e) => setBrandNameId(Number(e.target.value))}>
