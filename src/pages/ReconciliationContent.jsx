@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Dropdown } from 'primereact/dropdown'
 import { Dialog } from 'primereact/dialog'
 import { toast } from 'react-toastify'
 import {
-  GitCompare, RefreshCw, Search, Info, ShieldCheck, History, ListChecks, Eye,
+  GitCompare, RefreshCw, Search, Info, ShieldCheck, History, ListChecks, Eye, FileDown, Upload,
 } from 'lucide-react'
 import {
   STATUS_OPTIONS,
@@ -15,6 +15,7 @@ import {
   getSummarySms,
   verifySummarySms,
   getSummarySmsAuditLogs,
+  exportReconciliationReport,
 } from '../utils/reconciliationApi'
 import Pagination from '../components/common/Pagination'
 
@@ -103,6 +104,8 @@ function ReconciliationContent() {
   const [historyError, setHistoryError] = useState('')
   const [historyPage, setHistoryPage] = useState(1)
   const [historyPageSize, setHistoryPageSize] = useState(10)
+  const [exporting, setExporting] = useState(false)
+  const uploadInputRef = useRef(null)
 
   const selectableRowIds = useMemo(
     () => rows.filter((row) => isCompletedStatus(row.status)).map((row) => row.id),
@@ -261,6 +264,43 @@ function ReconciliationContent() {
     </div>
   )
 
+  const handleExport = () => {
+    if (!authToken) return
+
+    setExporting(true)
+    exportReconciliationReport({
+      token: authToken,
+      timeType: 0,
+    })
+      .then(({ blob, filename }) => {
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = filename
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+        URL.revokeObjectURL(url)
+        toast.success('Xuất báo cáo đối soát thành công.')
+      })
+      .catch((err) => {
+        toast.error(err.message || 'Không xuất được báo cáo đối soát.')
+      })
+      .finally(() => setExporting(false))
+  }
+
+  const handleUploadClick = () => {
+    uploadInputRef.current?.click()
+  }
+
+  const handleUploadFile = (event) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+    // Upload API chưa được ghép trong frontend hiện tại — giữ UI và thông báo rõ.
+    toast.info(`Đã chọn file "${file.name}". API upload đối soát chưa được cấu hình.`)
+  }
+
   return (
     <div className="reconciliation-content">
       {/* Header */}
@@ -273,6 +313,31 @@ function ReconciliationContent() {
             <h2 className="gw-card-title">SMS Reconciliation Management</h2>
             <p className="gw-card-subtitle">Quản lý đối soát sản lượng SMS Brandname với nhà cung cấp và khách hàng</p>
           </div>
+        </div>
+        <div className="rc-header-actions">
+          <button
+            type="button"
+            className="bn-btn-draft p-button"
+            onClick={handleExport}
+            disabled={exporting || !authToken}
+          >
+            <FileDown size={16} /> {exporting ? 'Đang xuất...' : 'Export báo cáo'}
+          </button>
+          <input
+            ref={uploadInputRef}
+            type="file"
+            accept=".xlsx,.xls,.csv"
+            hidden
+            onChange={handleUploadFile}
+          />
+          <button
+            type="button"
+            className="db-export-btn"
+            onClick={handleUploadClick}
+            disabled={!authToken}
+          >
+            <Upload size={16} /> Upload file
+          </button>
         </div>
       </div>
 
